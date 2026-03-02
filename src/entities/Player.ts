@@ -39,9 +39,8 @@ function makePlayerGeometry(): BufferGeometry {
      -8,  -4, 0, // 4 left wing inner
     -20, -12, 0, // 5 left wing tip
   ]);
-  // 4 triangles: fan from nose tip
-  // nose→right-wing-tip→right-inner, nose→right-inner→base, nose→base→left-inner, nose→left-inner→left-wing-tip
-  const indices = new Uint16Array([0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5]);
+  // CCW fan from nose tip (viewed from +Z camera): flip each triangle to face toward camera
+  const indices = new Uint16Array([0, 2, 1, 0, 3, 2, 0, 4, 3, 0, 5, 4]);
 
   const geo = new BufferGeometry();
   geo.setAttribute('position', new Float32BufferAttribute(positions, 3));

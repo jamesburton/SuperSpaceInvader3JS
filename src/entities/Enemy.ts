@@ -77,8 +77,8 @@ function makeRow0Geometry(): BufferGeometry {
      0, -hh, 0, // 2 bottom
    -hw,   0, 0, // 3 left
   ]);
-  // Two triangles: top-right-bottom, top-bottom-left
-  const indices = new Uint16Array([0, 1, 2, 0, 2, 3]);
+  // CCW winding (viewed from +Z camera): flip each triangle to face toward camera
+  const indices = new Uint16Array([0, 2, 1, 0, 3, 2]);
   return buildGeometry(positions, indices);
 }
 
@@ -100,8 +100,8 @@ function makeRow1Geometry(): BufferGeometry {
    -midX,-midY, 0, // 4 bottom-left
    -midX, midY, 0, // 5 top-left
   ]);
-  // 4 triangles from center fan: use vertex 0 as pivot
-  const indices = new Uint16Array([0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5]);
+  // CCW fan from vertex 0: flip each triangle to face toward +Z camera
+  const indices = new Uint16Array([0, 2, 1, 0, 3, 2, 0, 4, 3, 0, 5, 4]);
   return buildGeometry(positions, indices);
 }
 
@@ -121,8 +121,8 @@ function makeRow2Geometry(): BufferGeometry {
    -hw * 0.4, -hh * 0.3, 0, // 4 left inner notch
      -hw,  -hh, 0, // 5 left wing tip (bottom left)
   ]);
-  // 4 triangles: fan from nose
-  const indices = new Uint16Array([0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5]);
+  // CCW fan from nose: flip each triangle to face toward +Z camera
+  const indices = new Uint16Array([0, 2, 1, 0, 3, 2, 0, 4, 3, 0, 5, 4]);
   return buildGeometry(positions, indices);
 }
 
@@ -144,14 +144,14 @@ function makeRow3Geometry(): BufferGeometry {
          -hw,    -hh, 0, // 6 left pincer tip
          -hw, hh * 0.3, 0, // 7 left mid-outer
   ]);
-  // 6 triangles from center pivot (vertex 0)
+  // CCW fan from vertex 0: flip each triangle to face toward +Z camera
   const indices = new Uint16Array([
-    0, 1, 2,
-    0, 2, 3,
-    0, 3, 4,
-    0, 4, 5,
-    0, 5, 6,
-    0, 6, 7,
+    0, 2, 1,
+    0, 3, 2,
+    0, 4, 3,
+    0, 5, 4,
+    0, 6, 5,
+    0, 7, 6,
   ]);
   return buildGeometry(positions, indices);
 }
