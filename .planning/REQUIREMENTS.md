@@ -9,11 +9,11 @@
 
 ### Engine & Performance (ENG)
 
-- [ ] **ENG-01**: Game renders at stable 60fps using Three.js/WebGL with OrthographicCamera
-- [ ] **ENG-02**: Fixed-timestep accumulator game loop prevents bullet tunneling and FPS-dependent movement
-- [ ] **ENG-03**: Object pooling system pre-allocates enemies, bullets, and particle effects (no runtime GC spikes)
-- [ ] **ENG-04**: InstancedMesh rendering for enemy groups batches draw calls (target: under 100 draw calls per frame)
-- [ ] **ENG-05**: Three.js geometry and materials explicitly disposed on scene teardown (no VRAM leaks)
+- [x] **ENG-01**: Game renders at stable 60fps using Three.js/WebGL with OrthographicCamera
+- [x] **ENG-02**: Fixed-timestep accumulator game loop prevents bullet tunneling and FPS-dependent movement
+- [x] **ENG-03**: Object pooling system pre-allocates enemies, bullets, and particle effects (no runtime GC spikes)
+- [x] **ENG-04**: InstancedMesh rendering for enemy groups batches draw calls (target: under 100 draw calls per frame)
+- [x] **ENG-05**: Three.js geometry and materials explicitly disposed on scene teardown (no VRAM leaks)
 
 ### Core Gameplay (CORE)
 
@@ -164,11 +164,11 @@ Deferred — build after v1 is validated.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ENG-01 | Phase 1 | Pending |
-| ENG-02 | Phase 1 | Pending |
-| ENG-03 | Phase 1 | Pending |
-| ENG-04 | Phase 1 | Pending |
-| ENG-05 | Phase 1 | Pending |
+| ENG-01 | Phase 1 | Complete |
+| ENG-02 | Phase 1 | Complete |
+| ENG-03 | Phase 1 | Complete |
+| ENG-04 | Phase 1 | Complete |
+| ENG-05 | Phase 1 | Complete |
 | CORE-01 | Phase 1 | Pending |
 | CORE-02 | Phase 1 | Pending |
 | CORE-03 | Phase 1 | Pending |

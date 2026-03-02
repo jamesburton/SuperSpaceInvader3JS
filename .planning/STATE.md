@@ -1,3 +1,16 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
+last_updated: "2026-03-02T16:02:32.141Z"
+progress:
+  total_phases: 1
+  completed_phases: 0
+  total_plans: 6
+  completed_plans: 1
+---
+
 # Project State
 
 ## Project Reference
@@ -10,27 +23,27 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 ## Current Position
 
 Phase: 1 of 5 (Engine + Core Combat)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-03-02 — Roadmap created
+Plan: 1 of 6 in current phase
+Status: Executing
+Last activity: 2026-03-02 — Plan 01-01 complete
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 5% (1/6 plans in phase 1)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: -
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 12 min
+- Total execution time: 0.2 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01-engine-core-combat | 1 | 12 min | 12 min |
 
 **Recent Trend:**
-- Last 5 plans: -
+- Last 5 plans: 01-01 (12 min)
 - Trend: -
 
 *Updated after each plan completion*
@@ -47,6 +60,9 @@ Recent decisions affecting current work:
 - Object pooling and InstancedMesh must be built in Phase 1 — retrofitting is a HIGH-cost rewrite
 - No audio in v1 — deferred to post-v1 to avoid scope bloat
 - Fun bar gate: Phase 3 must be validated as engaging before Phase 4 meta systems are built
+- [Phase 01-engine-core-combat]: OrthographicCamera viewport: halfH = WORLD_HEIGHT/2, halfW = halfH * aspect — preserves aspect ratio on resize
+- [Phase 01-engine-core-combat]: ObjectPool uses visible-flag toggling not scene.add/remove — zero GC pressure during gameplay
+- [Phase 01-engine-core-combat]: Named Three.js imports enforced throughout — no import * as THREE — critical for Vite tree-shaking
 
 ### Pending Todos
 
@@ -54,12 +70,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Verify existing codebase (`SuperSpaceInvader3JS`) for any prior Three.js scaffolding before Phase 1 begins — may reuse or may need clean start
-- three.quarks 0.17.0 peer dependency against Three.js 0.183.2 should be verified on install before Phase 2 begins
+- three.quarks 0.17.0 peer dependency against Three.js 0.183.2 — npm install completed without errors but peer dependency should be monitored for Phase 2 particle work
 - Collision detection performance at 150+ simultaneous entities is unvalidated — run a stress test in Phase 1 before committing to AABB approach
 
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Phase 1 plans created and verified (6 plans, 5 waves) — ready to execute
-Resume file: .planning/phases/01-engine-core-combat/01-01-PLAN.md
+Stopped at: Completed 01-01-PLAN.md — engine scaffold with SceneManager, InputManager, ObjectPool, Game loop
+Resume file: .planning/phases/01-engine-core-combat/01-02-PLAN.md
