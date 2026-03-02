@@ -65,6 +65,22 @@ export class Game {
     // Apply Wave 1 palette so initial enemy formation spawns cyan (not gray default)
     spawnSystem.initPalette(formation);
 
+    // Initialise bloom post-processing — must be called after all entities are created
+    // so their meshes exist and can be registered with the SelectiveBloomEffect selection.
+    const bloom = this.scene.initBloom();
+
+    // Register player mesh for bloom (cyan emissive chevron)
+    bloom.bloomEffect.selection.add(player.mesh);
+
+    // Register all enemy row meshes for bloom (one InstancedMesh per row)
+    for (const rowMesh of formation.rowMeshes) {
+      bloom.bloomEffect.selection.add(rowMesh);
+    }
+
+    // Register all bullet meshes — both player (white) and enemy (red-orange) are emissive
+    playerBulletPool.forEach((b) => bloom.bloomEffect.selection.add(b.mesh));
+    enemyBulletPool.forEach((b) => bloom.bloomEffect.selection.add(b.mesh));
+
     // Start at TitleState
     this.stateManager.replace(new TitleState(this.stateManager, this.input, hud, ctx));
 

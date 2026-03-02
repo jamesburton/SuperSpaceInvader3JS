@@ -45,4 +45,11 @@ export class ObjectPool<T extends { visible: boolean }> {
   public get totalSize(): number {
     return this.all.length;
   }
+
+  /** Iterate over every pooled object (active and inactive). Used to register meshes with bloom. */
+  public forEach(cb: (item: T) => void): void {
+    for (const item of this.all) {
+      cb(item);
+    }
+  }
 }

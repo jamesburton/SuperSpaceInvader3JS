@@ -141,8 +141,7 @@ export class PlayingState implements IGameState {
   }
 
   render(alpha: number): void {
-    this.ctx.scene.render();
-    void alpha;
+    this.ctx.scene.renderWithEffects(alpha);
   }
 
   resume(): void {
