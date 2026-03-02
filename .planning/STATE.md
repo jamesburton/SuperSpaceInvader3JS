@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-03-02T16:08:00Z"
+last_updated: "2026-03-02T16:13:00Z"
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 6
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -23,27 +23,27 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 ## Current Position
 
 Phase: 1 of 5 (Engine + Core Combat)
-Plan: 2 of 6 in current phase
+Plan: 3 of 6 in current phase
 Status: Executing
-Last activity: 2026-03-02 — Plan 01-02 complete
+Last activity: 2026-03-02 — Plan 01-03 complete
 
-Progress: [██░░░░░░░░] 10% (2/6 plans in phase 1)
+Progress: [███░░░░░░░] 15% (3/6 plans in phase 1)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 8 min
-- Total execution time: 0.27 hours
+- Total plans completed: 3
+- Average duration: 6 min
+- Total execution time: 0.32 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-engine-core-combat | 2 | 16 min | 8 min |
+| 01-engine-core-combat | 3 | 19 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (12 min), 01-02 (4 min)
+- Last 5 plans: 01-01 (12 min), 01-02 (4 min), 01-03 (3 min)
 - Trend: Accelerating
 
 *Updated after each plan completion*
@@ -67,6 +67,10 @@ Recent decisions affecting current work:
 - [Phase 01-engine-core-combat]: WeaponSystem.update() receives activeBullets ref — system pushes acquired bullets directly into shared list
 - [Phase 01-engine-core-combat]: Update order in Game.update(): weaponSystem → player movement → movementSystem → clearJustPressed
 - [Phase 01-engine-core-combat]: Three.js mock in src/__mocks__/three.ts enables entity unit tests without WebGL context
+- [Phase 01-engine-core-combat]: InstancedMesh pre-allocated to ENEMY_POOL_SIZE=256 — formation uses first 40 slots; spawnWave() resets and reuses same mesh for Wave 2+
+- [Phase 01-engine-core-combat]: Dead enemies hidden via setMatrixAt(scale=0) — consistent with object-pool visible-flag pattern, zero GC pressure
+- [Phase 01-engine-core-combat]: EnemyFormation.getEnemyAABB() is canonical collision interface for Plan 04 — CollisionSystem must not access formationX/Y directly
+- [Phase 01-engine-core-combat]: March speed = BASE * pow(1.08, killed) recalculated from scratch each kill to prevent float drift over 40 kills
 
 ### Pending Todos
 
@@ -80,5 +84,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 01-02-PLAN.md — Player entity, Bullet pool, WeaponSystem, MovementSystem, Game loop wired
-Resume file: .planning/phases/01-engine-core-combat/01-03-PLAN.md
+Stopped at: Completed 01-03-PLAN.md — EnemyFormation (InstancedMesh), AISystem (march + firing), wired into Game loop
+Resume file: .planning/phases/01-engine-core-combat/01-04-PLAN.md

@@ -19,8 +19,8 @@
 
 - [x] **CORE-01**: Player can move ship horizontally across full screen width using keyboard (arrows / WASD)
 - [x] **CORE-02**: Player can fire projectiles with spacebar; input response is under 100ms
-- [ ] **CORE-03**: Player projectiles collide with and destroy enemy ships using AABB collision detection
-- [ ] **CORE-04**: Enemy projectiles collide with and damage the player ship
+- [x] **CORE-03**: Player projectiles collide with and destroy enemy ships using AABB collision detection
+- [x] **CORE-04**: Enemy projectiles collide with and damage the player ship
 - [ ] **CORE-05**: Player ship has a lives system displayed as a HUD counter
 - [ ] **CORE-06**: Player ship flashes and receives 1-2 seconds of invincibility frames after taking damage
 - [ ] **CORE-07**: All lives exhausted triggers game over state and shows run summary screen
@@ -171,8 +171,8 @@ Deferred — build after v1 is validated.
 | ENG-05 | Phase 1 | Complete |
 | CORE-01 | Phase 1 | Pending |
 | CORE-02 | Phase 1 | Pending |
-| CORE-03 | Phase 1 | Pending |
-| CORE-04 | Phase 1 | Pending |
+| CORE-03 | Phase 1 | Complete |
+| CORE-04 | Phase 1 | Complete |
 | CORE-05 | Phase 1 | Pending |
 | CORE-06 | Phase 1 | Pending |
 | CORE-07 | Phase 1 | Pending |

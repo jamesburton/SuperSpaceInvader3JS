@@ -94,7 +94,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Engine + Core Combat | 2/6 | In progress | - |
+| 1. Engine + Core Combat | 3/6 | In Progress|  |
 | 2. Visual Identity + Game Feel | 0/TBD | Not started | - |
 | 3. Enemy Depth + Wave Systems + Power-Ups | 0/TBD | Not started | - |
 | 4. Boss Encounter + Meta Progression | 0/TBD | Not started | - |
