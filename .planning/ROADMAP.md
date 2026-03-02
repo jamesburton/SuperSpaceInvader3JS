@@ -30,7 +30,15 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. When all lives are exhausted, a game over screen shows final score, wave reached, and enemies killed
   4. Pausing with ESC or P freezes all action and shows an overlay; resuming continues exactly where it left off
   5. Score, lives counter, and current wave number are always visible on the HUD during play
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Project scaffold + engine core (SceneManager, InputManager, ObjectPool, game loop)
+- [ ] 01-02-PLAN.md — Player entity + bullet pool + movement and weapon systems
+- [ ] 01-03-PLAN.md — Enemy InstancedMesh formation + AI march + enemy firing
+- [ ] 01-04-PLAN.md — Collision detection + RunState + MetaState + HUD + SpawnSystem
+- [ ] 01-05-PLAN.md — StateManager FSM + Pause + GameOver + TitleState
+- [ ] 01-06-PLAN.md — Human verification checkpoint (full Phase 1 playability)
 
 ### Phase 2: Visual Identity + Game Feel
 **Goal**: The game looks and feels like a Neon Tokyo cyberpunk arcade shooter with satisfying feedback on every action
