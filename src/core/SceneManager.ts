@@ -9,11 +9,14 @@ import {
   LineBasicMaterial,
 } from 'three';
 import { WORLD_WIDTH, WORLD_HEIGHT } from '../utils/constants';
+import { BloomEffect } from '../effects/BloomEffect';
 
 export class SceneManager {
   public readonly scene: Scene;
   public readonly camera: OrthographicCamera;
   public readonly renderer: WebGLRenderer;
+
+  private bloomEffect: BloomEffect | null = null;
 
   constructor(container: HTMLElement) {
     this.scene = new Scene();
@@ -71,7 +74,32 @@ export class SceneManager {
     container.style.width  = `${w}px`;
     container.style.height = `${h}px`;
     this.renderer.setSize(w, h);
+    this.bloomEffect?.setSize(w, h);
     // Camera projection is fixed — no update needed.
+  }
+
+  /**
+   * Initialise the bloom post-processing pipeline.
+   * Returns the BloomEffect so Game.ts can register emissive meshes via
+   * bloom.bloomEffect.selection.add(mesh).
+   * Call once during Game.init(), after all entities have been created.
+   */
+  public initBloom(): BloomEffect {
+    this.bloomEffect = new BloomEffect(this.renderer, this.scene, this.camera);
+    return this.bloomEffect;
+  }
+
+  /**
+   * Render via EffectComposer (bloom active).
+   * Used by PlayingState.render() only — other states call render() directly.
+   */
+  public renderWithEffects(alpha: number): void {
+    if (this.bloomEffect) {
+      this.bloomEffect.render(1 / 60); // fixed timestep delta for composer
+    } else {
+      this.renderer.render(this.scene, this.camera);
+    }
+    void alpha;
   }
 
   public render(): void {
@@ -79,6 +107,7 @@ export class SceneManager {
   }
 
   public dispose(): void {
+    this.bloomEffect?.dispose();
     this.scene.traverse((obj) => {
       if ('geometry' in obj && obj.geometry) {
         (obj as { geometry: { dispose(): void } }).geometry.dispose();
