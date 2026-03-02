@@ -12,7 +12,7 @@ Five phases deliver a complete browser-based roguelite arcade shooter. The build
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Engine + Core Combat** - Three.js foundation with object pooling, fixed-timestep loop, and a fully playable shoot-em-up combat loop
+- [x] **Phase 1: Engine + Core Combat** - Three.js foundation with object pooling, fixed-timestep loop, and a fully playable shoot-em-up combat loop
 - [ ] **Phase 2: Visual Identity + Game Feel** - Neon Tokyo cyberpunk aesthetic, bloom post-processing, particle effects, and the feedback systems that make the game feel responsive
 - [ ] **Phase 3: Enemy Depth + Wave Systems + Power-Ups** - Six enemy archetypes, formation-breaking AI, wave escalation, power-up drops, and in-run between-wave shop (the "fun bar" gate)
 - [ ] **Phase 4: Boss Encounter + Meta Progression** - Chapter 1 boss with multi-phase attack patterns, persistent meta shop, and the roguelite economy that connects runs
@@ -38,7 +38,7 @@ Plans:
 - [x] 01-03-PLAN.md — Enemy InstancedMesh formation + AI march + enemy firing
 - [x] 01-04-PLAN.md — Collision detection + RunState + MetaState + HUD + SpawnSystem
 - [x] 01-05-PLAN.md — StateManager FSM + Pause + GameOver + TitleState
-- [ ] 01-06-PLAN.md — Human verification checkpoint (full Phase 1 playability)
+- [x] 01-06-PLAN.md — Human verification checkpoint (full Phase 1 playability)
 
 ### Phase 2: Visual Identity + Game Feel
 **Goal**: The game looks and feels like a Neon Tokyo cyberpunk arcade shooter with satisfying feedback on every action
@@ -94,7 +94,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Engine + Core Combat | 5/6 | In Progress|  |
+| 1. Engine + Core Combat | 6/6 | Complete | 2026-03-02 |
 | 2. Visual Identity + Game Feel | 0/TBD | Not started | - |
 | 3. Enemy Depth + Wave Systems + Power-Ups | 0/TBD | Not started | - |
 | 4. Boss Encounter + Meta Progression | 0/TBD | Not started | - |
