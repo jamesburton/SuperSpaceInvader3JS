@@ -32,8 +32,8 @@
 ### Game Feel (FEEL)
 
 - [ ] **FEEL-01**: Screen shake triggers on hit events (boss impact = large shake; standard hit = small shake; never obscures readability)
-- [ ] **FEEL-02**: Particle burst fires on enemy death, color-matched to the enemy's type palette
-- [ ] **FEEL-03**: Muzzle flash particle effect plays at barrel position on every player shot fired
+- [x] **FEEL-02**: Particle burst fires on enemy death, color-matched to the enemy's type palette
+- [x] **FEEL-03**: Muzzle flash particle effect plays at barrel position on every player shot fired
 - [ ] **FEEL-04**: Power-up pickup triggers visual swell effect and brief text display of power-up name
 - [ ] **FEEL-05**: Wave transition displays "Wave X" with 2-3 seconds of breathing room before enemies spawn
 - [ ] **FEEL-06**: Boss health bar is segmented with visible phase indicator boundaries
@@ -57,8 +57,8 @@
 - [x] **VIS-01**: Neon Tokyo cyberpunk aesthetic with glowing emissive materials on all enemy and player sprites
 - [x] **VIS-02**: Each wave is assigned a distinct neon color palette; enemy materials update per wave
 - [x] **VIS-03**: Selective bloom post-processing (pmndrs/postprocessing) applied to neon elements; non-emissive elements excluded
-- [ ] **VIS-04**: Particle explosion system fires per-enemy-type burst profiles with matching colors on kill
-- [ ] **VIS-05**: Player ship displays an engine trail particle effect during horizontal movement
+- [x] **VIS-04**: Particle explosion system fires per-enemy-type burst profiles with matching colors on kill
+- [x] **VIS-05**: Player ship displays an engine trail particle effect during horizontal movement
 
 ### Power-Ups (PWR)
 
@@ -183,11 +183,11 @@ Deferred — build after v1 is validated.
 | VIS-01 | Phase 2 | Complete |
 | VIS-02 | Phase 2 | Complete |
 | VIS-03 | Phase 2 | Complete |
-| VIS-04 | Phase 2 | Pending |
-| VIS-05 | Phase 2 | Pending |
+| VIS-04 | Phase 2 | Complete |
+| VIS-05 | Phase 2 | Complete |
 | FEEL-01 | Phase 2 | Pending |
-| FEEL-02 | Phase 2 | Pending |
-| FEEL-03 | Phase 2 | Pending |
+| FEEL-02 | Phase 2 | Complete |
+| FEEL-03 | Phase 2 | Complete |
 | FEEL-04 | Phase 2 | Pending |
 | FEEL-05 | Phase 2 | Pending |
 | FEEL-06 | Phase 2 | Pending |

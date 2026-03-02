@@ -23,19 +23,19 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 ## Current Position
 
 Phase: 2 of 5 (Visual Identity + Game Feel) — IN PROGRESS
-Plan: 2 of 5 complete (02-02 SelectiveBloom post-processing pipeline)
-Next: Plan 02-03 (Particle system — hit sparks + death explosions)
+Plan: 3 of 5 complete (02-03 Particle system — death bursts, muzzle flash, engine trail)
+Next: Plan 02-04 (PlayingState wiring — update loop + bloom registration)
 Status: In progress
-Last activity: 2026-03-02 — Plan 02-02 complete: SelectiveBloom EffectComposer wired; emissive entities glow
+Last activity: 2026-03-02 — Plan 02-03 complete: Pooled particle system with death bursts, muzzle flash, engine trail infrastructure
 
 Progress: [██░░░░░░░░] 20% (1/5 phases complete, Phase 2 started)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 4 min
-- Total execution time: 0.42 hours
+- Total plans completed: 8
+- Average duration: 3.75 min
+- Total execution time: 0.45 hours
 
 **By Phase:**
 
@@ -45,11 +45,12 @@ Progress: [██░░░░░░░░] 20% (1/5 phases complete, Phase 2 sta
 | 02-visual-identity-game-feel | 2 | 5 min | 2.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (3 min), 01-04 (2 min), 01-05 (2 min), 02-01 (3 min), 02-02 (2 min)
+- Last 5 plans: 01-04 (2 min), 01-05 (2 min), 02-01 (3 min), 02-02 (2 min), 02-03 (2 min)
 - Trend: Stable fast
 
 *Updated after each plan completion*
 | Phase 02-visual-identity-game-feel P02 | 2 | 2 tasks | 5 files |
+| Phase 02-visual-identity-game-feel P03 | 2 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,10 @@ Recent decisions affecting current work:
 - [Phase 02-visual-identity-game-feel]: SelectiveBloomEffect.selection.add(mesh) — no manual layer management; library handles render layer 11 internally
 - [Phase 02-visual-identity-game-feel]: Bullet meshes pre-registered at init time (not lazily) — bloom applies from first shot with zero per-frame overhead
 - [Phase 02-visual-identity-game-feel]: renderWithEffects() falls back to renderer.render() if bloom uninitialised — safe for test harnesses
+- [Phase 02-visual-identity-game-feel 02-03]: Particle uses Object.defineProperty visible/active sync (same as Bullet) — consistent ObjectPool<T> contract
+- [Phase 02-visual-identity-game-feel 02-03]: Map<Particle, ObjectPool<Particle>> tracks source pool per particle — three pools (128/16/32) with correct release
+- [Phase 02-visual-identity-game-feel 02-03]: worldPos captured before killEnemy() in CollisionSystem — killEnemy zeroes the matrix so position must be read first
+- [Phase 02-visual-identity-game-feel 02-03]: setParticleManager() setter injection on CollisionSystem — avoids circular constructor deps
 
 ### Pending Todos
 
@@ -104,5 +109,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Phase 2, Plan 02 complete — SelectiveBloom post-processing pipeline; ready for Plan 02-03 particles
+Stopped at: Phase 2, Plan 03 complete — Particle system infrastructure; ready for Plan 02-04 PlayingState wiring
 Resume file: none — proceed to execute 02-03-PLAN.md
