@@ -31,12 +31,12 @@
 
 ### Game Feel (FEEL)
 
-- [ ] **FEEL-01**: Screen shake triggers on hit events (boss impact = large shake; standard hit = small shake; never obscures readability)
+- [x] **FEEL-01**: Screen shake triggers on hit events (boss impact = large shake; standard hit = small shake; never obscures readability)
 - [x] **FEEL-02**: Particle burst fires on enemy death, color-matched to the enemy's type palette
 - [x] **FEEL-03**: Muzzle flash particle effect plays at barrel position on every player shot fired
-- [ ] **FEEL-04**: Power-up pickup triggers visual swell effect and brief text display of power-up name
-- [ ] **FEEL-05**: Wave transition displays "Wave X" with 2-3 seconds of breathing room before enemies spawn
-- [ ] **FEEL-06**: Boss health bar is segmented with visible phase indicator boundaries
+- [x] **FEEL-04**: Power-up pickup triggers visual swell effect and brief text display of power-up name
+- [x] **FEEL-05**: Wave transition displays "Wave X" with 2-3 seconds of breathing room before enemies spawn
+- [x] **FEEL-06**: Boss health bar is segmented with visible phase indicator boundaries
 - [x] **FEEL-07**: Player projectile visually distinguishes weapon type via emissive color (spread = blue, rapid = orange, etc.)
 
 ### Enemy System (ENEMY)
@@ -185,12 +185,12 @@ Deferred — build after v1 is validated.
 | VIS-03 | Phase 2 | Complete |
 | VIS-04 | Phase 2 | Complete |
 | VIS-05 | Phase 2 | Complete |
-| FEEL-01 | Phase 2 | Pending |
+| FEEL-01 | Phase 2 | Complete |
 | FEEL-02 | Phase 2 | Complete |
 | FEEL-03 | Phase 2 | Complete |
-| FEEL-04 | Phase 2 | Pending |
-| FEEL-05 | Phase 2 | Pending |
-| FEEL-06 | Phase 2 | Pending |
+| FEEL-04 | Phase 2 | Complete |
+| FEEL-05 | Phase 2 | Complete |
+| FEEL-06 | Phase 2 | Complete |
 | FEEL-07 | Phase 2 | Complete |
 | ENEMY-01 | Phase 3 | Pending |
 | ENEMY-02 | Phase 3 | Pending |
