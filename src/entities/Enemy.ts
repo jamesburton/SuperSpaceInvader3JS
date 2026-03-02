@@ -67,10 +67,6 @@ export class EnemyFormation {
   private readonly colSpacing = 56;        // horizontal gap between columns
   private readonly rowSpacing = 44;        // vertical gap between rows
 
-  // Right/left boundaries for march reversal
-  private readonly marchBoundRight: number;
-  private readonly marchBoundLeft: number;
-
   private readonly tmpMatrix = new Matrix4();
 
   constructor(scene: Scene) {
@@ -82,12 +78,6 @@ export class EnemyFormation {
     this.instancedMesh = new InstancedMesh(geo, mat, ENEMY_POOL_SIZE);
     this.instancedMesh.count = 0; // will be set in spawnWave
     scene.add(this.instancedMesh);
-
-    // Compute march bounds based on formation width
-    const formationWidth = (ENEMY_COLS - 1) * this.colSpacing;
-    const halfFormation = formationWidth / 2;
-    this.marchBoundRight = (WORLD_WIDTH / 2) - halfFormation - 30;  // 30 unit margin from world edge
-    this.marchBoundLeft = -(WORLD_WIDTH / 2) + halfFormation + 30;
 
     this.spawnWave();
   }
@@ -119,19 +109,32 @@ export class EnemyFormation {
   /**
    * Update formation march. Called by AISystem each fixed step.
    * Returns true if enemies have reached the bottom (game over trigger).
+   *
+   * Reversal is triggered when the outermost *active* enemy edge touches the
+   * world boundary — so clearing one side of the formation makes the remaining
+   * enemies travel further before turning, just like classic Space Invaders.
    */
   public updateMarch(dt: number): boolean {
     this.formationX += this.marchDir * this.marchSpeed * dt;
 
-    // Check right boundary
-    if (this.marchDir === 1 && this.formationX >= this.marchBoundRight) {
-      this.formationX = this.marchBoundRight;
+    // Find the actual left/right extents of active enemies this frame.
+    const wall = WORLD_WIDTH / 2;
+    let rightEdge = -Infinity;
+    let leftEdge  =  Infinity;
+    for (const enemy of this.enemies) {
+      if (!enemy.active) continue;
+      const pos = this.getEnemyWorldPos(enemy);
+      if (pos.x + enemy.width > rightEdge) rightEdge = pos.x + enemy.width;
+      if (pos.x - enemy.width < leftEdge)  leftEdge  = pos.x - enemy.width;
+    }
+
+    if (this.marchDir === 1 && rightEdge >= wall) {
+      // Clamp so the outermost enemy sits exactly at the wall, then drop and reverse.
+      this.formationX -= rightEdge - wall;
       this.formationY -= ENEMY_DROP_DISTANCE;
       this.marchDir = -1;
-    }
-    // Check left boundary
-    else if (this.marchDir === -1 && this.formationX <= this.marchBoundLeft) {
-      this.formationX = this.marchBoundLeft;
+    } else if (this.marchDir === -1 && leftEdge <= -wall) {
+      this.formationX += -wall - leftEdge;
       this.formationY -= ENEMY_DROP_DISTANCE;
       this.marchDir = 1;
     }
@@ -213,7 +216,7 @@ export class EnemyFormation {
     for (const enemy of this.enemies) {
       if (!enemy.active) continue;
       const pos = this.getEnemyWorldPos(enemy);
-      this.tmpMatrix.setPosition(pos.x, pos.y, 0);
+      this.tmpMatrix.makeTranslation(pos.x, pos.y, 0);
       this.instancedMesh.setMatrixAt(enemy.instanceIndex, this.tmpMatrix);
     }
     this.instancedMesh.instanceMatrix.needsUpdate = true;

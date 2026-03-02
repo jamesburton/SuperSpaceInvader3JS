@@ -3,8 +3,12 @@ import {
   OrthographicCamera,
   WebGLRenderer,
   Color,
+  LineLoop,
+  BufferGeometry,
+  Float32BufferAttribute,
+  LineBasicMaterial,
 } from 'three';
-import { WORLD_HEIGHT } from '../utils/constants';
+import { WORLD_WIDTH, WORLD_HEIGHT } from '../utils/constants';
 
 export class SceneManager {
   public readonly scene: Scene;
@@ -15,45 +19,65 @@ export class SceneManager {
     this.scene = new Scene();
     this.scene.background = new Color(0x000000);
 
-    // OrthographicCamera maps WORLD_WIDTH x WORLD_HEIGHT logical units to screen
-    // This makes hitbox math exact and eliminates perspective distortion
-    const aspect = container.clientWidth / container.clientHeight;
-    const halfH = WORLD_HEIGHT / 2;
-    const halfW = halfH * aspect;
-    this.camera = new OrthographicCamera(-halfW, halfW, halfH, -halfH, 0.1, 100);
+    // Fixed orthographic camera — always shows exactly WORLD_WIDTH × WORLD_HEIGHT.
+    // Game logic can treat these as the true play area bounds at all times.
+    this.camera = new OrthographicCamera(
+      -WORLD_WIDTH / 2, WORLD_WIDTH / 2,
+      WORLD_HEIGHT / 2, -WORLD_HEIGHT / 2,
+      0.1, 100,
+    );
     this.camera.position.z = 10;
 
     this.renderer = new WebGLRenderer({ antialias: false });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.setSize(container.clientWidth, container.clientHeight);
+
+    // Letterbox: fill maximum viewport space while preserving 4:3 aspect ratio.
+    // The container (#game-viewport) is flex-centred in the full-viewport parent.
+    const { w, h } = this.letterboxSize();
+    container.style.width  = `${w}px`;
+    container.style.height = `${h}px`;
+    this.renderer.setSize(w, h);
     container.appendChild(this.renderer.domElement);
 
-    // Resize handling — update camera aspect ratio and renderer size
+    // Dim border marks the play-area edges so the boundary is always visible.
+    const hw = WORLD_WIDTH / 2 - 1;
+    const hh = WORLD_HEIGHT / 2 - 1;
+    const borderGeo = new BufferGeometry();
+    borderGeo.setAttribute('position', new Float32BufferAttribute([
+      -hw, -hh, 0,
+       hw, -hh, 0,
+       hw,  hh, 0,
+      -hw,  hh, 0,
+    ], 3));
+    this.scene.add(new LineLoop(borderGeo, new LineBasicMaterial({ color: 0x333366 })));
+
     window.addEventListener('resize', () => this.onResize(container));
   }
 
+  private letterboxSize(): { w: number; h: number } {
+    const gameAspect   = WORLD_WIDTH / WORLD_HEIGHT;
+    const screenAspect = window.innerWidth / window.innerHeight;
+    if (screenAspect > gameAspect) {
+      // Screen wider than 4:3 — pillarbox (fit to height)
+      return { w: Math.round(window.innerHeight * gameAspect), h: window.innerHeight };
+    } else {
+      // Screen taller than 4:3 — letterbox (fit to width)
+      return { w: window.innerWidth, h: Math.round(window.innerWidth / gameAspect) };
+    }
+  }
+
   private onResize(container: HTMLElement): void {
-    const w = container.clientWidth;
-    const h = container.clientHeight;
-    const aspect = w / h;
-    const halfH = WORLD_HEIGHT / 2;
-    const halfW = halfH * aspect;
-    this.camera.left = -halfW;
-    this.camera.right = halfW;
-    this.camera.top = halfH;
-    this.camera.bottom = -halfH;
-    this.camera.updateProjectionMatrix();
+    const { w, h } = this.letterboxSize();
+    container.style.width  = `${w}px`;
+    container.style.height = `${h}px`;
     this.renderer.setSize(w, h);
+    // Camera projection is fixed — no update needed.
   }
 
   public render(): void {
     this.renderer.render(this.scene, this.camera);
   }
 
-  /**
-   * Call on scene teardown to prevent VRAM leaks.
-   * Iterates scene children and disposes geometry + material.
-   */
   public dispose(): void {
     this.scene.traverse((obj) => {
       if ('geometry' in obj && obj.geometry) {

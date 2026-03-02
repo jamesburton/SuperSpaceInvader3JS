@@ -20,8 +20,8 @@ export const PLAYER_MOVE_BOUNDS = 360;     // ±units from center horizontally
 // Enemy formation
 export const ENEMY_COLS = 10;
 export const ENEMY_ROWS = 4;
-export const ENEMY_BASE_MARCH_SPEED = 60;  // units/second
-export const ENEMY_MARCH_SPEEDUP = 0.08;   // 8% faster per enemy destroyed (classic)
+export const ENEMY_BASE_MARCH_SPEED = 30;  // units/second
+export const ENEMY_MARCH_SPEEDUP = 0.035;  // 3.5% faster per enemy destroyed
 export const ENEMY_DROP_DISTANCE = 20;     // units to drop when reversing direction
 export const ENEMY_FIRE_RATE = 1.5;        // shots/second across whole formation
 

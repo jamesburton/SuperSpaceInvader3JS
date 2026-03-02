@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { createStore } from 'zustand/vanilla';
 import { persist } from 'zustand/middleware';
 import { META_STORAGE_KEY } from '../utils/constants';
 
@@ -13,7 +13,7 @@ export interface MetaStore {
   addMetaCurrency: (amount: number) => void;
 }
 
-export const useMetaStore = create<MetaStore>()(
+export const useMetaStore = createStore<MetaStore>()(
   persist(
     (set, get) => ({
       saveVersion: SAVE_VERSION,

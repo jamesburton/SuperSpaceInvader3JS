@@ -8,14 +8,19 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #000; overflow: hidden; }
     #game-container {
-      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 100vw;
       height: 100vh;
+      background: #0d0d0d;
+    }
+    #game-viewport {
+      position: relative;
+      /* width/height set by SceneManager to the letterboxed canvas size */
     }
     canvas {
       display: block;
-      width: 100% !important;
-      height: 100% !important;
     }
     #hud {
       position: absolute;
@@ -29,7 +34,9 @@
 </head>
 <body>
   <div id="game-container">
-    <div id="hud"></div>
+    <div id="game-viewport">
+      <div id="hud"></div>
+    </div>
   </div>
   <script type="module" src="/src/main.ts"></script>
 </body>
