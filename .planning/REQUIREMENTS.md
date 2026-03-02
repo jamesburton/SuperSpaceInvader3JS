@@ -22,12 +22,12 @@
 - [x] **CORE-03**: Player projectiles collide with and destroy enemy ships using AABB collision detection
 - [x] **CORE-04**: Enemy projectiles collide with and damage the player ship
 - [x] **CORE-05**: Player ship has a lives system displayed as a HUD counter
-- [ ] **CORE-06**: Player ship flashes and receives 1-2 seconds of invincibility frames after taking damage
-- [ ] **CORE-07**: All lives exhausted triggers game over state and shows run summary screen
-- [ ] **CORE-08**: Game can be paused and resumed with ESC or P key; pause shows overlay menu
+- [x] **CORE-06**: Player ship flashes and receives 1-2 seconds of invincibility frames after taking damage
+- [x] **CORE-07**: All lives exhausted triggers game over state and shows run summary screen
+- [x] **CORE-08**: Game can be paused and resumed with ESC or P key; pause shows overlay menu
 - [x] **CORE-09**: Live score increments on enemy kill and is displayed on HUD
 - [x] **CORE-10**: Current wave number is visible on HUD at all times during play
-- [ ] **CORE-11**: Game over screen shows: final score, wave reached, and enemies killed
+- [x] **CORE-11**: Game over screen shows: final score, wave reached, and enemies killed
 
 ### Game Feel (FEEL)
 
@@ -174,12 +174,12 @@ Deferred — build after v1 is validated.
 | CORE-03 | Phase 1 | Complete |
 | CORE-04 | Phase 1 | Complete |
 | CORE-05 | Phase 1 | Complete |
-| CORE-06 | Phase 1 | Pending |
-| CORE-07 | Phase 1 | Pending |
-| CORE-08 | Phase 1 | Pending |
+| CORE-06 | Phase 1 | Complete |
+| CORE-07 | Phase 1 | Complete |
+| CORE-08 | Phase 1 | Complete |
 | CORE-09 | Phase 1 | Complete |
 | CORE-10 | Phase 1 | Complete |
-| CORE-11 | Phase 1 | Pending |
+| CORE-11 | Phase 1 | Complete |
 | VIS-01 | Phase 2 | Pending |
 | VIS-02 | Phase 2 | Pending |
 | VIS-03 | Phase 2 | Pending |

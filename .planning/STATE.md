@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-03-02T16:18:05Z"
+last_updated: "2026-03-02T16:23:16Z"
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -23,28 +23,28 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 ## Current Position
 
 Phase: 1 of 5 (Engine + Core Combat)
-Plan: 4 of 6 in current phase
+Plan: 5 of 6 in current phase
 Status: Executing
-Last activity: 2026-03-02 — Plan 01-04 complete
+Last activity: 2026-03-02 — Plan 01-05 complete
 
-Progress: [████░░░░░░] 20% (4/6 plans in phase 1)
+Progress: [█████░░░░░] 83% (5/6 plans in phase 1)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 5 min
-- Total execution time: 0.35 hours
+- Total plans completed: 5
+- Average duration: 4 min
+- Total execution time: 0.37 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-engine-core-combat | 4 | 21 min | 5 min |
+| 01-engine-core-combat | 5 | 23 min | 5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (12 min), 01-02 (4 min), 01-03 (3 min), 01-04 (2 min)
-- Trend: Accelerating
+- Last 5 plans: 01-01 (12 min), 01-02 (4 min), 01-03 (3 min), 01-04 (2 min), 01-05 (2 min)
+- Trend: Stable fast
 
 *Updated after each plan completion*
 
@@ -76,6 +76,10 @@ Recent decisions affecting current work:
 - [Phase 01-engine-core-combat]: HUD is DOM overlay (absolutely-positioned divs in #hud) — no Three.js TextGeometry
 - [Phase 01-engine-core-combat]: CollisionSystem owns playerInvincibility timer — not Player entity — keeps entity layer clean
 - [Phase 01-engine-core-combat]: SpawnSystem.update() returns isTransitioning bool — Game.ts skips AI during 2.5s wave gap
+- [Phase 01-engine-core-combat]: Factory callback in PlayingState.triggerGameOver() — GameOverState accepts onRestart: () => void instead of importing PlayingState, eliminating circular import
+- [Phase 01-engine-core-combat]: StateManager pushdown automaton: push() does not call exit() on current state — preserves PlayingState intact for resume
+- [Phase 01-engine-core-combat]: PausedState.exit() does NOT hide overlay — PlayingState.resume() handles it, keeping state responsibilities clean
+- [Phase 01-engine-core-combat]: PlayingStateContext interface bundles all entity/system refs — single pass to all states, extensible for Phase 2+
 
 ### Pending Todos
 
@@ -89,5 +93,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 01-04-PLAN.md — CollisionSystem, RunState, MetaState, HUD, SpawnSystem, fully wired Game.ts combat loop
-Resume file: .planning/phases/01-engine-core-combat/01-05-PLAN.md
+Stopped at: Completed 01-05-PLAN.md — StateManager pushdown automaton, TitleState, PlayingState, PausedState, GameOverState, Game.ts thin orchestrator
+Resume file: .planning/phases/01-engine-core-combat/01-06-PLAN.md
