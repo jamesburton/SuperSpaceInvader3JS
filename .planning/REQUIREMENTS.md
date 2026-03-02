@@ -17,8 +17,8 @@
 
 ### Core Gameplay (CORE)
 
-- [ ] **CORE-01**: Player can move ship horizontally across full screen width using keyboard (arrows / WASD)
-- [ ] **CORE-02**: Player can fire projectiles with spacebar; input response is under 100ms
+- [x] **CORE-01**: Player can move ship horizontally across full screen width using keyboard (arrows / WASD)
+- [x] **CORE-02**: Player can fire projectiles with spacebar; input response is under 100ms
 - [ ] **CORE-03**: Player projectiles collide with and destroy enemy ships using AABB collision detection
 - [ ] **CORE-04**: Enemy projectiles collide with and damage the player ship
 - [ ] **CORE-05**: Player ship has a lives system displayed as a HUD counter

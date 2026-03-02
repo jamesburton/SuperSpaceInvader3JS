@@ -33,8 +33,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 6 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Project scaffold + engine core (SceneManager, InputManager, ObjectPool, game loop)
-- [ ] 01-02-PLAN.md — Player entity + bullet pool + movement and weapon systems
+- [x] 01-01-PLAN.md — Project scaffold + engine core (SceneManager, InputManager, ObjectPool, game loop)
+- [x] 01-02-PLAN.md — Player entity + bullet pool + movement and weapon systems
 - [ ] 01-03-PLAN.md — Enemy InstancedMesh formation + AI march + enemy firing
 - [ ] 01-04-PLAN.md — Collision detection + RunState + MetaState + HUD + SpawnSystem
 - [ ] 01-05-PLAN.md — StateManager FSM + Pause + GameOver + TitleState
@@ -94,7 +94,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Engine + Core Combat | 0/TBD | Not started | - |
+| 1. Engine + Core Combat | 2/6 | In progress | - |
 | 2. Visual Identity + Game Feel | 0/TBD | Not started | - |
 | 3. Enemy Depth + Wave Systems + Power-Ups | 0/TBD | Not started | - |
 | 4. Boss Encounter + Meta Progression | 0/TBD | Not started | - |

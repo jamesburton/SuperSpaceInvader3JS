@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-03-02T16:02:32.141Z"
+status: executing
+last_updated: "2026-03-02T16:08:00Z"
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 6
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -23,28 +23,28 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 ## Current Position
 
 Phase: 1 of 5 (Engine + Core Combat)
-Plan: 1 of 6 in current phase
+Plan: 2 of 6 in current phase
 Status: Executing
-Last activity: 2026-03-02 — Plan 01-01 complete
+Last activity: 2026-03-02 — Plan 01-02 complete
 
-Progress: [█░░░░░░░░░] 5% (1/6 plans in phase 1)
+Progress: [██░░░░░░░░] 10% (2/6 plans in phase 1)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 12 min
-- Total execution time: 0.2 hours
+- Total plans completed: 2
+- Average duration: 8 min
+- Total execution time: 0.27 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-engine-core-combat | 1 | 12 min | 12 min |
+| 01-engine-core-combat | 2 | 16 min | 8 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (12 min)
-- Trend: -
+- Last 5 plans: 01-01 (12 min), 01-02 (4 min)
+- Trend: Accelerating
 
 *Updated after each plan completion*
 
@@ -63,6 +63,10 @@ Recent decisions affecting current work:
 - [Phase 01-engine-core-combat]: OrthographicCamera viewport: halfH = WORLD_HEIGHT/2, halfW = halfH * aspect — preserves aspect ratio on resize
 - [Phase 01-engine-core-combat]: ObjectPool uses visible-flag toggling not scene.add/remove — zero GC pressure during gameplay
 - [Phase 01-engine-core-combat]: Named Three.js imports enforced throughout — no import * as THREE — critical for Vite tree-shaking
+- [Phase 01-engine-core-combat]: Bullet.visible via Object.defineProperty — pool calls obj.visible, getter/setter syncs mesh.visible and active flag
+- [Phase 01-engine-core-combat]: WeaponSystem.update() receives activeBullets ref — system pushes acquired bullets directly into shared list
+- [Phase 01-engine-core-combat]: Update order in Game.update(): weaponSystem → player movement → movementSystem → clearJustPressed
+- [Phase 01-engine-core-combat]: Three.js mock in src/__mocks__/three.ts enables entity unit tests without WebGL context
 
 ### Pending Todos
 
@@ -76,5 +80,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 01-01-PLAN.md — engine scaffold with SceneManager, InputManager, ObjectPool, Game loop
-Resume file: .planning/phases/01-engine-core-combat/01-02-PLAN.md
+Stopped at: Completed 01-02-PLAN.md — Player entity, Bullet pool, WeaponSystem, MovementSystem, Game loop wired
+Resume file: .planning/phases/01-engine-core-combat/01-03-PLAN.md
