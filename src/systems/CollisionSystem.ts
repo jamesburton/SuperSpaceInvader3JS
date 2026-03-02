@@ -19,6 +19,7 @@ function aabbOverlap(
 export class CollisionSystem {
   private playerInvincibility: number = 0; // countdown timer in seconds
   private particleManager: ParticleManager | null = null;
+  private hitThisStep: boolean = false;    // flag for camera shake trigger
 
   /**
    * Inject ParticleManager for death burst effects.
@@ -27,6 +28,16 @@ export class CollisionSystem {
    */
   public setParticleManager(pm: ParticleManager): void {
     this.particleManager = pm;
+  }
+
+  /**
+   * Returns true if an enemy bullet hit the player during the last update() call.
+   * Auto-resets on read — call once per fixed step from PlayingState to trigger CameraShake.
+   */
+  public wasHitThisStep(): boolean {
+    const result = this.hitThisStep;
+    this.hitThisStep = false; // auto-reset on read
+    return result;
   }
 
   /**
@@ -90,6 +101,7 @@ export class CollisionSystem {
             bulletsToRelease.push({ bullet, pool: enemyBulletPool });
             runState.loseLife();
             this.playerInvincibility = PLAYER_INVINCIBILITY_DURATION;
+            this.hitThisStep = true; // signal PlayingState to trigger camera shake
           }
         }
       }

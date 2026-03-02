@@ -45,7 +45,7 @@ export class SpawnSystem {
       runState.nextWave();
       this.waveTransitioning = true;
       this.transitionTimer = this.TRANSITION_DELAY;
-      hud.showWaveAnnouncement(runState.wave);
+      hud.showWaveAnnouncement(runState.wave, wavePalette.getColor(runState.wave));
     }
 
     return false;

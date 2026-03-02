@@ -9,6 +9,10 @@ import { MovementSystem } from '../systems/MovementSystem';
 import { AISystem } from '../systems/AISystem';
 import { CollisionSystem } from '../systems/CollisionSystem';
 import { SpawnSystem } from '../systems/SpawnSystem';
+import { ParticleManager } from '../effects/ParticleManager';
+import { CameraShake } from '../effects/CameraShake';
+import { BossHealthBar } from '../ui/BossHealthBar';
+import { PickupFeedback } from '../ui/PickupFeedback';
 import { HUD } from '../ui/HUD';
 import { TitleState } from '../states/TitleState';
 import type { PlayingStateContext } from '../states/PlayingState';
@@ -48,6 +52,12 @@ export class Game {
     const hudRoot = document.getElementById('hud') as HTMLElement;
     const hud = new HUD(hudRoot);
 
+    // Phase 2: construct particle, shake, and stub UI components
+    const particleManager = new ParticleManager(this.scene.scene);
+    const cameraShake = new CameraShake();
+    const bossHealthBar = new BossHealthBar(hudRoot);
+    const pickupFeedback = new PickupFeedback(hudRoot);
+
     // PlayingStateContext — shared across all states
     const ctx: PlayingStateContext = {
       scene: this.scene,
@@ -60,6 +70,10 @@ export class Game {
       aiSystem,
       collisionSystem,
       spawnSystem,
+      particleManager,   // Phase 2
+      cameraShake,       // Phase 2
+      bossHealthBar,     // Phase 2 stub (Phase 4 activates)
+      pickupFeedback,    // Phase 2 stub (Phase 3 activates)
     };
 
     // Apply Wave 1 palette so initial enemy formation spawns cyan (not gray default)
@@ -80,6 +94,12 @@ export class Game {
     // Register all bullet meshes — both player (white) and enemy (red-orange) are emissive
     playerBulletPool.forEach((b) => bloom.bloomEffect.selection.add(b.mesh));
     enemyBulletPool.forEach((b) => bloom.bloomEffect.selection.add(b.mesh));
+
+    // Phase 2: register particle meshes with bloom so particles glow
+    particleManager.registerBloom((mesh) => bloom.bloomEffect.selection.add(mesh));
+
+    // Phase 2: wire particle manager into collision system for death burst effects
+    collisionSystem.setParticleManager(particleManager);
 
     // Start at TitleState
     this.stateManager.replace(new TitleState(this.stateManager, this.input, hud, ctx));

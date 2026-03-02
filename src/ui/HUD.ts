@@ -38,9 +38,15 @@ export class HUD {
     this.overlayEl.style.display = 'none';
   }
 
-  /** Show "WAVE X" for a brief moment — called by SpawnSystem */
-  public showWaveAnnouncement(wave: number): void {
-    this.showOverlay(`<h1 style="font-size:48px;text-shadow:0 0 20px #fff;">WAVE ${wave}</h1>`);
-    setTimeout(() => this.hideOverlay(), 2000); // 2 second announcement
+  /** Show "WAVE X" neon-styled with the wave palette color, for 2.5 seconds */
+  public showWaveAnnouncement(wave: number, hexColor?: number): void {
+    const colorHex = hexColor !== undefined
+      ? `#${hexColor.toString(16).padStart(6, '0')}`
+      : '#00ffff'; // fallback cyan
+    const glow = colorHex;
+    this.showOverlay(
+      `<h1 style="font-size:56px;font-family:'Courier New',monospace;color:${colorHex};text-shadow:0 0 24px ${glow},0 0 48px ${glow};letter-spacing:0.1em;">WAVE ${wave}</h1>`,
+    );
+    setTimeout(() => this.hideOverlay(), 2500); // 2.5 seconds (per spec: 2-3s)
   }
 }
