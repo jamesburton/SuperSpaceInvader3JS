@@ -37,7 +37,7 @@
 - [ ] **FEEL-04**: Power-up pickup triggers visual swell effect and brief text display of power-up name
 - [ ] **FEEL-05**: Wave transition displays "Wave X" with 2-3 seconds of breathing room before enemies spawn
 - [ ] **FEEL-06**: Boss health bar is segmented with visible phase indicator boundaries
-- [ ] **FEEL-07**: Player projectile visually distinguishes weapon type via emissive color (spread = blue, rapid = orange, etc.)
+- [x] **FEEL-07**: Player projectile visually distinguishes weapon type via emissive color (spread = blue, rapid = orange, etc.)
 
 ### Enemy System (ENEMY)
 
@@ -54,8 +54,8 @@
 
 ### Visual & Aesthetic (VIS)
 
-- [ ] **VIS-01**: Neon Tokyo cyberpunk aesthetic with glowing emissive materials on all enemy and player sprites
-- [ ] **VIS-02**: Each wave is assigned a distinct neon color palette; enemy materials update per wave
+- [x] **VIS-01**: Neon Tokyo cyberpunk aesthetic with glowing emissive materials on all enemy and player sprites
+- [x] **VIS-02**: Each wave is assigned a distinct neon color palette; enemy materials update per wave
 - [ ] **VIS-03**: Selective bloom post-processing (pmndrs/postprocessing) applied to neon elements; non-emissive elements excluded
 - [ ] **VIS-04**: Particle explosion system fires per-enemy-type burst profiles with matching colors on kill
 - [ ] **VIS-05**: Player ship displays an engine trail particle effect during horizontal movement
@@ -180,8 +180,8 @@ Deferred — build after v1 is validated.
 | CORE-09 | Phase 1 | Complete |
 | CORE-10 | Phase 1 | Complete |
 | CORE-11 | Phase 1 | Complete |
-| VIS-01 | Phase 2 | Pending |
-| VIS-02 | Phase 2 | Pending |
+| VIS-01 | Phase 2 | Complete |
+| VIS-02 | Phase 2 | Complete |
 | VIS-03 | Phase 2 | Pending |
 | VIS-04 | Phase 2 | Pending |
 | VIS-05 | Phase 2 | Pending |
@@ -191,7 +191,7 @@ Deferred — build after v1 is validated.
 | FEEL-04 | Phase 2 | Pending |
 | FEEL-05 | Phase 2 | Pending |
 | FEEL-06 | Phase 2 | Pending |
-| FEEL-07 | Phase 2 | Pending |
+| FEEL-07 | Phase 2 | Complete |
 | ENEMY-01 | Phase 3 | Pending |
 | ENEMY-02 | Phase 3 | Pending |
 | ENEMY-03 | Phase 3 | Pending |

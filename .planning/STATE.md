@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
+status: in-progress
 last_updated: "2026-03-02"
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 11
+  completed_plans: 7
 ---
 
 # Project State
@@ -18,32 +18,34 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-02)
 
 **Core value:** The thrill of arcade shooting elevated — every run feels different because of layered in-run progression, meta-unlocks that evolve your build over time, and enemies smart enough to keep you on your toes.
-**Current focus:** Phase 1 - Engine + Core Combat
+**Current focus:** Phase 2 - Visual Identity + Game Feel
 
 ## Current Position
 
-Phase: 1 of 5 (Engine + Core Combat) — COMPLETE
-Next: Phase 2 (Visual Identity + Game Feel)
-Status: Planning
-Last activity: 2026-03-02 — Phase 1 human verification passed; 5 bugs found and fixed
+Phase: 2 of 5 (Visual Identity + Game Feel) — IN PROGRESS
+Plan: 1 of 5 complete (02-01 neon materials + WavePalette)
+Next: Plan 02-02 (SelectiveBloom + post-processing pipeline)
+Status: In progress
+Last activity: 2026-03-02 — Plan 02-01 complete: neon emissive materials + WavePalette system
 
-Progress: [██░░░░░░░░] 20% (1/5 phases complete)
+Progress: [██░░░░░░░░] 20% (1/5 phases complete, Phase 2 started)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 7
 - Average duration: 4 min
-- Total execution time: 0.37 hours
+- Total execution time: 0.42 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-engine-core-combat | 5 | 23 min | 5 min |
+| 02-visual-identity-game-feel | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (12 min), 01-02 (4 min), 01-03 (3 min), 01-04 (2 min), 01-05 (2 min)
+- Last 5 plans: 01-02 (4 min), 01-03 (3 min), 01-04 (2 min), 01-05 (2 min), 02-01 (3 min)
 - Trend: Stable fast
 
 *Updated after each plan completion*
@@ -80,6 +82,11 @@ Recent decisions affecting current work:
 - [Phase 01-engine-core-combat]: StateManager pushdown automaton: push() does not call exit() on current state — preserves PlayingState intact for resume
 - [Phase 01-engine-core-combat]: PausedState.exit() does NOT hide overlay — PlayingState.resume() handles it, keeping state responsibilities clean
 - [Phase 01-engine-core-combat]: PlayingStateContext interface bundles all entity/system refs — single pass to all states, extensible for Phase 2+
+- [Phase 02-visual-identity-game-feel 02-01]: Enemy.instanceIndex equals enemy.col (0-9) — each row has its own InstancedMesh; index within mesh = column position
+- [Phase 02-visual-identity-game-feel 02-01]: EnemyFormation.rowMeshes[4] replaces single instancedMesh — 4 per-row InstancedMesh with distinct BufferGeometry shapes
+- [Phase 02-visual-identity-game-feel 02-01]: applyPalette(hex) called in SpawnSystem.initPalette() at game start + startNextWave() on wave transition
+- [Phase 02-visual-identity-game-feel 02-01]: Bullet constructor no longer accepts color param — init() sets emissive per isPlayerBullet flag
+- [Phase 02-visual-identity-game-feel 02-01]: MeshStandardMaterial with emissiveIntensity on all entities — prerequisite for bloom rendering pipeline (Plan 02-02)
 
 ### Pending Todos
 
@@ -93,5 +100,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Phase 1 complete — all 6 plans done, human verification passed, 5 playtest bugs fixed
-Resume file: none — proceed to /gsd:plan-phase 2
+Stopped at: Phase 2, Plan 01 complete — neon emissive materials + WavePalette system; ready for Plan 02-02 bloom
+Resume file: none — proceed to execute 02-02-PLAN.md

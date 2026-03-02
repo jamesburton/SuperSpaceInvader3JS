@@ -53,7 +53,7 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Entity geometry + neon emissive materials + WavePalette system
+- [x] 02-01-PLAN.md — Entity geometry + neon emissive materials + WavePalette system
 - [ ] 02-02-PLAN.md — SelectiveBloom post-processing (EffectComposer replaces bare renderer.render)
 - [ ] 02-03-PLAN.md — Particle system: death bursts, muzzle flash, engine trail
 - [ ] 02-04-PLAN.md — Full wiring: PlayingState integration, CameraShake, wave announcement, UI stubs
@@ -102,7 +102,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Engine + Core Combat | 6/6 | Complete | 2026-03-02 |
-| 2. Visual Identity + Game Feel | 0/5 | Planning | - |
+| 2. Visual Identity + Game Feel | 1/5 | In progress | - |
 | 3. Enemy Depth + Wave Systems + Power-Ups | 0/TBD | Not started | - |
 | 4. Boss Encounter + Meta Progression | 0/TBD | Not started | - |
 | 5. Campaign Mode + Game Modes | 0/TBD | Not started | - |
