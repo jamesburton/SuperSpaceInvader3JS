@@ -62,6 +62,9 @@ export class Game {
       spawnSystem,
     };
 
+    // Apply Wave 1 palette so initial enemy formation spawns cyan (not gray default)
+    spawnSystem.initPalette(formation);
+
     // Start at TitleState
     this.stateManager.replace(new TitleState(this.stateManager, this.input, hud, ctx));
 

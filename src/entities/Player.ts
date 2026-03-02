@@ -1,4 +1,11 @@
-import { Mesh, BoxGeometry, MeshBasicMaterial } from 'three';
+import {
+  Mesh,
+  BufferGeometry,
+  Float32BufferAttribute,
+  Uint16BufferAttribute,
+  MeshStandardMaterial,
+  Color,
+} from 'three';
 import type { Scene } from 'three';
 import {
   PLAYER_SPEED,
@@ -9,6 +16,39 @@ import {
 
 // Fire rate: one shot per FIRE_COOLDOWN seconds (4 shots/second max)
 const FIRE_COOLDOWN = 0.25;
+
+/**
+ * Build the player ship angular chevron geometry.
+ * 6 vertices forming a pointed-nose ship with swept-back wings.
+ * Fits within 40×24 unit bounding box (AABB half-extents: width=20, height=12).
+ *
+ * Vertex layout (y+ is up, toward enemies):
+ *   0: nose tip        ( 0,  12, 0)  — top center
+ *   1: right wing tip  (20, -12, 0)  — bottom right
+ *   2: right wing inner( 8,  -4, 0)  — inner notch
+ *   3: center base     ( 0,  -8, 0)  — center base notch
+ *   4: left wing inner (-8,  -4, 0)  — inner notch mirror
+ *   5: left wing tip   (-20, -12, 0) — bottom left
+ */
+function makePlayerGeometry(): BufferGeometry {
+  const positions = new Float32Array([
+      0,  12, 0, // 0 nose tip
+     20, -12, 0, // 1 right wing tip
+      8,  -4, 0, // 2 right wing inner
+      0,  -8, 0, // 3 center base notch
+     -8,  -4, 0, // 4 left wing inner
+    -20, -12, 0, // 5 left wing tip
+  ]);
+  // 4 triangles: fan from nose tip
+  // nose→right-wing-tip→right-inner, nose→right-inner→base, nose→base→left-inner, nose→left-inner→left-wing-tip
+  const indices = new Uint16Array([0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5]);
+
+  const geo = new BufferGeometry();
+  geo.setAttribute('position', new Float32BufferAttribute(positions, 3));
+  geo.setIndex(new Uint16BufferAttribute(indices, 1));
+  geo.computeVertexNormals();
+  return geo;
+}
 
 export class Player {
   public x: number = 0;
@@ -22,10 +62,15 @@ export class Player {
   public readonly mesh: Mesh;
 
   constructor(scene: Scene) {
-    // Placeholder chevron: BoxGeometry. Phase 2 replaces with neon material.
-    // Width=40, height=24 (matches AABB: half-size = width/height above)
-    const geo = new BoxGeometry(40, 24, 1);
-    const mat = new MeshBasicMaterial({ color: 0xffffff });
+    // Angular chevron ship pointing upward (toward enemies)
+    const geo = makePlayerGeometry();
+    const mat = new MeshStandardMaterial({
+      color: 0x00ffff,      // cyan — player is always cyan regardless of wave
+      emissive: new Color(0x00ffff),
+      emissiveIntensity: 1.2,
+      roughness: 1.0,
+      metalness: 0.0,
+    });
     this.mesh = new Mesh(geo, mat);
     this.mesh.position.set(this.x, this.y, 0);
     scene.add(this.mesh);

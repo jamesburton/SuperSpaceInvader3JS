@@ -3,11 +3,21 @@ import type { ObjectPool } from '../core/ObjectPool';
 import type { Bullet } from '../entities/Bullet';
 import type { HUD } from '../ui/HUD';
 import { runState } from '../state/RunState';
+import { wavePalette } from '../config/palettes';
 
 export class SpawnSystem {
   private waveTransitioning: boolean = false;
   private transitionTimer: number = 0;
   private readonly TRANSITION_DELAY = 2.5; // seconds before new wave spawns
+
+  /**
+   * Apply Wave 1 palette to the formation at game start.
+   * Call this from Game.ts after constructing spawnSystem and formation,
+   * before entering the first state, so enemies spawn with cyan color.
+   */
+  public initPalette(formation: EnemyFormation): void {
+    formation.applyPalette(wavePalette.getColor(1));
+  }
 
   /**
    * Check if wave is clear; if so, begin transition to next wave.
@@ -56,6 +66,9 @@ export class SpawnSystem {
 
     // Spawn new wave
     formation.spawnWave();
+
+    // Apply wave-specific neon palette color
+    formation.applyPalette(wavePalette.getColor(runState.wave));
   }
 
   public reset(): void {
