@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-03-02T16:13:00Z"
+last_updated: "2026-03-02T16:18:05Z"
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 6
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -23,27 +23,27 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 ## Current Position
 
 Phase: 1 of 5 (Engine + Core Combat)
-Plan: 3 of 6 in current phase
+Plan: 4 of 6 in current phase
 Status: Executing
-Last activity: 2026-03-02 — Plan 01-03 complete
+Last activity: 2026-03-02 — Plan 01-04 complete
 
-Progress: [███░░░░░░░] 15% (3/6 plans in phase 1)
+Progress: [████░░░░░░] 20% (4/6 plans in phase 1)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 6 min
-- Total execution time: 0.32 hours
+- Total plans completed: 4
+- Average duration: 5 min
+- Total execution time: 0.35 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-engine-core-combat | 3 | 19 min | 6 min |
+| 01-engine-core-combat | 4 | 21 min | 5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (12 min), 01-02 (4 min), 01-03 (3 min)
+- Last 5 plans: 01-01 (12 min), 01-02 (4 min), 01-03 (3 min), 01-04 (2 min)
 - Trend: Accelerating
 
 *Updated after each plan completion*
@@ -71,6 +71,11 @@ Recent decisions affecting current work:
 - [Phase 01-engine-core-combat]: Dead enemies hidden via setMatrixAt(scale=0) — consistent with object-pool visible-flag pattern, zero GC pressure
 - [Phase 01-engine-core-combat]: EnemyFormation.getEnemyAABB() is canonical collision interface for Plan 04 — CollisionSystem must not access formationX/Y directly
 - [Phase 01-engine-core-combat]: March speed = BASE * pow(1.08, killed) recalculated from scratch each kill to prevent float drift over 40 kills
+- [Phase 01-engine-core-combat]: RunState plain TS module singleton — volatile, no Zustand, no localStorage
+- [Phase 01-engine-core-combat]: MetaState Zustand 5 persist (ssix_v1) with saveVersion=1 for Phase 4 migration hook
+- [Phase 01-engine-core-combat]: HUD is DOM overlay (absolutely-positioned divs in #hud) — no Three.js TextGeometry
+- [Phase 01-engine-core-combat]: CollisionSystem owns playerInvincibility timer — not Player entity — keeps entity layer clean
+- [Phase 01-engine-core-combat]: SpawnSystem.update() returns isTransitioning bool — Game.ts skips AI during 2.5s wave gap
 
 ### Pending Todos
 
@@ -79,10 +84,10 @@ None yet.
 ### Blockers/Concerns
 
 - three.quarks 0.17.0 peer dependency against Three.js 0.183.2 — npm install completed without errors but peer dependency should be monitored for Phase 2 particle work
-- Collision detection performance at 150+ simultaneous entities is unvalidated — run a stress test in Phase 1 before committing to AABB approach
+- Collision detection performance at 150+ simultaneous entities is unvalidated — AABB approach confirmed for Phase 1 (40 enemies + ~10 bullets); Phase 3 stress test still recommended
 
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Completed 01-03-PLAN.md — EnemyFormation (InstancedMesh), AISystem (march + firing), wired into Game loop
-Resume file: .planning/phases/01-engine-core-combat/01-04-PLAN.md
+Stopped at: Completed 01-04-PLAN.md — CollisionSystem, RunState, MetaState, HUD, SpawnSystem, fully wired Game.ts combat loop
+Resume file: .planning/phases/01-engine-core-combat/01-05-PLAN.md
