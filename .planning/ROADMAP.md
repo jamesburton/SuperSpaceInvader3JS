@@ -50,7 +50,14 @@ Plans:
   3. Enemy deaths trigger color-matched particle explosions; player shots produce a muzzle flash; power-up pickups display a swell effect and name text
   4. Screen shake responds to hit severity — large shake on boss impact, small shake on standard hits — without obscuring readability
   5. Wave transitions display "Wave X" with 2-3 seconds of breathing room, and the player ship trails particles during horizontal movement
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Entity geometry + neon emissive materials + WavePalette system
+- [ ] 02-02-PLAN.md — SelectiveBloom post-processing (EffectComposer replaces bare renderer.render)
+- [ ] 02-03-PLAN.md — Particle system: death bursts, muzzle flash, engine trail
+- [ ] 02-04-PLAN.md — Full wiring: PlayingState integration, CameraShake, wave announcement, UI stubs
+- [ ] 02-05-PLAN.md — Human verification checkpoint (full Phase 2 visual + feel)
 
 ### Phase 3: Enemy Depth + Wave Systems + Power-Ups
 **Goal**: Six distinct enemy types with intelligent behaviors make the core loop engaging enough to play for 10+ minutes without meta unlocks
@@ -95,7 +102,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Engine + Core Combat | 6/6 | Complete | 2026-03-02 |
-| 2. Visual Identity + Game Feel | 0/TBD | Not started | - |
+| 2. Visual Identity + Game Feel | 0/5 | Planning | - |
 | 3. Enemy Depth + Wave Systems + Power-Ups | 0/TBD | Not started | - |
 | 4. Boss Encounter + Meta Progression | 0/TBD | Not started | - |
 | 5. Campaign Mode + Game Modes | 0/TBD | Not started | - |
