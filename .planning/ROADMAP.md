@@ -13,7 +13,7 @@ Five phases deliver a complete browser-based roguelite arcade shooter. The build
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Engine + Core Combat** - Three.js foundation with object pooling, fixed-timestep loop, and a fully playable shoot-em-up combat loop
-- [ ] **Phase 2: Visual Identity + Game Feel** - Neon Tokyo cyberpunk aesthetic, bloom post-processing, particle effects, and the feedback systems that make the game feel responsive
+- [x] **Phase 2: Visual Identity + Game Feel** - Neon Tokyo cyberpunk aesthetic, bloom post-processing, particle effects, and the feedback systems that make the game feel responsive
 - [ ] **Phase 3: Enemy Depth + Wave Systems + Power-Ups** - Six enemy archetypes, formation-breaking AI, wave escalation, power-up drops, and in-run between-wave shop (the "fun bar" gate)
 - [ ] **Phase 4: Boss Encounter + Meta Progression** - Chapter 1 boss with multi-phase attack patterns, persistent meta shop, and the roguelite economy that connects runs
 - [ ] **Phase 5: Campaign Mode + Game Modes** - Handcrafted Campaign Chapter 1 with data-driven wave scripts, full mode selection, and campaign progress persistence
@@ -54,10 +54,10 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — Entity geometry + neon emissive materials + WavePalette system
-- [ ] 02-02-PLAN.md — SelectiveBloom post-processing (EffectComposer replaces bare renderer.render)
-- [ ] 02-03-PLAN.md — Particle system: death bursts, muzzle flash, engine trail
-- [ ] 02-04-PLAN.md — Full wiring: PlayingState integration, CameraShake, wave announcement, UI stubs
-- [ ] 02-05-PLAN.md — Human verification checkpoint (full Phase 2 visual + feel)
+- [x] 02-02-PLAN.md — SelectiveBloom post-processing (EffectComposer replaces bare renderer.render)
+- [x] 02-03-PLAN.md — Particle system: death bursts, muzzle flash, engine trail
+- [x] 02-04-PLAN.md — Full wiring: PlayingState integration, CameraShake, wave announcement, UI stubs
+- [x] 02-05-PLAN.md — Human verification checkpoint (full Phase 2 visual + feel)
 
 ### Phase 3: Enemy Depth + Wave Systems + Power-Ups
 **Goal**: Six distinct enemy types with intelligent behaviors make the core loop engaging enough to play for 10+ minutes without meta unlocks
@@ -102,7 +102,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Engine + Core Combat | 6/6 | Complete | 2026-03-02 |
-| 2. Visual Identity + Game Feel | 4/5 | In Progress|  |
+| 2. Visual Identity + Game Feel | 5/5 | Complete | 2026-03-02 |
 | 3. Enemy Depth + Wave Systems + Power-Ups | 0/TBD | Not started | - |
 | 4. Boss Encounter + Meta Progression | 0/TBD | Not started | - |
 | 5. Campaign Mode + Game Modes | 0/TBD | Not started | - |

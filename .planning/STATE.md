@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: in_progress
-last_updated: "2026-03-02T18:13:00Z"
+last_updated: "2026-03-02T22:10:00Z"
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 11
-  completed_plans: 9
+  completed_plans: 11
 ---
 
 # Project State
@@ -18,17 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-02)
 
 **Core value:** The thrill of arcade shooting elevated — every run feels different because of layered in-run progression, meta-unlocks that evolve your build over time, and enemies smart enough to keep you on your toes.
-**Current focus:** Phase 2 - Visual Identity + Game Feel
+**Current focus:** Phase 3 - Enemy Depth + Wave Systems + Power-Ups
 
 ## Current Position
 
-Phase: 2 of 5 (Visual Identity + Game Feel) — IN PROGRESS
-Plan: 4 of 5 complete (02-04 PlayingState wiring — all Phase 2 effects integrated)
-Next: Plan 02-05 (Phase 2 verification checkpoint)
-Status: In progress
-Last activity: 2026-03-02 — Plan 02-04 complete: CameraShake + DOM stubs + all Phase 2 effects wired into PlayingState
+Phase: 2 of 5 (Visual Identity + Game Feel) — COMPLETE ✓
+Next: Phase 3 (Enemy Depth + Wave Systems + Power-Ups) — not yet planned
+Status: Phase 2 complete, Phase 3 ready to plan
+Last activity: 2026-03-02 — Phase 2 verified 12/12, v0.5 tagged, Phase 2 closed
 
-Progress: [███░░░░░░░] 24% (1/5 phases complete, Phase 2 Plan 4/5 done)
+Progress: [██████░░░░] 40% (2/5 phases complete)
 
 ## Performance Metrics
 
@@ -107,11 +106,10 @@ None yet.
 
 ### Blockers/Concerns
 
-- three.quarks 0.17.0 peer dependency against Three.js 0.183.2 — npm install completed without errors but peer dependency should be monitored for Phase 2 particle work
 - Collision detection performance at 150+ simultaneous entities is unvalidated — AABB approach confirmed for Phase 1 (40 enemies + ~10 bullets); Phase 3 stress test still recommended
 
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Phase 2, Plan 04 complete — PlayingState fully wired with all Phase 2 effects; ready for Plan 02-05 verification checkpoint
-Resume file: none — proceed to execute 02-05-PLAN.md
+Stopped at: Phase 2 complete — verified 12/12, v0.5 tagged. Ready to discuss/plan Phase 3.
+Resume file: none
