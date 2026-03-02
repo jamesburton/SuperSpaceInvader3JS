@@ -162,27 +162,78 @@ Deferred — build after v1 is validated.
 
 ## Traceability
 
-*Populated during roadmap creation.*
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ENG-01 through ENG-05 | Phase 1 | Pending |
-| CORE-01 through CORE-11 | Phase 2 | Pending |
-| FEEL-01 through FEEL-07 | Phase 3 | Pending |
-| VIS-01 through VIS-05 | Phase 3 | Pending |
-| ENEMY-01 through ENEMY-10 | Phase 4 | Pending |
-| PWR-01 through PWR-04 | Phase 4 | Pending |
-| INRUN-01 through INRUN-04 | Phase 4 | Pending |
-| BOSS-01 through BOSS-04 | Phase 5 | Pending |
-| META-01 through META-07 | Phase 6 | Pending |
-| MODE-01 through MODE-04 | Phase 7 | Pending |
-| CAMP-01 through CAMP-03 | Phase 7 | Pending |
+| ENG-01 | Phase 1 | Pending |
+| ENG-02 | Phase 1 | Pending |
+| ENG-03 | Phase 1 | Pending |
+| ENG-04 | Phase 1 | Pending |
+| ENG-05 | Phase 1 | Pending |
+| CORE-01 | Phase 1 | Pending |
+| CORE-02 | Phase 1 | Pending |
+| CORE-03 | Phase 1 | Pending |
+| CORE-04 | Phase 1 | Pending |
+| CORE-05 | Phase 1 | Pending |
+| CORE-06 | Phase 1 | Pending |
+| CORE-07 | Phase 1 | Pending |
+| CORE-08 | Phase 1 | Pending |
+| CORE-09 | Phase 1 | Pending |
+| CORE-10 | Phase 1 | Pending |
+| CORE-11 | Phase 1 | Pending |
+| VIS-01 | Phase 2 | Pending |
+| VIS-02 | Phase 2 | Pending |
+| VIS-03 | Phase 2 | Pending |
+| VIS-04 | Phase 2 | Pending |
+| VIS-05 | Phase 2 | Pending |
+| FEEL-01 | Phase 2 | Pending |
+| FEEL-02 | Phase 2 | Pending |
+| FEEL-03 | Phase 2 | Pending |
+| FEEL-04 | Phase 2 | Pending |
+| FEEL-05 | Phase 2 | Pending |
+| FEEL-06 | Phase 2 | Pending |
+| FEEL-07 | Phase 2 | Pending |
+| ENEMY-01 | Phase 3 | Pending |
+| ENEMY-02 | Phase 3 | Pending |
+| ENEMY-03 | Phase 3 | Pending |
+| ENEMY-04 | Phase 3 | Pending |
+| ENEMY-05 | Phase 3 | Pending |
+| ENEMY-06 | Phase 3 | Pending |
+| ENEMY-07 | Phase 3 | Pending |
+| ENEMY-08 | Phase 3 | Pending |
+| ENEMY-09 | Phase 3 | Pending |
+| ENEMY-10 | Phase 3 | Pending |
+| PWR-01 | Phase 3 | Pending |
+| PWR-02 | Phase 3 | Pending |
+| PWR-03 | Phase 3 | Pending |
+| PWR-04 | Phase 3 | Pending |
+| INRUN-01 | Phase 3 | Pending |
+| INRUN-02 | Phase 3 | Pending |
+| INRUN-03 | Phase 3 | Pending |
+| INRUN-04 | Phase 3 | Pending |
+| BOSS-01 | Phase 4 | Pending |
+| BOSS-02 | Phase 4 | Pending |
+| BOSS-03 | Phase 4 | Pending |
+| BOSS-04 | Phase 4 | Pending |
+| META-01 | Phase 4 | Pending |
+| META-02 | Phase 4 | Pending |
+| META-03 | Phase 4 | Pending |
+| META-04 | Phase 4 | Pending |
+| META-05 | Phase 4 | Pending |
+| META-06 | Phase 4 | Pending |
+| META-07 | Phase 4 | Pending |
+| MODE-01 | Phase 5 | Pending |
+| MODE-02 | Phase 5 | Pending |
+| MODE-03 | Phase 5 | Pending |
+| MODE-04 | Phase 5 | Pending |
+| CAMP-01 | Phase 5 | Pending |
+| CAMP-02 | Phase 5 | Pending |
+| CAMP-03 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 57 total
-- Mapped to phases: 57
-- Unmapped: 0 ✓
+- v1 requirements: 64 total
+- Mapped to phases: 64
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-02*
-*Last updated: 2026-03-02 after initial definition*
+*Last updated: 2026-03-02 — traceability updated after roadmap creation (5-phase structure)*
