@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in-progress
-last_updated: "2026-03-02"
+status: unknown
+last_updated: "2026-03-02T18:03:31.650Z"
 progress:
-  total_phases: 5
+  total_phases: 2
   completed_phases: 1
   total_plans: 11
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -23,10 +23,10 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 ## Current Position
 
 Phase: 2 of 5 (Visual Identity + Game Feel) — IN PROGRESS
-Plan: 1 of 5 complete (02-01 neon materials + WavePalette)
-Next: Plan 02-02 (SelectiveBloom + post-processing pipeline)
+Plan: 2 of 5 complete (02-02 SelectiveBloom post-processing pipeline)
+Next: Plan 02-03 (Particle system — hit sparks + death explosions)
 Status: In progress
-Last activity: 2026-03-02 — Plan 02-01 complete: neon emissive materials + WavePalette system
+Last activity: 2026-03-02 — Plan 02-02 complete: SelectiveBloom EffectComposer wired; emissive entities glow
 
 Progress: [██░░░░░░░░] 20% (1/5 phases complete, Phase 2 started)
 
@@ -42,13 +42,14 @@ Progress: [██░░░░░░░░] 20% (1/5 phases complete, Phase 2 sta
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-engine-core-combat | 5 | 23 min | 5 min |
-| 02-visual-identity-game-feel | 1 | 3 min | 3 min |
+| 02-visual-identity-game-feel | 2 | 5 min | 2.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (4 min), 01-03 (3 min), 01-04 (2 min), 01-05 (2 min), 02-01 (3 min)
+- Last 5 plans: 01-03 (3 min), 01-04 (2 min), 01-05 (2 min), 02-01 (3 min), 02-02 (2 min)
 - Trend: Stable fast
 
 *Updated after each plan completion*
+| Phase 02-visual-identity-game-feel P02 | 2 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,9 @@ Recent decisions affecting current work:
 - [Phase 02-visual-identity-game-feel 02-01]: applyPalette(hex) called in SpawnSystem.initPalette() at game start + startNextWave() on wave transition
 - [Phase 02-visual-identity-game-feel 02-01]: Bullet constructor no longer accepts color param — init() sets emissive per isPlayerBullet flag
 - [Phase 02-visual-identity-game-feel 02-01]: MeshStandardMaterial with emissiveIntensity on all entities — prerequisite for bloom rendering pipeline (Plan 02-02)
+- [Phase 02-visual-identity-game-feel]: SelectiveBloomEffect.selection.add(mesh) — no manual layer management; library handles render layer 11 internally
+- [Phase 02-visual-identity-game-feel]: Bullet meshes pre-registered at init time (not lazily) — bloom applies from first shot with zero per-frame overhead
+- [Phase 02-visual-identity-game-feel]: renderWithEffects() falls back to renderer.render() if bloom uninitialised — safe for test harnesses
 
 ### Pending Todos
 
@@ -100,5 +104,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: Phase 2, Plan 01 complete — neon emissive materials + WavePalette system; ready for Plan 02-02 bloom
-Resume file: none — proceed to execute 02-02-PLAN.md
+Stopped at: Phase 2, Plan 02 complete — SelectiveBloom post-processing pipeline; ready for Plan 02-03 particles
+Resume file: none — proceed to execute 02-03-PLAN.md

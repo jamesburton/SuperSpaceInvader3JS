@@ -56,7 +56,7 @@
 
 - [x] **VIS-01**: Neon Tokyo cyberpunk aesthetic with glowing emissive materials on all enemy and player sprites
 - [x] **VIS-02**: Each wave is assigned a distinct neon color palette; enemy materials update per wave
-- [ ] **VIS-03**: Selective bloom post-processing (pmndrs/postprocessing) applied to neon elements; non-emissive elements excluded
+- [x] **VIS-03**: Selective bloom post-processing (pmndrs/postprocessing) applied to neon elements; non-emissive elements excluded
 - [ ] **VIS-04**: Particle explosion system fires per-enemy-type burst profiles with matching colors on kill
 - [ ] **VIS-05**: Player ship displays an engine trail particle effect during horizontal movement
 
@@ -182,7 +182,7 @@ Deferred — build after v1 is validated.
 | CORE-11 | Phase 1 | Complete |
 | VIS-01 | Phase 2 | Complete |
 | VIS-02 | Phase 2 | Complete |
-| VIS-03 | Phase 2 | Pending |
+| VIS-03 | Phase 2 | Complete |
 | VIS-04 | Phase 2 | Pending |
 | VIS-05 | Phase 2 | Pending |
 | FEEL-01 | Phase 2 | Pending |
