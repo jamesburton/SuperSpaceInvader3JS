@@ -1,7 +1,10 @@
 import {
   InstancedMesh,
-  BoxGeometry,
-  MeshBasicMaterial,
+  BufferGeometry,
+  Float32BufferAttribute,
+  Uint16BufferAttribute,
+  MeshStandardMaterial,
+  Color,
   Matrix4,
 } from 'three';
 import type { Scene } from 'three';
@@ -46,12 +49,147 @@ export class Enemy {
 }
 
 /**
- * EnemyFormation: manages the InstancedMesh and formation march logic.
+ * Build a BufferGeometry from vertex positions and triangle indices.
+ * All shapes are flat (z=0) for the 2D gameplay plane.
+ */
+function buildGeometry(
+  positions: Float32Array,
+  indices: Uint16Array,
+): BufferGeometry {
+  const geo = new BufferGeometry();
+  geo.setAttribute('position', new Float32BufferAttribute(positions, 3));
+  geo.setIndex(new Uint16BufferAttribute(indices, 1));
+  geo.computeVertexNormals();
+  return geo;
+}
+
+/**
+ * Row 0 (small, top): Diamond — rotated square, 4 vertices.
+ * Dimensions: 24w × 18h
+ */
+function makeRow0Geometry(): BufferGeometry {
+  const hw = 12; // half-width
+  const hh = 9;  // half-height
+  // vertices: top, right, bottom, left
+  const positions = new Float32Array([
+     0,  hh, 0, // 0 top
+    hw,   0, 0, // 1 right
+     0, -hh, 0, // 2 bottom
+   -hw,   0, 0, // 3 left
+  ]);
+  // Two triangles: top-right-bottom, top-bottom-left
+  const indices = new Uint16Array([0, 1, 2, 0, 2, 3]);
+  return buildGeometry(positions, indices);
+}
+
+/**
+ * Row 1 (medium-small): Elongated hexagon — 6 vertices.
+ * Dimensions: 28w × 20h
+ */
+function makeRow1Geometry(): BufferGeometry {
+  const hw = 14; // half-width
+  const hh = 10; // half-height
+  const midX = hw * 0.7; // horizontal extent of mid vertices
+  const midY = hh * 0.45; // vertical offset for mid vertices
+  // vertices: top-center, top-right, bottom-right, bottom-center, bottom-left, top-left
+  const positions = new Float32Array([
+       0,  hh, 0, // 0 top-center
+    midX, midY, 0, // 1 top-right
+    midX,-midY, 0, // 2 bottom-right
+       0, -hh, 0, // 3 bottom-center
+   -midX,-midY, 0, // 4 bottom-left
+   -midX, midY, 0, // 5 top-left
+  ]);
+  // 4 triangles from center fan: use vertex 0 as pivot
+  const indices = new Uint16Array([0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5]);
+  return buildGeometry(positions, indices);
+}
+
+/**
+ * Row 2 (medium-large): Angular chevron/arrowhead pointing up — 6 vertices.
+ * Dimensions: 32w × 22h
+ */
+function makeRow2Geometry(): BufferGeometry {
+  const hw = 16; // half-width
+  const hh = 11; // half-height
+  // Arrowhead shape pointing upward with swept-back wings
+  const positions = new Float32Array([
+       0,   hh, 0, // 0 nose tip (top center)
+      hw,  -hh, 0, // 1 right wing tip (bottom right)
+    hw * 0.4, -hh * 0.3, 0, // 2 right inner notch
+       0, -hh * 0.7, 0, // 3 center base notch
+   -hw * 0.4, -hh * 0.3, 0, // 4 left inner notch
+     -hw,  -hh, 0, // 5 left wing tip (bottom left)
+  ]);
+  // 4 triangles: fan from nose
+  const indices = new Uint16Array([0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 5]);
+  return buildGeometry(positions, indices);
+}
+
+/**
+ * Row 3 (large, bottom): Wide crab with pincer notches — 8 vertices.
+ * Dimensions: 36w × 24h
+ */
+function makeRow3Geometry(): BufferGeometry {
+  const hw = 18; // half-width
+  const hh = 12; // half-height
+  // Crab body with pincer notches cut into bottom corners
+  const positions = new Float32Array([
+      -hw * 0.5,  hh, 0, // 0 top-left
+       hw * 0.5,  hh, 0, // 1 top-right
+          hw, hh * 0.3, 0, // 2 right mid-outer
+          hw,     -hh, 0, // 3 right pincer tip
+       hw * 0.5,  0,  0, // 4 right pincer inner notch
+      -hw * 0.5,  0,  0, // 5 left pincer inner notch
+         -hw,    -hh, 0, // 6 left pincer tip
+         -hw, hh * 0.3, 0, // 7 left mid-outer
+  ]);
+  // 6 triangles from center pivot (vertex 0)
+  const indices = new Uint16Array([
+    0, 1, 2,
+    0, 2, 3,
+    0, 3, 4,
+    0, 4, 5,
+    0, 5, 6,
+    0, 6, 7,
+  ]);
+  return buildGeometry(positions, indices);
+}
+
+/** Create per-row geometry factory array */
+const ROW_GEOMETRY_FACTORIES: Array<() => BufferGeometry> = [
+  makeRow0Geometry,
+  makeRow1Geometry,
+  makeRow2Geometry,
+  makeRow3Geometry,
+];
+
+/**
+ * EnemyFormation: manages per-row InstancedMesh objects and formation march logic.
  * Owns all Enemy instances. AISystem calls updateMarch() each fixed step.
+ *
+ * Phase 2: replaced single instancedMesh with rowMeshes[4], one per row.
+ * Each row has its own BufferGeometry shape and MeshStandardMaterial for emissive neon.
+ * Public API remains 100% compatible with Phase 1 — CollisionSystem and AISystem unchanged.
  */
 export class EnemyFormation {
   public readonly enemies: Enemy[] = [];
-  public readonly instancedMesh: InstancedMesh;
+
+  /**
+   * Per-row instanced meshes.
+   * rowMeshes[0] = row 0 (top, small diamonds), rowMeshes[3] = row 3 (bottom, crabs).
+   * Each InstancedMesh pre-allocated to ENEMY_POOL_SIZE slots.
+   */
+  public readonly rowMeshes: InstancedMesh[];
+
+  /**
+   * @deprecated Phase 1 compatibility alias — points to rowMeshes[0].
+   * CollisionSystem and AISystem do not access instancedMesh directly,
+   * but keep it available for any legacy reference.
+   */
+  public get instancedMesh(): InstancedMesh {
+    return this.rowMeshes[0];
+  }
 
   // Formation position — all enemies relative to this anchor
   private formationX: number = 0;
@@ -70,16 +208,38 @@ export class EnemyFormation {
   private readonly tmpMatrix = new Matrix4();
 
   constructor(scene: Scene) {
-    // Single BoxGeometry shared by all instances (Phase 2 will replace with per-row sub-meshes)
-    // Phase 1: all instances use the same mesh; row size differences are purely in AABB data
-    const geo = new BoxGeometry(32, 22, 1);
-    const mat = new MeshBasicMaterial({ color: 0xffffff });
+    this.rowMeshes = [];
 
-    this.instancedMesh = new InstancedMesh(geo, mat, ENEMY_POOL_SIZE);
-    this.instancedMesh.count = 0; // will be set in spawnWave
-    scene.add(this.instancedMesh);
+    for (let row = 0; row < ENEMY_ROWS; row++) {
+      const geo = ROW_GEOMETRY_FACTORIES[Math.min(row, ROW_GEOMETRY_FACTORIES.length - 1)]();
+      const mat = new MeshStandardMaterial({
+        color: 0x00ffff,
+        emissive: new Color(0x00ffff),
+        emissiveIntensity: 1.0,
+        roughness: 1.0,
+        metalness: 0.0,
+      });
+
+      const mesh = new InstancedMesh(geo, mat, ENEMY_POOL_SIZE);
+      mesh.count = 0;
+      scene.add(mesh);
+      this.rowMeshes.push(mesh);
+    }
 
     this.spawnWave();
+  }
+
+  /**
+   * Apply a neon palette color to all row materials.
+   * Called by SpawnSystem on each new wave spawn.
+   */
+  public applyPalette(hexColor: number): void {
+    const c = new Color(hexColor);
+    for (const mesh of this.rowMeshes) {
+      const mat = mesh.material as MeshStandardMaterial;
+      mat.color.copy(c);
+      mat.emissive.copy(c);
+    }
   }
 
   /** Spawn a fresh wave of enemies at the top formation position */
@@ -96,23 +256,24 @@ export class EnemyFormation {
 
     for (let row = 0; row < ENEMY_ROWS; row++) {
       for (let col = 0; col < ENEMY_COLS; col++) {
-        const instanceIndex = row * ENEMY_COLS + col;
+        // instanceIndex within each row mesh = column index (0–9)
+        const instanceIndex = col;
         const enemy = new Enemy(row, col, instanceIndex);
         this.enemies.push(enemy);
       }
     }
 
-    this.instancedMesh.count = totalEnemies;
+    // Update per-row mesh counts
+    for (let row = 0; row < ENEMY_ROWS; row++) {
+      this.rowMeshes[row].count = ENEMY_COLS;
+    }
+
     this.updateAllMatrices();
   }
 
   /**
    * Update formation march. Called by AISystem each fixed step.
    * Returns true if enemies have reached the bottom (game over trigger).
-   *
-   * Reversal is triggered when the outermost *active* enemy edge touches the
-   * world boundary — so clearing one side of the formation makes the remaining
-   * enemies travel further before turning, just like classic Space Invaders.
    */
   public updateMarch(dt: number): boolean {
     this.formationX += this.marchDir * this.marchSpeed * dt;
@@ -151,7 +312,11 @@ export class EnemyFormation {
     return false;
   }
 
-  /** Kill an enemy by instanceIndex. Updates march speed and deactivates instance. */
+  /**
+   * Kill an enemy by instanceIndex. Updates march speed and deactivates instance.
+   * instanceIndex here is the flat index (row * ENEMY_COLS + col) — same as Phase 1 API.
+   * Internally maps to per-row instancedMesh column index.
+   */
   public killEnemy(instanceIndex: number): void {
     const enemy = this.enemies[instanceIndex];
     if (!enemy || !enemy.active) return;
@@ -164,10 +329,11 @@ export class EnemyFormation {
     const killed = this.totalEnemies - this.activeEnemyCount;
     this.marchSpeed = ENEMY_BASE_MARCH_SPEED * Math.pow(1 + ENEMY_MARCH_SPEEDUP, killed);
 
-    // Hide this instance by scaling it to zero
+    // Hide this instance by scaling it to zero in the row's InstancedMesh
     this.tmpMatrix.makeScale(0, 0, 0);
-    this.instancedMesh.setMatrixAt(instanceIndex, this.tmpMatrix);
-    this.instancedMesh.instanceMatrix.needsUpdate = true;
+    const rowMesh = this.rowMeshes[enemy.row];
+    rowMesh.setMatrixAt(enemy.instanceIndex, this.tmpMatrix);
+    rowMesh.instanceMatrix.needsUpdate = true;
   }
 
   public get activeCount(): number {
@@ -217,8 +383,12 @@ export class EnemyFormation {
       if (!enemy.active) continue;
       const pos = this.getEnemyWorldPos(enemy);
       this.tmpMatrix.makeTranslation(pos.x, pos.y, 0);
-      this.instancedMesh.setMatrixAt(enemy.instanceIndex, this.tmpMatrix);
+      // Each row has its own InstancedMesh; enemy.instanceIndex = enemy.col (0-9)
+      this.rowMeshes[enemy.row].setMatrixAt(enemy.instanceIndex, this.tmpMatrix);
     }
-    this.instancedMesh.instanceMatrix.needsUpdate = true;
+    // Mark all row meshes as needing update
+    for (const mesh of this.rowMeshes) {
+      mesh.instanceMatrix.needsUpdate = true;
+    }
   }
 }
