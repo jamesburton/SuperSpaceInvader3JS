@@ -1,0 +1,24 @@
+{
+  "name": "super-space-invaders-x",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "0.183.2",
+    "postprocessing": "6.38.3",
+    "three.quarks": "0.17.0",
+    "zustand": "5.0.11"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/three": "0.183.1",
+    "vite": "7.3.1",
+    "stats-gl": "latest",
+    "lil-gui": "0.21.0"
+  }
+}
