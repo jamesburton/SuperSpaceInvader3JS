@@ -6,19 +6,24 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "three": "0.183.2",
     "postprocessing": "6.38.3",
+    "three": "0.183.2",
     "three.quarks": "0.17.0",
     "zustand": "5.0.11"
   },
   "devDependencies": {
-    "typescript": "5.9.3",
     "@types/three": "0.183.1",
-    "vite": "7.3.1",
+    "@vitest/coverage-v8": "^4.0.18",
+    "jsdom": "^28.1.0",
+    "lil-gui": "0.21.0",
     "stats-gl": "latest",
-    "lil-gui": "0.21.0"
+    "typescript": "5.9.3",
+    "vite": "7.3.1",
+    "vitest": "^4.0.18"
   }
 }
