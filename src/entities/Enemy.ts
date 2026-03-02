@@ -256,8 +256,8 @@ export class EnemyFormation {
 
     for (let row = 0; row < ENEMY_ROWS; row++) {
       for (let col = 0; col < ENEMY_COLS; col++) {
-        // instanceIndex within each row mesh = column index (0–9)
-        const instanceIndex = col;
+        // instanceIndex = flat array position (row * ENEMY_COLS + col), used by killEnemy lookup
+        const instanceIndex = row * ENEMY_COLS + col;
         const enemy = new Enemy(row, col, instanceIndex);
         this.enemies.push(enemy);
       }
@@ -330,9 +330,10 @@ export class EnemyFormation {
     this.marchSpeed = ENEMY_BASE_MARCH_SPEED * Math.pow(1 + ENEMY_MARCH_SPEEDUP, killed);
 
     // Hide this instance by scaling it to zero in the row's InstancedMesh
+    // Use enemy.col as the per-row InstancedMesh slot index (0–9 within each row mesh)
     this.tmpMatrix.makeScale(0, 0, 0);
     const rowMesh = this.rowMeshes[enemy.row];
-    rowMesh.setMatrixAt(enemy.instanceIndex, this.tmpMatrix);
+    rowMesh.setMatrixAt(enemy.col, this.tmpMatrix);
     rowMesh.instanceMatrix.needsUpdate = true;
   }
 
@@ -383,8 +384,8 @@ export class EnemyFormation {
       if (!enemy.active) continue;
       const pos = this.getEnemyWorldPos(enemy);
       this.tmpMatrix.makeTranslation(pos.x, pos.y, 0);
-      // Each row has its own InstancedMesh; enemy.instanceIndex = enemy.col (0-9)
-      this.rowMeshes[enemy.row].setMatrixAt(enemy.instanceIndex, this.tmpMatrix);
+      // Each row has its own InstancedMesh; use enemy.col (0-9) as the slot index within that mesh
+      this.rowMeshes[enemy.row].setMatrixAt(enemy.col, this.tmpMatrix);
     }
     // Mark all row meshes as needing update
     for (const mesh of this.rowMeshes) {
