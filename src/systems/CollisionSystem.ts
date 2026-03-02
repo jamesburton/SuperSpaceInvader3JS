@@ -2,9 +2,11 @@ import type { Bullet } from '../entities/Bullet';
 import type { Player } from '../entities/Player';
 import type { EnemyFormation } from '../entities/Enemy';
 import type { ObjectPool } from '../core/ObjectPool';
+import type { ParticleManager } from '../effects/ParticleManager';
 import { runState } from '../state/RunState';
 import { ENEMY_DEFS } from '../config/enemies';
 import { PLAYER_INVINCIBILITY_DURATION } from '../utils/constants';
+import { wavePalette } from '../config/palettes';
 
 /** AABB overlap test: true if two axis-aligned boxes overlap */
 function aabbOverlap(
@@ -16,6 +18,16 @@ function aabbOverlap(
 
 export class CollisionSystem {
   private playerInvincibility: number = 0; // countdown timer in seconds
+  private particleManager: ParticleManager | null = null;
+
+  /**
+   * Inject ParticleManager for death burst effects.
+   * Called from Game.ts during init() after ParticleManager is created.
+   * Using setter injection to avoid circular constructor dependencies.
+   */
+  public setParticleManager(pm: ParticleManager): void {
+    this.particleManager = pm;
+  }
 
   /**
    * Check player bullets vs enemies, enemy bullets vs player.
@@ -56,9 +68,16 @@ export class CollisionSystem {
             bulletsToRelease.push({ bullet, pool: playerBulletPool });
 
             if (enemy.health <= 0) {
+              // Capture world position BEFORE killEnemy() scales matrix to zero
+              const worldPos = formation.getEnemyWorldPos(enemy);
               formation.killEnemy(enemy.instanceIndex);
               runState.addScore(ENEMY_DEFS[enemy.type].scoreValue);
               runState.recordKill();
+              // Spawn death particle burst at kill position with current wave palette color
+              if (this.particleManager) {
+                const paletteColor = wavePalette.getColor(runState.wave);
+                this.particleManager.spawnDeathBurst(worldPos.x, worldPos.y, paletteColor);
+              }
             }
             break; // bullet consumed by first hit — stop checking this bullet
           }
