@@ -7,6 +7,7 @@ import type { Player } from '../entities/Player';
 import type { Bullet } from '../entities/Bullet';
 import type { EnemyFormation } from '../entities/Enemy';
 import type { MovementSystem } from '../systems/MovementSystem';
+import type { WeaponSystem } from '../systems/WeaponSystem';
 import type { AISystem } from '../systems/AISystem';
 import type { CollisionSystem } from '../systems/CollisionSystem';
 import type { SpawnSystem } from '../systems/SpawnSystem';
@@ -14,6 +15,7 @@ import type { ParticleManager } from '../effects/ParticleManager';
 import type { CameraShake } from '../effects/CameraShake';
 import type { BossHealthBar } from '../ui/BossHealthBar';
 import type { PickupFeedback } from '../ui/PickupFeedback';
+import type { PowerUpManager } from '../systems/PowerUpManager';
 import { runState } from '../state/RunState';
 import { useMetaStore } from '../state/MetaState';
 import { FIXED_STEP } from '../utils/constants';
@@ -29,14 +31,17 @@ export interface PlayingStateContext {
   enemyBulletPool: ObjectPool<Bullet>;
   activeBullets: Bullet[];
   movementSystem: MovementSystem;
+  weaponSystem: WeaponSystem;         // Phase 3: canonical player fire path
   aiSystem: AISystem;
   collisionSystem: CollisionSystem;
   spawnSystem: SpawnSystem;
   // Phase 2 additions
   particleManager: ParticleManager;
   cameraShake: CameraShake;
-  bossHealthBar: BossHealthBar;     // Phase 4 stub — present but not called in Phase 2
-  pickupFeedback: PickupFeedback;   // Phase 3 stub — present but not called in Phase 2
+  bossHealthBar: BossHealthBar;       // Phase 4 stub — present but not called in Phase 2
+  pickupFeedback: PickupFeedback;     // Phase 3 stub — present but not called in Phase 2
+  // Phase 3 additions
+  powerUpManager: PowerUpManager | null; // null until Plan 03-08 wires into Game.ts fully
 }
 
 export class PlayingState implements IGameState {
@@ -63,17 +68,16 @@ export class PlayingState implements IGameState {
       return;
     }
 
-    // 1. Player fire input
-    if (ctx.player.active && input.justPressed('Space') && ctx.player.canFire()) {
-      const bullet = ctx.playerBulletPool.acquire();
-      if (bullet !== null) {
-        bullet.init(ctx.player.x, ctx.player.y + ctx.player.height + 10, true);
-        ctx.activeBullets.push(bullet);
-        ctx.player.recordFire();
-        // Phase 2: muzzle flash at barrel tip
-        ctx.particleManager.spawnMuzzleFlash(ctx.player.x, ctx.player.y + ctx.player.height + 10);
-      }
-    }
+    // 1. Player fire input — WeaponSystem is canonical fire path (Phase 3 refactor)
+    ctx.weaponSystem.update(
+      dt,
+      input,
+      ctx.player,
+      ctx.playerBulletPool,
+      ctx.activeBullets,
+      ctx.particleManager,
+      ctx.powerUpManager ?? undefined,
+    );
 
     // 2. Player movement
     const left = input.isDown('ArrowLeft') || input.isDown('KeyA');
@@ -141,6 +145,11 @@ export class PlayingState implements IGameState {
 
     // Phase 2: update all active particles
     ctx.particleManager.update(dt);
+
+    // Phase 3: update power-up token drift and duration ticking
+    if (ctx.powerUpManager) {
+      ctx.powerUpManager.update(dt);
+    }
 
     // 7. Check lives
     if (runState.lives <= 0) {

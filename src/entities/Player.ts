@@ -123,4 +123,14 @@ export class Player {
   public setSpeedMultiplier(m: number): void {
     this.speedMultiplier = m;
   }
+
+  /**
+   * Override the fire cooldown directly to a specific value in seconds.
+   * Used by WeaponSystem after recordFire() to apply rapid fire (0.08s) override
+   * instead of the standard cooldown (0.25s × multiplier).
+   * Call after recordFire() to replace the standard cooldown.
+   */
+  public setFireCooldown(v: number): void {
+    this.fireCooldown = v;
+  }
 }

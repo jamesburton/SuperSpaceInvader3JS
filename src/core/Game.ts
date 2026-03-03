@@ -6,9 +6,11 @@ import { Player } from '../entities/Player';
 import { Bullet, createBulletPools } from '../entities/Bullet';
 import { EnemyFormation } from '../entities/Enemy';
 import { MovementSystem } from '../systems/MovementSystem';
+import { WeaponSystem } from '../systems/WeaponSystem';
 import { AISystem } from '../systems/AISystem';
 import { CollisionSystem } from '../systems/CollisionSystem';
 import { SpawnSystem } from '../systems/SpawnSystem';
+import { PowerUpManager } from '../systems/PowerUpManager';
 import { ParticleManager } from '../effects/ParticleManager';
 import { CameraShake } from '../effects/CameraShake';
 import { BossHealthBar } from '../ui/BossHealthBar';
@@ -45,9 +47,11 @@ export class Game {
     const formation = new EnemyFormation(this.scene.scene);
 
     const movementSystem = new MovementSystem();
+    const weaponSystem = new WeaponSystem();      // Phase 3: canonical player fire path
     const aiSystem = new AISystem();
     const collisionSystem = new CollisionSystem();
     const spawnSystem = new SpawnSystem();
+    const powerUpManager = new PowerUpManager(this.scene.scene); // Phase 3: drop spawner + active state
 
     const hudRoot = document.getElementById('hud') as HTMLElement;
     const hud = new HUD(hudRoot);
@@ -67,13 +71,15 @@ export class Game {
       enemyBulletPool,
       activeBullets,
       movementSystem,
+      weaponSystem,      // Phase 3
       aiSystem,
       collisionSystem,
       spawnSystem,
       particleManager,   // Phase 2
       cameraShake,       // Phase 2
       bossHealthBar,     // Phase 2 stub (Phase 4 activates)
-      pickupFeedback,    // Phase 2 stub (Phase 3 activates)
+      pickupFeedback,    // Phase 2 stub (Phase 3 activates in 03-07)
+      powerUpManager,    // Phase 3
     };
 
     // Apply Wave 1 palette so initial enemy formation spawns cyan (not gray default)
@@ -98,8 +104,14 @@ export class Game {
     // Phase 2: register particle meshes with bloom so particles glow
     particleManager.registerBloom((mesh) => bloom.bloomEffect.selection.add(mesh));
 
+    // Phase 3: register pickup token meshes with bloom so tokens glow
+    powerUpManager.registerBloom((mesh) => bloom.bloomEffect.selection.add(mesh));
+
     // Phase 2: wire particle manager into collision system for death burst effects
     collisionSystem.setParticleManager(particleManager);
+
+    // Phase 3: wire power-up manager into collision system for pickup/shield/SID drops
+    collisionSystem.setPowerUpManager(powerUpManager);
 
     // Start at TitleState
     this.stateManager.replace(new TitleState(this.stateManager, this.input, hud, ctx));
