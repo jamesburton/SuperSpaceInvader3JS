@@ -81,7 +81,7 @@
 - [x] **META-03**: Meta shop offers at least 2 starting weapon loadout unlocks (purchasable alternatives to default weapon)
 - [x] **META-04**: Meta shop offers a limited set of passive stat upgrades (small % bonuses to fire rate, speed, or shield capacity; capped to prevent balance inflation)
 - [x] **META-05**: All meta shop purchases persist across browser sessions via localStorage
-- [ ] **META-06**: Run-end screen displays meta currency earned this run alongside total meta currency
+- [x] **META-06**: Run-end screen displays meta currency earned this run alongside total meta currency
 - [x] **META-07**: localStorage schema is versioned (v1) to enable future migration without data loss
 
 ### Game Modes (MODE)
@@ -95,7 +95,7 @@
 
 - [x] **BOSS-01**: Chapter 1 boss is visually distinct and significantly larger than normal enemies
 - [x] **BOSS-02**: Boss fight has at least 2 distinct attack phases with telegraphed phase transitions
-- [ ] **BOSS-03**: Boss health bar is displayed throughout the encounter with segmented phase indicators
+- [x] **BOSS-03**: Boss health bar is displayed throughout the encounter with segmented phase indicators
 - [x] **BOSS-04**: Boss phase transition triggers a visual and behavioral change (new attack patterns, movement)
 
 ### Campaign Structure (CAMP)
@@ -212,14 +212,14 @@ Deferred — build after v1 is validated.
 | INRUN-04 | Phase 3 | Complete |
 | BOSS-01 | Phase 4 | Complete |
 | BOSS-02 | Phase 4 | Complete |
-| BOSS-03 | Phase 4 | Pending |
+| BOSS-03 | Phase 4 | Complete |
 | BOSS-04 | Phase 4 | Complete |
 | META-01 | Phase 4 | Complete |
 | META-02 | Phase 4 | Complete |
 | META-03 | Phase 4 | Complete |
 | META-04 | Phase 4 | Complete |
 | META-05 | Phase 4 | Complete |
-| META-06 | Phase 4 | Pending |
+| META-06 | Phase 4 | Complete |
 | META-07 | Phase 4 | Complete |
 | MODE-01 | Phase 5 | Pending |
 | MODE-02 | Phase 5 | Pending |
