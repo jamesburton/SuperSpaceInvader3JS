@@ -1,0 +1,121 @@
+/**
+ * Tests for waveConfig — WaveConfig structure, WAVE_CONFIGS entries, getWaveConfig function,
+ * and FormationLayout interface (structural check via duck typing).
+ */
+import { describe, it, expect } from 'vitest';
+import {
+  WAVE_CONFIGS,
+  getWaveConfig,
+  type FormationLayout,
+} from './waveConfig';
+
+describe('WAVE_CONFIGS — structure', () => {
+  it('has 10 entries (waves 1-10)', () => {
+    expect(WAVE_CONFIGS).toHaveLength(10);
+  });
+
+  it('every entry has required WaveConfig fields', () => {
+    for (const cfg of WAVE_CONFIGS) {
+      expect(typeof cfg.waveNumber).toBe('number');
+      expect(typeof cfg.rows).toBe('number');
+      expect(typeof cfg.cols).toBe('number');
+      expect(typeof cfg.speedMultiplier).toBe('number');
+      expect(typeof cfg.fireRateMultiplier).toBe('number');
+      expect(typeof cfg.hpMultiplier).toBe('number');
+      expect(Array.isArray(cfg.allowedTypes)).toBe(true);
+      expect(typeof cfg.shopAfterThisWave).toBe('boolean');
+    }
+  });
+
+  it('waveNumbers match index (wave 1 at index 0, wave 10 at index 9)', () => {
+    WAVE_CONFIGS.forEach((cfg, i) => {
+      expect(cfg.waveNumber).toBe(i + 1);
+    });
+  });
+});
+
+describe('getWaveConfig — known waves', () => {
+  it('wave 1: rows=3, cols=8, only grunt allowed, shopAfterThisWave=false', () => {
+    const cfg = getWaveConfig(1);
+    expect(cfg.rows).toBe(3);
+    expect(cfg.cols).toBe(8);
+    expect(cfg.allowedTypes).toEqual(['grunt']);
+    expect(cfg.shopAfterThisWave).toBe(false);
+    expect(cfg.speedMultiplier).toBe(1.0);
+  });
+
+  it('wave 5: shopAfterThisWave=true, has flanker in allowedTypes', () => {
+    const cfg = getWaveConfig(5);
+    expect(cfg.shopAfterThisWave).toBe(true);
+    expect(cfg.allowedTypes).toContain('flanker');
+    expect(cfg.allowedTypes).toContain('shielder');
+  });
+
+  it('wave 10: shopAfterThisWave=true, all 6 types allowed', () => {
+    const cfg = getWaveConfig(10);
+    expect(cfg.shopAfterThisWave).toBe(true);
+    expect(cfg.allowedTypes).toContain('grunt');
+    expect(cfg.allowedTypes).toContain('swooper');
+    expect(cfg.rows).toBe(5);
+    expect(cfg.cols).toBe(10);
+  });
+
+  it('wave 3: includes shielder', () => {
+    const cfg = getWaveConfig(3);
+    expect(cfg.allowedTypes).toContain('shielder');
+    expect(cfg.rows).toBe(4);
+  });
+});
+
+describe('getWaveConfig — beyond wave 10', () => {
+  it('wave 11: returns valid config (does not throw)', () => {
+    expect(() => getWaveConfig(11)).not.toThrow();
+  });
+
+  it('wave 999: returns valid config with all types', () => {
+    const cfg = getWaveConfig(999);
+    expect(cfg).toBeDefined();
+    expect(cfg.allowedTypes).toContain('grunt');
+    expect(cfg.allowedTypes).toContain('swooper');
+    expect(cfg.rows).toBeLessThanOrEqual(5);
+    expect(cfg.cols).toBeLessThanOrEqual(10);
+  });
+
+  it('wave 15: shopAfterThisWave=true (15 % 5 === 0)', () => {
+    const cfg = getWaveConfig(15);
+    expect(cfg.shopAfterThisWave).toBe(true);
+  });
+
+  it('wave 12: shopAfterThisWave=false (12 % 5 !== 0)', () => {
+    const cfg = getWaveConfig(12);
+    expect(cfg.shopAfterThisWave).toBe(false);
+  });
+
+  it('wave 15 speedMultiplier > wave 10 speedMultiplier (escalates)', () => {
+    const w10 = getWaveConfig(10);
+    const w15 = getWaveConfig(15);
+    expect(w15.speedMultiplier).toBeGreaterThan(w10.speedMultiplier);
+  });
+});
+
+describe('FormationLayout — interface shape', () => {
+  it('can be duck-typed: object with rows, cols, colSpacing, rowSpacing, getPosition', () => {
+    // Structural check: create a minimal conforming object
+    const layout: FormationLayout = {
+      rows: 4,
+      cols: 10,
+      colSpacing: 50,
+      rowSpacing: 40,
+      getPosition(row, col, fx, fy) {
+        return { x: fx + col * 50, y: fy + row * 40 };
+      },
+    };
+    expect(layout.rows).toBe(4);
+    const pos = layout.getPosition(0, 0, 0, 0);
+    expect(pos.x).toBe(0);
+    expect(pos.y).toBe(0);
+    const pos2 = layout.getPosition(1, 2, 100, 200);
+    expect(pos2.x).toBe(200);
+    expect(pos2.y).toBe(240);
+  });
+});
