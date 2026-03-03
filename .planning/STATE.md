@@ -168,7 +168,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: 04-06-PLAN.md checkpoint — human verification of all 11 Phase 4 requirements. Awaiting player sign-off on boss encounter + meta progression before Phase 4 is marked complete.
+Stopped at: Phase 5 context gathered — 05-CONTEXT.md written, ready for planning
+Resume file: .planning/phases/05-campaign-mode-game-modes/05-CONTEXT.md
 Resume file: none
 
 ## Phase 3 Plan Index
