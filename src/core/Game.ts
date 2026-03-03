@@ -11,10 +11,12 @@ import { AISystem } from '../systems/AISystem';
 import { CollisionSystem } from '../systems/CollisionSystem';
 import { SpawnSystem } from '../systems/SpawnSystem';
 import { PowerUpManager } from '../systems/PowerUpManager';
+import { ShopSystem } from '../systems/ShopSystem';
 import { ParticleManager } from '../effects/ParticleManager';
 import { CameraShake } from '../effects/CameraShake';
 import { BossHealthBar } from '../ui/BossHealthBar';
 import { PickupFeedback } from '../ui/PickupFeedback';
+import { ShopUI } from '../ui/ShopUI';
 import { HUD } from '../ui/HUD';
 import { TitleState } from '../states/TitleState';
 import type { PlayingStateContext } from '../states/PlayingState';
@@ -62,6 +64,15 @@ export class Game {
     const bossHealthBar = new BossHealthBar(hudRoot);
     const pickupFeedback = new PickupFeedback(hudRoot);
 
+    // Phase 3: shop system and shop UI
+    const shopSystem = new ShopSystem();
+    const shopUI = new ShopUI(hudRoot);
+
+    // Wire shield charge purchase callback — avoids circular import ShopSystem<->PowerUpManager
+    shopSystem._onShieldChargePurchased = () => {
+      powerUpManager.grantShieldCharge();
+    };
+
     // PlayingStateContext — shared across all states
     const ctx: PlayingStateContext = {
       scene: this.scene,
@@ -78,8 +89,10 @@ export class Game {
       particleManager,   // Phase 2
       cameraShake,       // Phase 2
       bossHealthBar,     // Phase 2 stub (Phase 4 activates)
-      pickupFeedback,    // Phase 2 stub (Phase 3 activates in 03-07)
+      pickupFeedback,    // Phase 2 stub (Phase 3 activates)
       powerUpManager,    // Phase 3
+      shopSystem,        // Phase 3
+      shopUI,            // Phase 3
     };
 
     // Apply Wave 1 palette so initial enemy formation spawns cyan (not gray default)

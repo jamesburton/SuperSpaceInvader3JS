@@ -80,6 +80,14 @@ export class PowerUpManager {
   }
 
   /**
+   * Grant one additional shield charge (called via ShopSystem._onShieldChargePurchased callback).
+   * Capped at 3 charges maximum.
+   */
+  public grantShieldCharge(): void {
+    this.shieldCharges = Math.min(3, this.shieldCharges + 1);
+  }
+
+  /**
    * Called when player takes a hit while shield is active.
    * Consumes one shield charge and returns true (hit absorbed).
    * Returns false if no shield charges remain.
