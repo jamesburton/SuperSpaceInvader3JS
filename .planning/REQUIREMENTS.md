@@ -41,15 +41,15 @@
 
 ### Enemy System (ENEMY)
 
-- [ ] **ENEMY-01**: Grunt enemy type moves in formation grid and fires basic projectiles at random intervals
+- [x] **ENEMY-01**: Grunt enemy type moves in formation grid and fires basic projectiles at random intervals
 - [ ] **ENEMY-02**: Shielder enemy type has a destructible front shield that must be destroyed before the enemy can be killed
 - [ ] **ENEMY-03**: Flanker enemy type detects player position and breaks formation to charge laterally
 - [ ] **ENEMY-04**: Sniper enemy type maintains distance at rear of formation and fires targeted precision shots at player
 - [ ] **ENEMY-05**: Charger enemy type triggers a direct dive at the player when its health drops below a threshold
 - [ ] **ENEMY-06**: Swooper enemy type dives in a swooping chain pattern (leader-follower formation arc)
-- [ ] **ENEMY-07**: Each enemy type has a visually distinct design (unique shape, size, and neon color identity)
-- [ ] **ENEMY-08**: Enemies spawn in grid-based formations that can break into dynamic individual behavior mid-wave
-- [ ] **ENEMY-09**: Wave escalation increases enemy count, movement speed, and firing rate across waves
+- [x] **ENEMY-07**: Each enemy type has a visually distinct design (unique shape, size, and neon color identity)
+- [x] **ENEMY-08**: Enemies spawn in grid-based formations that can break into dynamic individual behavior mid-wave
+- [x] **ENEMY-09**: Wave escalation increases enemy count, movement speed, and firing rate across waves
 - [ ] **ENEMY-10**: Enemy formation-breaking behavior is triggered by conditions (player position, health threshold, wave timer)
 
 ### Visual & Aesthetic (VIS)
@@ -69,9 +69,9 @@
 
 ### In-Run Progression (INRUN)
 
-- [ ] **INRUN-01**: Enemies drop in-run currency (distinct from meta currency) on kill
+- [x] **INRUN-01**: Enemies drop in-run currency (distinct from meta currency) on kill
 - [ ] **INRUN-02**: Between-wave upgrade shop presents 3 random upgrade choices costing in-run currency
-- [ ] **INRUN-03**: In-run currency resets to zero at run end (not carried to meta)
+- [x] **INRUN-03**: In-run currency resets to zero at run end (not carried to meta)
 - [ ] **INRUN-04**: Between-wave shop upgrades persist for the current run only
 
 ### Meta Progression (META)
@@ -192,23 +192,23 @@ Deferred — build after v1 is validated.
 | FEEL-05 | Phase 2 | Complete |
 | FEEL-06 | Phase 2 | Complete |
 | FEEL-07 | Phase 2 | Complete |
-| ENEMY-01 | Phase 3 | Pending |
+| ENEMY-01 | Phase 3 | Complete |
 | ENEMY-02 | Phase 3 | Pending |
 | ENEMY-03 | Phase 3 | Pending |
 | ENEMY-04 | Phase 3 | Pending |
 | ENEMY-05 | Phase 3 | Pending |
 | ENEMY-06 | Phase 3 | Pending |
-| ENEMY-07 | Phase 3 | Pending |
-| ENEMY-08 | Phase 3 | Pending |
-| ENEMY-09 | Phase 3 | Pending |
+| ENEMY-07 | Phase 3 | Complete |
+| ENEMY-08 | Phase 3 | Complete |
+| ENEMY-09 | Phase 3 | Complete |
 | ENEMY-10 | Phase 3 | Pending |
 | PWR-01 | Phase 3 | Pending |
 | PWR-02 | Phase 3 | Pending |
 | PWR-03 | Phase 3 | Pending |
 | PWR-04 | Phase 3 | Pending |
-| INRUN-01 | Phase 3 | Pending |
+| INRUN-01 | Phase 3 | Complete |
 | INRUN-02 | Phase 3 | Pending |
-| INRUN-03 | Phase 3 | Pending |
+| INRUN-03 | Phase 3 | Complete |
 | INRUN-04 | Phase 3 | Pending |
 | BOSS-01 | Phase 4 | Pending |
 | BOSS-02 | Phase 4 | Pending |

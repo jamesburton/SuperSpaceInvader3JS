@@ -69,7 +69,18 @@ Plans:
   3. Waves grow noticeably harder over time: more enemies, faster movement, higher fire rate
   4. Spread shot, rapid fire, and shield power-ups drop randomly from kills, activate immediately on pickup, and expire after a fixed duration
   5. Between waves, an upgrade shop offers 3 choices costing in-run currency; selections persist for the run and reset at run end
-**Plans**: TBD
+**Plans**: 9 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Data layer: EnemyType extension, WaveConfig, FormationLayout interface, RunState SI$ currency
+- [ ] 03-02-PLAN.md — Enemy geometries + extended EnemyFormation with data-driven spawnWave(config)
+- [ ] 03-03-PLAN.md — Power-up system: PickupToken entity, PowerUpManager, powerups config
+- [ ] 03-04-PLAN.md — AI behaviors: per-archetype dispatch (Flanker charge, Sniper aim, Charger dive, Swooper loop)
+- [ ] 03-05-PLAN.md — SpawnSystem refactor: data-driven wave spawning, escalation multipliers, shop trigger signal
+- [ ] 03-06-PLAN.md — Collision + WeaponSystem extension: Shielder shield phasing, pickup collision, spread/rapid fire, SID drops
+- [ ] 03-07-PLAN.md — Shop + HUD: ShopSystem, ShopUI modal, HUD SI$ counter and power-up timer bar
+- [ ] 03-08-PLAN.md — Full wiring: Game.ts init, PlayingState integration, run-restart reset
+- [ ] 03-09-PLAN.md — Human verification checkpoint (all 18 Phase 3 requirements + fun bar gate)
 
 ### Phase 4: Boss Encounter + Meta Progression
 **Goal**: A memorable multi-phase boss encounter caps the run, and a persistent meta shop gives players a reason to play again
@@ -103,6 +114,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Engine + Core Combat | 6/6 | Complete | 2026-03-02 |
 | 2. Visual Identity + Game Feel | 5/5 | Complete | 2026-03-02 |
-| 3. Enemy Depth + Wave Systems + Power-Ups | 0/TBD | Not started | - |
+| 3. Enemy Depth + Wave Systems + Power-Ups | 1/9 | In Progress|  |
 | 4. Boss Encounter + Meta Progression | 0/TBD | Not started | - |
 | 5. Campaign Mode + Game Modes | 0/TBD | Not started | - |

@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in_progress
-last_updated: "2026-03-02T22:10:00Z"
+status: unknown
+last_updated: "2026-03-03T00:33:29.801Z"
 progress:
-  total_phases: 5
+  total_phases: 3
   completed_phases: 2
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 20
+  completed_plans: 12
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 
 ## Current Position
 
-Phase: 2 of 5 (Visual Identity + Game Feel) — COMPLETE ✓
-Next: Phase 3 (Enemy Depth + Wave Systems + Power-Ups) — not yet planned
-Status: Phase 2 complete, Phase 3 ready to plan
-Last activity: 2026-03-02 — Phase 2 verified 12/12, v0.5 tagged, Phase 2 closed
+Phase: 3 of 5 (Enemy Depth + Wave Systems + Power-Ups) — IN PROGRESS
+Next: Phase 4 (Boss Encounter + Meta Progression) — pending Phase 3 fun bar gate
+Status: Phase 3 executing — 1/9 plans complete
+Last activity: 2026-03-03 — 03-01 complete: data layer foundation (enemies, waveConfig, RunState currency)
 
-Progress: [██████░░░░] 40% (2/5 phases complete)
+Progress: [██████░░░░] 40% (2/5 phases complete; Phase 3 in progress 1/9 plans)
 
 ## Performance Metrics
 
@@ -42,15 +42,17 @@ Progress: [██████░░░░] 40% (2/5 phases complete)
 |-------|-------|-------|----------|
 | 01-engine-core-combat | 5 | 23 min | 5 min |
 | 02-visual-identity-game-feel | 4 | 11 min | 2.75 min |
+| 03-enemy-depth-wave-systems-power-ups | 1 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (3 min), 02-02 (2 min), 02-03 (2 min), 02-04 (3 min)
+- Last 5 plans: 02-01 (3 min), 02-02 (2 min), 02-03 (2 min), 02-04 (3 min), 03-01 (4 min)
 - Trend: Stable fast
 
 *Updated after each plan completion*
 | Phase 02-visual-identity-game-feel P02 | 2 | 2 tasks | 5 files |
 | Phase 02-visual-identity-game-feel P03 | 2 | 2 tasks | 4 files |
 | Phase 02-visual-identity-game-feel P04 | 3 | 2 tasks | 8 files |
+| Phase 03-enemy-depth-wave-systems-power-ups P01 | 4 | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -99,6 +101,10 @@ Recent decisions affecting current work:
 - [Phase 02-visual-identity-game-feel 02-04]: CameraShake.apply() called in render() not update() — shake is render-frequency, not fixed-step
 - [Phase 02-visual-identity-game-feel 02-04]: wasHitThisStep() auto-reset-on-read pattern — PlayingState polls once per step without separate clear call
 - [Phase 02-visual-identity-game-feel 02-04]: Stub components (BossHealthBar, PickupFeedback) constructed in Game.init() and in PlayingStateContext — Phase 3/4 hooks require zero wiring changes
+- [Phase 03-enemy-depth-wave-systems-power-ups]: EnemyDef.shieldHp optional only for Shielder; sidDropAmount required on all types — type system enforces archetype-specific data
+- [Phase 03-enemy-depth-wave-systems-power-ups]: getWaveConfig beyond wave 10: +5% speed, +4% fireRate, +3% HP per extra wave; shop every 5th wave
+- [Phase 03-enemy-depth-wave-systems-power-ups]: ENEMY_POOL_SIZE 256->512: accommodates 5x10 formation plus Swooper off-screen pool headroom
+- [Phase 03-enemy-depth-wave-systems-power-ups]: EnemyEntity.type broadened to EnemyType in Plan 03-01 (types.ts), not deferred to 03-02 — avoids inconsistent intermediate state
 
 ### Pending Todos
 
@@ -110,6 +116,20 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-02
-Stopped at: Phase 2 complete — verified 12/12, v0.5 tagged. Ready to discuss/plan Phase 3.
+Last session: 2026-03-03
+Stopped at: Completed 03-01-PLAN.md — data layer foundation (EnemyType x6, WaveConfig, RunState SI$ currency)
 Resume file: none
+
+## Phase 3 Plan Index
+
+| Plan | Wave | Depends On | Files | Requirements |
+|------|------|------------|-------|--------------|
+| 03-01 | 1 | — | enemies.ts, waveConfig.ts, constants.ts, types.ts, RunState.ts | ENEMY-01,07,08,09, INRUN-01,03 |
+| 03-02 | 2 | 03-01 | Enemy.ts | ENEMY-02,03,04,05,06,07,08,10 |
+| 03-03 | 2 | 03-01 | PickupToken.ts, PowerUpManager.ts, powerups.ts | PWR-01,02,03,04 |
+| 03-04 | 3 | 03-02 | AISystem.ts | ENEMY-03,04,05,06,10 |
+| 03-05 | 3 | 03-01,02 | SpawnSystem.ts | ENEMY-08,09, INRUN-02 |
+| 03-06 | 4 | 03-03,04 | CollisionSystem.ts, WeaponSystem.ts, Bullet.ts | ENEMY-02, PWR-01,02,03,04 |
+| 03-07 | 4 | 03-01,05 | ShopSystem.ts, ShopUI.ts, HUD.ts | INRUN-02,04 |
+| 03-08 | 5 | 03-04,06,07 | Game.ts, PlayingState.ts, GameOverState.ts | INRUN-01,02,03,04, PWR-01,02,03,04 |
+| 03-09 | 6 | 03-08 | — | All 18 (human verification) |
