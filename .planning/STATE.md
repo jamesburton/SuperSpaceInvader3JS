@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T00:33:29.801Z"
+last_updated: "2026-03-03T01:03:00.325Z"
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 20
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State
@@ -24,10 +24,10 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 
 Phase: 3 of 5 (Enemy Depth + Wave Systems + Power-Ups) — IN PROGRESS
 Next: Phase 4 (Boss Encounter + Meta Progression) — pending Phase 3 fun bar gate
-Status: Phase 3 executing — 1/9 plans complete
-Last activity: 2026-03-03 — 03-01 complete: data layer foundation (enemies, waveConfig, RunState currency)
+Status: Phase 3 executing — 2/9 plans complete
+Last activity: 2026-03-03 — 03-03 complete: PickupToken, PowerUpManager, powerups config (PWR-01..04)
 
-Progress: [██████░░░░] 40% (2/5 phases complete; Phase 3 in progress 1/9 plans)
+Progress: [██████░░░░] 40% (2/5 phases complete; Phase 3 in progress 2/9 plans)
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [██████░░░░] 40% (2/5 phases complete; Phase 3 in 
 | Phase 02-visual-identity-game-feel P03 | 2 | 2 tasks | 4 files |
 | Phase 02-visual-identity-game-feel P04 | 3 | 2 tasks | 8 files |
 | Phase 03-enemy-depth-wave-systems-power-ups P01 | 4 | 3 tasks | 8 files |
+| Phase 03-enemy-depth-wave-systems-power-ups P03 | 27 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,10 @@ Recent decisions affecting current work:
 - [Phase 03-enemy-depth-wave-systems-power-ups]: getWaveConfig beyond wave 10: +5% speed, +4% fireRate, +3% HP per extra wave; shop every 5th wave
 - [Phase 03-enemy-depth-wave-systems-power-ups]: ENEMY_POOL_SIZE 256->512: accommodates 5x10 formation plus Swooper off-screen pool headroom
 - [Phase 03-enemy-depth-wave-systems-power-ups]: EnemyEntity.type broadened to EnemyType in Plan 03-01 (types.ts), not deferred to 03-02 — avoids inconsistent intermediate state
+- [Phase 03-enemy-depth-wave-systems-power-ups]: PickupToken.visible uses Object.defineProperty to sync mesh.visible and active flag — identical to Bullet.ts ObjectPool contract
+- [Phase 03-enemy-depth-wave-systems-power-ups]: Shield power-up modelled as absorb charge (shieldCharges=1) not a duration — consumeShieldCharge() returns bool for CollisionSystem
+- [Phase 03-enemy-depth-wave-systems-power-ups]: trySpawnDrop() takes dropChance float — caller (CollisionSystem) owns enemy-specific drop probability, PowerUpManager stays generic
+- [Phase 03-enemy-depth-wave-systems-power-ups]: getActiveTokens() returns readonly array — prevents CollisionSystem from mutating pool-internal list directly
 
 ### Pending Todos
 
@@ -117,7 +122,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 03-01-PLAN.md — data layer foundation (EnemyType x6, WaveConfig, RunState SI$ currency)
+Stopped at: Completed 03-03-PLAN.md — PickupToken, PowerUpManager, powerups config (PWR-01..04)
 Resume file: none
 
 ## Phase 3 Plan Index

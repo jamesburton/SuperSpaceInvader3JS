@@ -62,10 +62,10 @@
 
 ### Power-Ups (PWR)
 
-- [ ] **PWR-01**: Spread shot power-up drops from enemy kills at a chance rate; fires 3-way spread
-- [ ] **PWR-02**: Rapid fire power-up drops from enemy kills; significantly increases fire rate for duration
-- [ ] **PWR-03**: Shield power-up drops from enemy kills; absorbs one hit before expiring
-- [ ] **PWR-04**: All power-up effects are time-limited and expire after a fixed duration
+- [x] **PWR-01**: Spread shot power-up drops from enemy kills at a chance rate; fires 3-way spread
+- [x] **PWR-02**: Rapid fire power-up drops from enemy kills; significantly increases fire rate for duration
+- [x] **PWR-03**: Shield power-up drops from enemy kills; absorbs one hit before expiring
+- [x] **PWR-04**: All power-up effects are time-limited and expire after a fixed duration
 
 ### In-Run Progression (INRUN)
 
@@ -202,10 +202,10 @@ Deferred — build after v1 is validated.
 | ENEMY-08 | Phase 3 | Complete |
 | ENEMY-09 | Phase 3 | Complete |
 | ENEMY-10 | Phase 3 | Pending |
-| PWR-01 | Phase 3 | Pending |
-| PWR-02 | Phase 3 | Pending |
-| PWR-03 | Phase 3 | Pending |
-| PWR-04 | Phase 3 | Pending |
+| PWR-01 | Phase 3 | Complete |
+| PWR-02 | Phase 3 | Complete |
+| PWR-03 | Phase 3 | Complete |
+| PWR-04 | Phase 3 | Complete |
 | INRUN-01 | Phase 3 | Complete |
 | INRUN-02 | Phase 3 | Pending |
 | INRUN-03 | Phase 3 | Complete |
