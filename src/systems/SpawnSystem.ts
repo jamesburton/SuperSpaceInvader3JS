@@ -66,6 +66,7 @@ export class SpawnSystem {
     if (formation.activeCount === 0 && !this.waveTransitioning) {
       // Capture current wave config BEFORE advancing (shopAfterThisWave belongs to wave just cleared)
       const currentConfig = getWaveConfig(runState.wave);
+      runState.recordWaveSI(); // earn 1 SI$ per wave cleared (META-01)
       runState.nextWave();
       this.waveTransitioning = true;
       this.transitionTimer = this.TRANSITION_DELAY;

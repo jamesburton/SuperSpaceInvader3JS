@@ -10,6 +10,7 @@ const _state: RunStateData = {
   enemiesKilled: 0,
   gamePhase: 'playing' as GamePhase,
   gold: 0,
+  siEarnedThisRun: 0,
 };
 
 /** Tracks total gold earned during this run (for shop balance history). Resets on reset(). */
@@ -23,6 +24,7 @@ export const runState = {
   get gamePhase() { return _state.gamePhase; },
   get gold() { return _state.gold; },
   get goldEarnedThisRun() { return _goldEarnedThisRun; },
+  get siEarnedThisRun() { return _state.siEarnedThisRun; },
 
   addScore(amount: number): void {
     _state.score += amount;
@@ -61,6 +63,11 @@ export const runState = {
     _state.gold = 0;
   },
 
+  /** Called each time a wave is cleared — earns 1 SI$ per wave (META-01) */
+  recordWaveSI(): void {
+    _state.siEarnedThisRun += 1;
+  },
+
   /** Reset for new run */
   reset(): void {
     _state.score = 0;
@@ -70,6 +77,7 @@ export const runState = {
     _state.gamePhase = 'playing';
     _state.gold = 0;
     _goldEarnedThisRun = 0;
+    _state.siEarnedThisRun = 0;
   },
 
   snapshot(): RunStateData {
