@@ -66,8 +66,10 @@ export class Enemy {
   public swooperLoopX: number = 0;
   public swooperLoopY: number = 0;
 
-  /** Flanker: true after it breaks formation */
+  /** Flanker: true after it breaks formation and is charging */
   public flankerCharging: boolean = false;
+  /** Flanker: true when returning to formation slot after charge */
+  public flankerReturning: boolean = false;
 
   /** Charger: countdown until next dive; reset after each dive */
   public chargerDiveTimer: number = 0;
@@ -750,11 +752,17 @@ export class EnemyFormation {
   public getEnemyWorldPos(enemy: Enemy): { x: number; y: number } {
     if (
       enemy.flankerCharging ||
+      enemy.flankerReturning ||
       enemy.chargerDiving ||
       enemy.swooperPhase !== 'formation'
     ) {
       return { x: enemy.x, y: enemy.y };
     }
+    return this.layout.getPosition(enemy.row, enemy.col, this.formationX, this.formationY);
+  }
+
+  /** Get formation-grid position for an enemy, ignoring any independent-movement state. */
+  public getFormationSlotPos(enemy: Enemy): { x: number; y: number } {
     return this.layout.getPosition(enemy.row, enemy.col, this.formationX, this.formationY);
   }
 

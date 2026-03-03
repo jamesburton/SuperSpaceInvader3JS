@@ -64,7 +64,7 @@ export class WeaponSystem {
 
   /**
    * Fire one or more bullets depending on power-up state.
-   * Spread shot: 3 bullets at -0.25, 0, +0.25 radian offsets from vertical.
+   * Spread shot: 3 bullets at -0.4, 0, +0.4 radian offsets from vertical (~23°).
    * Normal shot: 1 bullet straight up.
    */
   private fireShot(
@@ -74,8 +74,8 @@ export class WeaponSystem {
     powerUpManager?: PowerUpManager,
   ): void {
     const isSpread = powerUpManager?.isActive('spreadShot') ?? false;
-    // Angle offsets in radians from vertical (0 = straight up)
-    const angles = isSpread ? [-0.25, 0, 0.25] : [0];
+    // Angle offsets in radians from vertical (0 = straight up, positive = right)
+    const angles = isSpread ? [-0.4, 0, 0.4] : [0];
 
     for (const angleOffset of angles) {
       const bullet = playerBulletPool.acquire();
@@ -85,10 +85,10 @@ export class WeaponSystem {
       bullet.init(player.x, player.y + player.height + 10, true);
 
       if (isSpread && angleOffset !== 0) {
-        // Decompose vertical bullet speed into angled trajectory
+        // Decompose bullet speed into angled trajectory (negative vy = upward)
         const speed = Math.abs(bullet.vy); // BULLET_SPEED from init()
         bullet.vx = Math.sin(angleOffset) * speed;
-        bullet.vy = Math.cos(angleOffset) * speed; // still mostly upward
+        bullet.vy = -Math.cos(angleOffset) * speed; // negative = upward
         bullet.setColor(0x0088ff); // spread bullets: blue (FEEL-07)
       }
 

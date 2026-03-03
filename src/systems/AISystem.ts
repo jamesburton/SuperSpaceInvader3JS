@@ -25,6 +25,10 @@ export class AISystem {
   private readonly flankerChargeDelay: number = 15;
   /** True once flankers have been triggered this wave */
   private flankersTriggered: boolean = false;
+  /** Seconds elapsed since flankers triggered — used to switch to return phase */
+  private flankerChargeTimer: number = 0;
+  /** How long flankers charge before returning to formation */
+  private readonly FLANKER_CHARGE_DURATION: number = 5.0;
 
   // ---- Sniper state ----
   /** Accumulator for sniper aimed shot interval */
@@ -113,14 +117,16 @@ export class AISystem {
 
   /**
    * Flanker state machine:
-   *   formation → charging (triggered after flankerChargeDelay seconds elapsed)
+   *   formation → charging → returning → formation
    *
    * formation: march normally (handled by updateMarch).
-   * charging:  move toward captured playerX at 200 units/s with a 50 units/s downward
-   *            drift. Fire one bullet every second. Kill when off-screen.
-   *
-   * Note: chargerTargetX field is reused for flanker's target X (both are float targets).
-   *       chargerDiveTimer field is reused as flanker fire interval countdown.
+   * charging:  chain behavior — each flanker chases the previous one's live X.
+   *            flanker[0] targets playerX; flanker[n] targets flanker[n-1].x.
+   *            Gentle downward drift. Fire every second. After FLANKER_CHARGE_DURATION,
+   *            switch all to returning phase.
+   * returning: each flanker independently moves back toward its formation grid slot.
+   *            On arrival, flankerCharging and flankerReturning are cleared and the
+   *            formation march takes over again.
    */
   private updateFlankers(
     dt: number,
@@ -129,40 +135,58 @@ export class AISystem {
     activeBullets: Bullet[],
     playerX: number,
   ): void {
-    const flankers = formation.getActiveEnemiesByType('flanker');
+    // Sort by instanceIndex so chain order is consistent
+    const flankers = formation.getActiveEnemiesByType('flanker')
+      .sort((a, b) => a.instanceIndex - b.instanceIndex);
 
     // Trigger charge when timer reaches threshold (once per wave)
     if (!this.flankersTriggered && this.flankerTimer >= this.flankerChargeDelay) {
       this.flankersTriggered = true;
+      this.flankerChargeTimer = 0;
       for (const flanker of flankers) {
         if (!flanker.flankerCharging) {
-          // Capture world position before breaking from formation
           const pos = formation.getEnemyWorldPos(flanker);
           flanker.x = pos.x;
           flanker.y = pos.y;
           flanker.flankerCharging = true;
-          // Re-use chargerTargetX for flanker target X
-          flanker.chargerTargetX = playerX;
-          // Re-use chargerDiveTimer as a 1-second fire interval countdown
-          flanker.chargerDiveTimer = 1.0;
+          flanker.flankerReturning = false;
+          flanker.chargerDiveTimer = 1.0; // fire interval timer
         }
       }
     }
 
-    for (const flanker of flankers) {
-      if (!flanker.flankerCharging) continue;
+    // Count up charge timer — switch all to returning after duration
+    if (this.flankersTriggered) {
+      this.flankerChargeTimer += dt;
+      if (this.flankerChargeTimer >= this.FLANKER_CHARGE_DURATION) {
+        for (const flanker of flankers) {
+          if (flanker.flankerCharging && !flanker.flankerReturning) {
+            flanker.flankerReturning = true;
+          }
+        }
+      }
+    }
 
-      // Move toward target X at 200 units/s
-      const dx = flanker.chargerTargetX - flanker.x;
+    // --- Charging pass (chain targeting) ---
+    // Each flanker chases the previous one's live X, creating a snake effect.
+    let prevX = playerX;
+    for (const flanker of flankers) {
+      if (!flanker.flankerCharging || flanker.flankerReturning) {
+        // Update prevX even for returning flankers so chain stays coherent
+        prevX = flanker.x;
+        continue;
+      }
+
+      // Move toward previous flanker's X at 200 units/s
+      const dx = prevX - flanker.x;
       const moveX = Math.sign(dx) * Math.min(Math.abs(dx), 200 * dt);
       flanker.x += moveX;
-
-      // Slight downward drift at 50 units/s
-      flanker.y -= 50 * dt;
+      flanker.y -= 30 * dt; // gentle downward drift
 
       formation.setEnemyWorldPos(flanker, flanker.x, flanker.y);
+      prevX = flanker.x; // next flanker in chain targets this one
 
-      // Flanker fire interval: one bullet per second while charging
+      // Fire every second during charge
       flanker.chargerDiveTimer -= dt;
       if (flanker.chargerDiveTimer <= 0) {
         flanker.chargerDiveTimer = 1.0;
@@ -172,13 +196,27 @@ export class AISystem {
           activeBullets.push(bullet);
         }
       }
+    }
 
-      // Kill when off-screen left/right or off-screen bottom
-      if (
-        Math.abs(flanker.x) > WORLD_WIDTH / 2 + 50 ||
-        flanker.y < -(WORLD_HEIGHT / 2) - 50
-      ) {
-        formation.killEnemy(flanker.instanceIndex);
+    // --- Returning pass ---
+    for (const flanker of flankers) {
+      if (!flanker.flankerReturning) continue;
+
+      const slot = formation.getFormationSlotPos(flanker);
+      const dx = slot.x - flanker.x;
+      const dy = slot.y - flanker.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < 12) {
+        // Arrived — snap back and hand control to formation march
+        formation.setEnemyWorldPos(flanker, slot.x, slot.y);
+        flanker.flankerCharging = false;
+        flanker.flankerReturning = false;
+      } else {
+        const step = 180 * dt;
+        flanker.x += (dx / dist) * Math.min(step, dist);
+        flanker.y += (dy / dist) * Math.min(step, dist);
+        formation.setEnemyWorldPos(flanker, flanker.x, flanker.y);
       }
     }
   }
@@ -441,6 +479,7 @@ export class AISystem {
     this.sniperFireAccumulator = 0;
     this.flankerTimer = 0;
     this.flankersTriggered = false;
+    this.flankerChargeTimer = 0;
     this.swooperGroupTimers = [8, 18, 28, 38];
     this.swooperGroupTriggered = [false, false, false, false];
   }
