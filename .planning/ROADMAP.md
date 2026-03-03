@@ -111,7 +111,15 @@ Plans:
   2. Campaign Chapter 1 contains 3-4 handcrafted levels followed by the boss fight, with a brief atmospheric text overlay between each level
   3. Campaign progress saves to localStorage; returning to the main menu shows a resume option for an in-progress campaign
   4. All wave content is defined in data objects (not hardcoded logic), making future chapters straightforward to add
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Data types: GameMode + RunState mode field + campaign.ts config (CampaignLevel, Chapter 1 data)
+- [ ] 05-02-PLAN.md — Infrastructure: InputManager.anyKeyJustPressed(), SpawnSystem campaign override, GameOverState bug fix
+- [ ] 05-03-PLAN.md — TitleState mode select UI (Campaign/Endless/Upgrades) + full system reset on launch
+- [ ] 05-04-PLAN.md — Campaign orchestration: LevelBriefingState + PlayingState campaign routing
+- [ ] 05-05-PLAN.md — MetaStore SAVE_VERSION 3 + campaignProgress + TitleState level select resume
+- [ ] 05-06-PLAN.md — Human verification checkpoint (all 7 Phase 5 requirements)
 
 ## Progress
 
@@ -124,4 +132,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Visual Identity + Game Feel | 5/5 | Complete | 2026-03-02 |
 | 3. Enemy Depth + Wave Systems + Power-Ups | 8/9 | In Progress|  |
 | 4. Boss Encounter + Meta Progression | 6/6 | Complete   | 2026-03-03 |
-| 5. Campaign Mode + Game Modes | 0/TBD | Not started | - |
+| 5. Campaign Mode + Game Modes | 0/6 | Not started | - |
