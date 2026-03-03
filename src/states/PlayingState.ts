@@ -16,6 +16,8 @@ import type { CameraShake } from '../effects/CameraShake';
 import type { BossHealthBar } from '../ui/BossHealthBar';
 import type { PickupFeedback } from '../ui/PickupFeedback';
 import type { PowerUpManager } from '../systems/PowerUpManager';
+import type { ShopSystem } from '../systems/ShopSystem';
+import type { ShopUI } from '../ui/ShopUI';
 import { runState } from '../state/RunState';
 import { useMetaStore } from '../state/MetaState';
 import { FIXED_STEP } from '../utils/constants';
@@ -39,12 +41,17 @@ export interface PlayingStateContext {
   particleManager: ParticleManager;
   cameraShake: CameraShake;
   bossHealthBar: BossHealthBar;       // Phase 4 stub — present but not called in Phase 2
-  pickupFeedback: PickupFeedback;     // Phase 3 stub — present but not called in Phase 2
-  // Phase 3 additions
-  powerUpManager: PowerUpManager | null; // null until Plan 03-08 wires into Game.ts fully
+  pickupFeedback: PickupFeedback;     // Phase 3: activates on power-up pickup
+  // Phase 3 additions (Plan 03-08 final wiring)
+  powerUpManager: PowerUpManager;
+  shopSystem: ShopSystem;
+  shopUI: ShopUI;
 }
 
 export class PlayingState implements IGameState {
+  /** Tracks previous isTransitioning state to detect wave-end moment for releaseAll() */
+  private lastWasTransitioning: boolean = false;
+
   constructor(
     private readonly stateManager: StateManager,
     private readonly input: InputManager,
@@ -53,6 +60,7 @@ export class PlayingState implements IGameState {
   ) {}
 
   enter(): void {
+    this.lastWasTransitioning = false;
     runState.setPhase('playing');
     this.hud.hideOverlay();
     this.ctx.cameraShake.reset(); // Phase 2: clear any residual shake
@@ -60,6 +68,12 @@ export class PlayingState implements IGameState {
 
   update(dt: number): void {
     const { ctx, input, stateManager, hud } = this;
+
+    // Phase 3: while shop is visible, pause all gameplay logic
+    if (ctx.shopUI.isVisible) {
+      input.clearJustPressed();
+      return;
+    }
 
     // Pause on ESC or P
     if (input.justPressed('Escape') || input.justPressed('KeyP')) {
@@ -76,7 +90,7 @@ export class PlayingState implements IGameState {
       ctx.playerBulletPool,
       ctx.activeBullets,
       ctx.particleManager,
-      ctx.powerUpManager ?? undefined,
+      ctx.powerUpManager,
     );
 
     // 2. Player movement
@@ -91,6 +105,7 @@ export class PlayingState implements IGameState {
     }
 
     // 3. Spawn system (wave transitions)
+    const wasTransitioning = this.lastWasTransitioning;
     const isTransitioning = ctx.spawnSystem.update(
       dt,
       ctx.formation,
@@ -100,10 +115,25 @@ export class PlayingState implements IGameState {
       hud,
       ctx.aiSystem,
     );
+    this.lastWasTransitioning = isTransitioning;
 
-    // Phase 3: shop trigger (wiring completed in Plan 03-07)
-    // if (ctx.spawnSystem.shopPending && ctx.shopSystem) { ... }
-    // Left as comment — ShopSystem added to ctx in Plan 03-07
+    // Phase 3: release pickup tokens when wave transition ends (new wave is starting)
+    if (wasTransitioning && !isTransitioning) {
+      ctx.powerUpManager.releaseAll();
+    }
+
+    // Phase 3: shop trigger — open shop when shopPending flag is set after wave clear
+    if (ctx.spawnSystem.shopPending) {
+      ctx.spawnSystem.clearShopPending();
+      const choices = ctx.shopSystem.generateChoices();
+      ctx.shopUI.show(choices, runState.inRunCurrency, (selectedIndex: number) => {
+        if (selectedIndex >= 0 && selectedIndex < choices.length) {
+          ctx.shopSystem.purchaseItem(choices[selectedIndex], ctx.player);
+        }
+        ctx.shopUI.hide();
+      });
+      return; // skip rest of update this step — shop is now open
+    }
 
     if (!isTransitioning) {
       // 4. Enemy AI
@@ -147,8 +177,12 @@ export class PlayingState implements IGameState {
     ctx.particleManager.update(dt);
 
     // Phase 3: update power-up token drift and duration ticking
-    if (ctx.powerUpManager) {
-      ctx.powerUpManager.update(dt);
+    ctx.powerUpManager.update(dt);
+
+    // Phase 3: activate PickupFeedback when a power-up token is collected
+    const pickedUpName = ctx.collisionSystem.consumePickupName();
+    if (pickedUpName) {
+      ctx.pickupFeedback.showPickup(pickedUpName); // FEEL-04: activates Phase 2 stub
     }
 
     // 7. Check lives
@@ -159,6 +193,14 @@ export class PlayingState implements IGameState {
 
     // 8. Sync HUD
     hud.sync(runState.snapshot());
+
+    // Phase 3: sync power-up timer bar with current power-up state
+    hud.syncPowerUp(
+      ctx.powerUpManager.activePowerUpType,
+      ctx.powerUpManager.activeDurationRemaining,
+      ctx.powerUpManager.activeDurationFull,
+      ctx.powerUpManager.activeShieldCharges,
+    );
 
     // 9. Clear just-pressed
     input.clearJustPressed();
