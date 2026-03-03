@@ -37,6 +37,9 @@ export interface EnemyEntity extends Entity {
 // High-level game phase state (used by StateManager in Phase 1)
 export type GamePhase = 'title' | 'playing' | 'paused' | 'gameover';
 
+// Game mode — determines whether the player is in endless roguelite or structured campaign
+export type GameMode = 'endless' | 'campaign';
+
 // Run-level ephemeral state
 export interface RunStateData {
   score: number;
