@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-03-03T12:34:21.570Z"
+status: in-progress
+last_updated: "2026-03-03T12:40:00.000Z"
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 26
-  completed_plans: 23
+  completed_plans: 24
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 ## Current Position
 
 Phase: 4 of 5 (Boss Encounter + Meta Progression) — IN PROGRESS
-Next: 04-05 (next plan in Phase 4)
-Status: Phase 4 executing — 5/6 plans complete (04-03 done: BossHealthBar, SpawnSystem bossPending, PlayingState boss mode, VICTORY screen with SI$ award)
-Last activity: 2026-03-03 — 04-03 complete: BossHealthBar fully implemented, SpawnSystem bossPending trigger at wave 10, PlayingState boss mode routing (BossSystem update + AABB collision + camera shake), triggerVictory() awards 50 SI$
+Next: Phase 4 complete — all 6 plans done
+Status: Phase 4 executing — 6/6 plans complete (04-05 done: SI$ earn on wave clear, run-end SI$ award + display, meta bonuses at run start)
+Last activity: 2026-03-03 — 04-05 complete: SI$ earn tracking (1 per wave), runState.recordWaveSI() on wave clear, addMetaCurrency on run end, GameOverState shows SI$ earned + total, applyMetaBonuses() applies fire rate/speed/life/loadout upgrades at run start
 
-Progress: [█████████░] 72% (Phase 3 complete + Phase 4 in progress — 5/6 plans done)
+Progress: [██████████] 77% (Phase 3 complete + Phase 4 complete — all 6 plans done)
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Progress: [█████████░] 72% (Phase 3 complete + Phase 4 in pr
 | Phase 04-boss-encounter-meta-progression P01 | 139 | 3 tasks | 11 files |
 | Phase 04-boss-encounter-meta-progression P02 | 11 | 2 tasks | 3 files |
 | Phase 04-boss-encounter-meta-progression P03 | 7 | 2 tasks | 6 files |
+| Phase 04-boss-encounter-meta-progression P05 | 4 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -151,6 +152,10 @@ Recent decisions affecting current work:
 - [Phase 04-boss-encounter-meta-progression 04-04]: MetaShopUI appended to #hud at z-index:200 — renders above existing overlay without HUD API changes
 - [Phase 04-boss-encounter-meta-progression]: Boss mode early-return in PlayingState.update(): ctx.boss.active check returns early, skipping normal AI/collision — cleaner separation
 - [Phase 04-boss-encounter-meta-progression]: triggerVictory() reuses GameOverState for R-to-restart flow via factory callback — same circular-import avoidance as game-over flow
+- [Phase 04-boss-encounter-meta-progression 04-05]: SI$ awarded to MetaStore before GameOverState constructed — constructor reads metaCurrency after addMetaCurrency() for accurate totalSI display
+- [Phase 04-boss-encounter-meta-progression 04-05]: triggerVictory() combines waveSI + bossReward in one addMetaCurrency() call — avoids double-counting
+- [Phase 04-boss-encounter-meta-progression 04-05]: PowerUpManager.activate(type, duration) uses same activePowerUp/activeDuration fields as collectPickup() — WeaponSystem.isActive() unchanged
+- [Phase 04-boss-encounter-meta-progression 04-05]: applyMetaBonuses() compound multiplier: Math.pow(1.10, tiers) fire rate, Math.pow(1.08, tiers) speed — applies 0 tiers if no upgrades purchased
 
 ### Pending Todos
 
@@ -163,7 +168,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 04-03-PLAN.md — BossHealthBar (segmented fill bar, phase label, 50% boundary marker), SpawnSystem bossPending trigger (wave 10), PlayingState boss mode routing, triggerVictory() awards 50 SI$ meta currency
+Stopped at: Completed 04-05-PLAN.md — SI$ earn tracking (1 per wave cleared), addMetaCurrency on run end, GameOverState displays SI$ earned + total, applyMetaBonuses() at run start applies fire rate/speed/life/loadout upgrades. Phase 4 COMPLETE.
 Resume file: none
 
 ## Phase 3 Plan Index
