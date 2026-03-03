@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T12:08:14.326Z"
+last_updated: "2026-03-03T12:22:08.783Z"
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 26
-  completed_plans: 20
+  completed_plans: 21
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 ## Current Position
 
 Phase: 4 of 5 (Boss Encounter + Meta Progression) — IN PROGRESS
-Next: 04-02 (next plan in Phase 4)
-Status: Phase 4 executing — 1/6 plans complete (04-01 done: dual currency system)
-Last activity: 2026-03-03 — 04-01 complete: dual currency system (Gold in-run, SI$ meta), MetaStore with purchasedUpgrades/purchaseUpgrade, ssi-meta-v1 schema with migration hook
+Next: 04-03 (next plan in Phase 4)
+Status: Phase 4 executing — 2/6 plans complete (04-02 done: BossEnemy entity + BossSystem)
+Last activity: 2026-03-03 — 04-02 complete: BossEnemy (80x60 angular hull, activate/deactivate/takeDamage), BossSystem (two-phase attack machine, aimed spread + sweeping beam, phase transition flash), BOSS_DEF config
 
-Progress: [████████░░] 60% (Phase 3 complete + Phase 4 in progress — 1/6 plans done)
+Progress: [████████░░] 62% (Phase 3 complete + Phase 4 in progress — 2/6 plans done)
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [████████░░] 60% (Phase 3 complete + Phase 4 in pr
 | Phase 03-enemy-depth-wave-systems-power-ups P06 | 3 | 2 tasks | 5 files |
 | Phase 03-enemy-depth-wave-systems-power-ups P08 | 3 | 3 tasks | 4 files |
 | Phase 04-boss-encounter-meta-progression P01 | 139 | 3 tasks | 11 files |
+| Phase 04-boss-encounter-meta-progression P02 | 11 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -141,6 +142,9 @@ Recent decisions affecting current work:
 - [Phase 04-boss-encounter-meta-progression]: Dual currency: Gold for in-run shop (volatile), SI$ for meta shop (persistent Zustand)
 - [Phase 04-boss-encounter-meta-progression]: META_STORAGE_KEY changed from ssix_v1 to ssi-meta-v1; SID_SYMBOL replaced by GOLD_SYMBOL+META_CURRENCY_SYMBOL
 - [Phase 04-boss-encounter-meta-progression]: purchaseUpgrade() is idempotent — re-purchasing same id does not double-add to purchasedUpgrades array
+- [Phase 04-boss-encounter-meta-progression]: Boss bullet speed 280 (vs 300 regular) for readability in multi-bullet patterns
+- [Phase 04-boss-encounter-meta-progression]: phaseJustChanged auto-reset-on-read getter — identical to wasHitThisStep() pattern, consumer polls once per step
+- [Phase 04-boss-encounter-meta-progression]: BossEnemy starts inactive (active=false, mesh.visible=false) — SpawnSystem activates at encounter start in 04-03
 
 ### Pending Todos
 
@@ -153,7 +157,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 03-08-PLAN.md — Phase 3 final wiring: Game.ts constructs ShopSystem+ShopUI, PlayingState integrates shop/pickup/HUD sync, GameOverState resets Phase 3 state on restart
+Stopped at: Completed 04-02-PLAN.md — BossEnemy entity (80x60 angular hull), BossSystem (two-phase attack machine: aimed spread + sweeping beam, transition at 50% HP), BOSS_DEF config
 Resume file: none
 
 ## Phase 3 Plan Index

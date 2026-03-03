@@ -93,10 +93,10 @@
 
 ### Boss Encounter (BOSS)
 
-- [ ] **BOSS-01**: Chapter 1 boss is visually distinct and significantly larger than normal enemies
-- [ ] **BOSS-02**: Boss fight has at least 2 distinct attack phases with telegraphed phase transitions
+- [x] **BOSS-01**: Chapter 1 boss is visually distinct and significantly larger than normal enemies
+- [x] **BOSS-02**: Boss fight has at least 2 distinct attack phases with telegraphed phase transitions
 - [ ] **BOSS-03**: Boss health bar is displayed throughout the encounter with segmented phase indicators
-- [ ] **BOSS-04**: Boss phase transition triggers a visual and behavioral change (new attack patterns, movement)
+- [x] **BOSS-04**: Boss phase transition triggers a visual and behavioral change (new attack patterns, movement)
 
 ### Campaign Structure (CAMP)
 
@@ -210,10 +210,10 @@ Deferred — build after v1 is validated.
 | INRUN-02 | Phase 3 | Complete |
 | INRUN-03 | Phase 3 | Complete |
 | INRUN-04 | Phase 3 | Complete |
-| BOSS-01 | Phase 4 | Pending |
-| BOSS-02 | Phase 4 | Pending |
+| BOSS-01 | Phase 4 | Complete |
+| BOSS-02 | Phase 4 | Complete |
 | BOSS-03 | Phase 4 | Pending |
-| BOSS-04 | Phase 4 | Pending |
+| BOSS-04 | Phase 4 | Complete |
 | META-01 | Phase 4 | Complete |
 | META-02 | Phase 4 | Pending |
 | META-03 | Phase 4 | Pending |
