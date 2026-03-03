@@ -25,8 +25,10 @@ import { runState } from '../state/RunState';
 import { useMetaStore } from '../state/MetaState';
 import { FIXED_STEP } from '../utils/constants';
 import { BOSS_DEF } from '../config/boss';
+import { CAMPAIGN_CHAPTER_1, getAlgorithmicWaves } from '../config/campaign';
 import { PausedState } from './PausedState';
 import { GameOverState } from './GameOverState';
+import { LevelBriefingState } from './LevelBriefingState';
 
 /** All dependencies PlayingState needs — passed from Game.ts */
 export interface PlayingStateContext {
@@ -78,6 +80,14 @@ export class PlayingState implements IGameState {
     this.ctx.cameraShake.reset(); // Phase 2: clear any residual shake
     this.applyMetaBonuses();      // Phase 4: apply persistent meta upgrades at run start
     this._spawnBunkers();         // Spawn bunkers if enabled and slots purchased
+
+    // Phase 5: Campaign mode — feed the current level's waves to SpawnSystem
+    if (runState.mode === 'campaign') {
+      this._setupCampaignLevel(runState.campaignLevelIndex);
+    } else {
+      // Endless mode — ensure SpawnSystem uses getWaveConfig() (no level override)
+      this.ctx.spawnSystem.setLevelWaves(null);
+    }
   }
 
   update(dt: number): void {
@@ -130,6 +140,13 @@ export class PlayingState implements IGameState {
       ctx.aiSystem,
     );
     this.lastWasTransitioning = isTransitioning;
+
+    // Phase 5: Campaign mode — check if the current level's waves are all exhausted
+    if (runState.mode === 'campaign' && ctx.spawnSystem.levelCompletePending) {
+      ctx.spawnSystem.clearLevelCompletePending();
+      this._onLevelComplete();
+      return;
+    }
 
     // Release uncollected tokens when a new wave starts — active effects carry over
     if (wasTransitioning && !isTransitioning) {
@@ -324,6 +341,17 @@ export class PlayingState implements IGameState {
     const { ctx } = this;
     runState.addScore(BOSS_DEF.scoreValue);
 
+    // Phase 5: Campaign victory — record the final level complete before showing victory screen
+    if (runState.mode === 'campaign') {
+      const meta = useMetaStore.getState() as unknown as Record<string, unknown>;
+      if (typeof meta['recordLevelComplete'] === 'function') {
+        (meta['recordLevelComplete'] as (chapter: number, levelIndex: number) => void)(
+          CAMPAIGN_CHAPTER_1.chapterNumber,
+          runState.campaignLevelIndex,
+        );
+      }
+    }
+
     // Gold → SI$ conversion at end of run
     const convRate = this._getConversionRate();
     runState.convertGoldToSI(convRate);
@@ -429,6 +457,71 @@ export class PlayingState implements IGameState {
     if (taxAmount > 0) {
       useMetaStore.getState().addMetaCurrency(-taxAmount);
     }
+  }
+
+  /**
+   * Phase 5: Campaign mode — set up SpawnSystem with the given level's waves.
+   * Called from enter() at level start and from _onLevelComplete's onDismiss callback.
+   */
+  private _setupCampaignLevel(levelIndex: number): void {
+    const chapter = CAMPAIGN_CHAPTER_1;
+    const level = chapter.levels[levelIndex];
+    if (!level) return; // safety guard — out of bounds level index
+    const waves = level.waves ?? getAlgorithmicWaves(levelIndex, level.waveCount ?? 3);
+    this.ctx.spawnSystem.setLevelWaves(waves);
+  }
+
+  /**
+   * Phase 5: Called when SpawnSystem signals levelCompletePending (campaign level waves exhausted).
+   * Routes to either boss encounter (hasBoss: true) or next level briefing.
+   */
+  private _onLevelComplete(): void {
+    const { ctx } = this;
+    const chapter = CAMPAIGN_CHAPTER_1;
+    const currentLevelIndex = runState.campaignLevelIndex;
+    const currentLevel = chapter.levels[currentLevelIndex];
+
+    // Record this level as completed in MetaStore (method added in Plan 05-05)
+    const meta = useMetaStore.getState() as unknown as Record<string, unknown>;
+    if (typeof meta['recordLevelComplete'] === 'function') {
+      (meta['recordLevelComplete'] as (chapter: number, levelIndex: number) => void)(
+        chapter.chapterNumber,
+        currentLevelIndex,
+      );
+    }
+
+    if (currentLevel?.hasBoss) {
+      // Final level: trigger boss encounter — same as endless boss trigger
+      ctx.spawnSystem.clearBossPending(); // prevent duplicate trigger if bossPending also set
+      ctx.boss.activate();
+      ctx.bossHealthBar.show(2, 1);
+      return;
+    }
+
+    const nextLevelIndex = currentLevelIndex + 1;
+    if (nextLevelIndex >= chapter.levels.length) {
+      // All levels complete without boss — Chapter 1 always ends on boss, but handle gracefully
+      this.triggerVictory();
+      return;
+    }
+
+    // Advance campaign level index and show briefing for next level
+    runState.setCampaignLevel(nextLevelIndex);
+    const nextLevel = chapter.levels[nextLevelIndex];
+
+    this.stateManager.push(
+      new LevelBriefingState(
+        this.stateManager,
+        this.input,
+        this.hud,
+        nextLevel,
+        () => {
+          // After briefing dismissed, set up next level waves in SpawnSystem
+          // The next update() cycle will detect empty formation and spawn the first wave
+          this._setupCampaignLevel(nextLevelIndex);
+        },
+      ),
+    );
   }
 
   /**
