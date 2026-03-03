@@ -44,7 +44,7 @@ export interface RunStateData {
   wave: number;
   enemiesKilled: number;
   gamePhase: GamePhase;
-  inRunCurrency: number;  // SI$ accumulated during this run (INRUN-01)
+  gold: number;  // Gold accumulated during this run (in-run only, resets on run end)
 }
 
 // InstancedMesh wrapper for enemy rendering

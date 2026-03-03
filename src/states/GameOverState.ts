@@ -41,7 +41,7 @@ export class GameOverState implements IGameState {
   }
 
   private restartGame(): void {
-    // Reset all game state (includes inRunCurrency via runState.reset())
+    // Reset all game state (includes gold via runState.reset())
     runState.reset();
 
     // Reset entities

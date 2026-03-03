@@ -123,9 +123,9 @@ export class CollisionSystem {
               runState.addScore(ENEMY_DEFS[enemy.type].scoreValue);
               runState.recordKill();
 
-              // INRUN-01: drop SI$ on kill
+              // INRUN-01: drop Gold on kill
               const def = ENEMY_DEFS[enemy.type];
-              runState.addCurrency(def.sidDropAmount);
+              runState.addGold(def.sidDropAmount);
 
               // Try to spawn a power-up drop at kill position
               if (this.powerUpManager) {

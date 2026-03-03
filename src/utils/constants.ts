@@ -35,7 +35,7 @@ export const BULLET_HEIGHT = 16;
 export const HUD_Z = 0;                    // Z-layer for HUD elements
 
 // LocalStorage
-export const META_STORAGE_KEY = 'ssix_v1';
+export const META_STORAGE_KEY = 'ssi-meta-v1';
 
 // Lives cap (for shop upgrades)
 export const MAX_LIVES_CAP = 9;
@@ -43,5 +43,6 @@ export const MAX_LIVES_CAP = 9;
 // Shop trigger interval (every N waves)
 export const SHOP_TRIGGER_INTERVAL = 5;
 
-// SI$ in-run currency symbol
-export const SID_SYMBOL = 'SI$';
+// Currency symbols
+export const GOLD_SYMBOL = 'Gold';        // In-run currency (resets each run)
+export const META_CURRENCY_SYMBOL = 'SI$'; // Meta/persistent currency (accumulates across runs)

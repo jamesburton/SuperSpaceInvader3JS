@@ -1,5 +1,5 @@
 /**
- * Tests for RunState — SI$ in-run currency (inRunCurrency field, addCurrency, resetCurrency).
+ * Tests for RunState — Gold in-run currency (gold field, addGold, resetGold).
  * RunState is a plain TS singleton — no WebGL or Three.js needed.
  */
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -9,56 +9,74 @@ beforeEach(() => {
   runState.reset();
 });
 
-describe('RunState — inRunCurrency initial state', () => {
+describe('RunState — gold initial state', () => {
   it('starts at 0 after reset', () => {
-    expect(runState.inRunCurrency).toBe(0);
+    expect(runState.gold).toBe(0);
   });
 });
 
-describe('RunState — addCurrency', () => {
-  it('adds currency correctly', () => {
-    runState.addCurrency(50);
-    expect(runState.inRunCurrency).toBe(50);
+describe('RunState — addGold', () => {
+  it('adds gold correctly', () => {
+    runState.addGold(50);
+    expect(runState.gold).toBe(50);
   });
 
   it('accumulates across multiple calls', () => {
-    runState.addCurrency(10);
-    runState.addCurrency(25);
-    runState.addCurrency(15);
-    expect(runState.inRunCurrency).toBe(50);
+    runState.addGold(10);
+    runState.addGold(25);
+    runState.addGold(15);
+    expect(runState.gold).toBe(50);
   });
 
   it('floors fractional amounts to integer', () => {
-    runState.addCurrency(7.9);
-    expect(runState.inRunCurrency).toBe(7);
+    runState.addGold(7.9);
+    expect(runState.gold).toBe(7);
   });
 
   it('handles zero gracefully', () => {
-    runState.addCurrency(0);
-    expect(runState.inRunCurrency).toBe(0);
+    runState.addGold(0);
+    expect(runState.gold).toBe(0);
+  });
+
+  it('tracks goldEarnedThisRun for positive amounts', () => {
+    runState.addGold(30);
+    runState.addGold(20);
+    expect(runState.goldEarnedThisRun).toBe(50);
+  });
+
+  it('does not add negative amounts to goldEarnedThisRun', () => {
+    runState.addGold(50);
+    runState.addGold(-10); // shop purchase deduction
+    expect(runState.goldEarnedThisRun).toBe(50);
   });
 });
 
-describe('RunState — resetCurrency', () => {
-  it('zeros inRunCurrency', () => {
-    runState.addCurrency(100);
-    runState.resetCurrency();
-    expect(runState.inRunCurrency).toBe(0);
+describe('RunState — resetGold', () => {
+  it('zeros gold balance', () => {
+    runState.addGold(100);
+    runState.resetGold();
+    expect(runState.gold).toBe(0);
   });
 });
 
-describe('RunState — reset() zeros currency', () => {
-  it('reset() resets inRunCurrency to 0 (INRUN-03)', () => {
-    runState.addCurrency(200);
+describe('RunState — reset() zeros gold', () => {
+  it('reset() resets gold to 0 (INRUN-03)', () => {
+    runState.addGold(200);
     runState.reset();
-    expect(runState.inRunCurrency).toBe(0);
+    expect(runState.gold).toBe(0);
+  });
+
+  it('reset() resets goldEarnedThisRun to 0', () => {
+    runState.addGold(100);
+    runState.reset();
+    expect(runState.goldEarnedThisRun).toBe(0);
   });
 });
 
-describe('RunState — snapshot includes inRunCurrency', () => {
-  it('snapshot() includes inRunCurrency field', () => {
-    runState.addCurrency(42);
+describe('RunState — snapshot includes gold', () => {
+  it('snapshot() includes gold field', () => {
+    runState.addGold(42);
     const snap = runState.snapshot();
-    expect(snap.inRunCurrency).toBe(42);
+    expect(snap.gold).toBe(42);
   });
 });

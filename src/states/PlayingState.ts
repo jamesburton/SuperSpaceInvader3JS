@@ -126,7 +126,7 @@ export class PlayingState implements IGameState {
     if (ctx.spawnSystem.shopPending) {
       ctx.spawnSystem.clearShopPending();
       const choices = ctx.shopSystem.generateChoices();
-      ctx.shopUI.show(choices, runState.inRunCurrency, (selectedIndex: number) => {
+      ctx.shopUI.show(choices, runState.gold, (selectedIndex: number) => {
         if (selectedIndex >= 0 && selectedIndex < choices.length) {
           ctx.shopSystem.purchaseItem(choices[selectedIndex], ctx.player);
         }

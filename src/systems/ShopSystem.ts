@@ -112,13 +112,13 @@ export class ShopSystem {
   }
 
   /**
-   * Apply purchase. Returns true if successful (sufficient SI$).
-   * Deducts price from runState.inRunCurrency and applies the immediate effect.
+   * Apply purchase. Returns true if successful (sufficient Gold).
+   * Deducts price from runState.gold and applies the immediate effect.
    */
   public purchaseItem(item: ShopItem, player: Player): boolean {
-    if (runState.inRunCurrency < item.price) return false;
+    if (runState.gold < item.price) return false;
 
-    runState.addCurrency(-item.price); // deduct (negative amount)
+    runState.addGold(-item.price); // deduct (negative amount)
 
     const prev = this.purchaseCounts.get(item.id) ?? 0;
     this.purchaseCounts.set(item.id, prev + 1);

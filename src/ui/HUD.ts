@@ -16,7 +16,7 @@ export class HUD {
     // Create HUD elements inside the #hud container
     hudRoot.innerHTML = `
       <div id="hud-score" style="position:absolute;top:16px;left:16px;font-size:18px;font-family:'Courier New',monospace;color:#fff;text-shadow:0 0 8px #fff;">SCORE: 0</div>
-      <div id="hud-sid" style="position:absolute;top:40px;left:16px;font-size:14px;font-family:'Courier New',monospace;color:#ffee00;text-shadow:0 0 8px #ffee00;">SI$ 0</div>
+      <div id="hud-sid" style="position:absolute;top:40px;left:16px;font-size:14px;font-family:'Courier New',monospace;color:#ffd700;text-shadow:0 0 8px #ffd700;">Gold: 0</div>
       <div id="hud-wave" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:18px;font-family:'Courier New',monospace;color:#fff;text-shadow:0 0 8px #fff;">WAVE 1</div>
       <div id="hud-powerup" style="display:none;position:absolute;top:40px;left:50%;transform:translateX(-50%);text-align:center;">
         <div id="hud-powerup-name" style="font-size:12px;font-family:'Courier New',monospace;color:#00ff88;text-shadow:0 0 8px #00ff88;"></div>
@@ -43,7 +43,7 @@ export class HUD {
     this.scoreEl.textContent = `SCORE: ${state.score}`;
     this.livesEl.textContent = `LIVES: ${state.lives}`;
     this.waveEl.textContent = `WAVE ${state.wave}`;
-    this.sidEl.textContent = `SI$ ${state.inRunCurrency}`;
+    this.sidEl.textContent = `Gold: ${state.gold}`;
   }
 
   /**

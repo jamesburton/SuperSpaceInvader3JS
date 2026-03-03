@@ -9,8 +9,11 @@ const _state: RunStateData = {
   wave: 1,
   enemiesKilled: 0,
   gamePhase: 'playing' as GamePhase,
-  inRunCurrency: 0,
+  gold: 0,
 };
+
+/** Tracks total gold earned during this run (for shop balance history). Resets on reset(). */
+let _goldEarnedThisRun = 0;
 
 export const runState = {
   get score() { return _state.score; },
@@ -18,7 +21,8 @@ export const runState = {
   get wave() { return _state.wave; },
   get enemiesKilled() { return _state.enemiesKilled; },
   get gamePhase() { return _state.gamePhase; },
-  get inRunCurrency() { return _state.inRunCurrency; },
+  get gold() { return _state.gold; },
+  get goldEarnedThisRun() { return _goldEarnedThisRun; },
 
   addScore(amount: number): void {
     _state.score += amount;
@@ -45,14 +49,16 @@ export const runState = {
     _state.lives = Math.min(MAX_LIVES_CAP, _state.lives + 1);
   },
 
-  /** Add SI$ in-run currency (floors to integer) */
-  addCurrency(amount: number): void {
-    _state.inRunCurrency += Math.floor(amount);
+  /** Add Gold in-run currency (floors to integer). Tracks goldEarnedThisRun for positive amounts. */
+  addGold(amount: number): void {
+    const floored = Math.floor(amount);
+    _state.gold += floored;
+    if (floored > 0) _goldEarnedThisRun += floored;
   },
 
-  /** Zero the in-run currency (called explicitly or via reset()) */
-  resetCurrency(): void {
-    _state.inRunCurrency = 0;
+  /** Zero the in-run gold balance (called explicitly or via reset()) */
+  resetGold(): void {
+    _state.gold = 0;
   },
 
   /** Reset for new run */
@@ -62,7 +68,8 @@ export const runState = {
     _state.wave = 1;
     _state.enemiesKilled = 0;
     _state.gamePhase = 'playing';
-    _state.inRunCurrency = 0;
+    _state.gold = 0;
+    _goldEarnedThisRun = 0;
   },
 
   snapshot(): RunStateData {

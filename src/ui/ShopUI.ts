@@ -42,7 +42,7 @@ export class ShopUI {
   /**
    * Display the shop with the given choices.
    * @param choices   Array of 1–3 ShopItem options to present
-   * @param sidBalance Current SI$ balance shown in the header
+   * @param sidBalance Current Gold balance shown in the header
    * @param onSelect  Callback: receives index (0/1/2) of chosen item, or -1 for skip
    */
   public show(choices: ShopItem[], sidBalance: number, onSelect: (index: number) => void): void {
@@ -56,13 +56,13 @@ export class ShopUI {
         <div style="font-size:13px;color:#888;">[${i + 1}]</div>
         <div style="font-size:20px;color:${cyan};text-shadow:${glow};margin:8px 0;">${item.displayName}</div>
         <div style="font-size:12px;color:#aaa;margin-bottom:8px;">${item.description}</div>
-        <div style="font-size:16px;color:#ffee00;">SI$ ${item.price}</div>
+        <div style="font-size:16px;color:#ffd700;">${item.price} Gold</div>
       </div>
     `).join('');
 
     this.el.innerHTML = `
       <h2 style="font-size:28px;color:${cyan};text-shadow:${glow};letter-spacing:0.1em;margin-bottom:8px;">-- UPGRADE SHOP --</h2>
-      <div style="font-size:14px;color:#aaa;margin-bottom:20px;">Balance: SI$ ${sidBalance} &nbsp;|&nbsp; Press 1/2/3 to buy &nbsp;|&nbsp; ESC to skip</div>
+      <div style="font-size:14px;color:#aaa;margin-bottom:20px;">Balance: ${sidBalance} Gold &nbsp;|&nbsp; Press 1/2/3 to buy &nbsp;|&nbsp; ESC to skip</div>
       <div style="display:flex;flex-direction:row;gap:8px;">${cardsHtml}</div>
     `;
     this.el.style.display = 'flex';
