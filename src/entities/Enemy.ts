@@ -725,8 +725,36 @@ export class EnemyFormation {
     return frontEnemies[Math.floor(Math.random() * frontEnemies.length)];
   }
 
-  /** Get world position of an enemy (for bullet spawn, collision) */
+  /**
+   * Set an enemy's world position independently of the formation grid.
+   * Used by AISystem for Charger and Swooper independent movement.
+   * Updates enemy.x / enemy.y and writes the translation matrix to the type mesh.
+   */
+  public setEnemyWorldPos(enemy: Enemy, x: number, y: number): void {
+    enemy.x = x;
+    enemy.y = y;
+    this.tmpMatrix.makeTranslation(x, y, 0);
+    const mesh = this.typeMeshes.get(enemy.type);
+    if (mesh) {
+      mesh.setMatrixAt(enemy.meshSlot, this.tmpMatrix);
+      mesh.instanceMatrix.needsUpdate = true;
+    }
+  }
+
+  /**
+   * Get world position of an enemy.
+   * For enemies moving independently (Flanker charging, Charger diving, Swooper not in
+   * formation phase) return stored enemy.x/y directly — those are maintained by AISystem.
+   * Otherwise, calculate from the formation grid anchor.
+   */
   public getEnemyWorldPos(enemy: Enemy): { x: number; y: number } {
+    if (
+      enemy.flankerCharging ||
+      enemy.chargerDiving ||
+      enemy.swooperPhase !== 'formation'
+    ) {
+      return { x: enemy.x, y: enemy.y };
+    }
     return this.layout.getPosition(enemy.row, enemy.col, this.formationX, this.formationY);
   }
 
