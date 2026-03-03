@@ -92,7 +92,15 @@ Plans:
   3. Meta currency earned at run end persists across browser sessions via localStorage with a versioned schema; the main menu provides access to the meta shop
   4. The meta shop offers at least 2 starting weapon loadout unlocks and a set of capped passive stat upgrades that carry into future runs
   5. The run-end screen shows meta currency earned this run alongside the total accumulated balance
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Currency redesign (Gold in-run + SI$ meta), MetaStore extension with purchasedUpgrades
+- [ ] 04-02-PLAN.md — Boss entity (BossEnemy 80×60 mesh) + BossSystem (2-phase attack state machine)
+- [ ] 04-03-PLAN.md — Boss health bar, SpawnSystem boss trigger, PlayingState boss mode + victory screen
+- [ ] 04-04-PLAN.md — Meta upgrade catalog + MetaShopUI + TitleState UPGRADES button
+- [ ] 04-05-PLAN.md — SI$ earn tracking (1/wave), run-end SI$ display, meta bonuses applied at run start
+- [ ] 04-06-PLAN.md — Human verification checkpoint (all 11 Phase 4 requirements)
 
 ### Phase 5: Campaign Mode + Game Modes
 **Goal**: Players can choose between Campaign and Endless modes from the main menu; Campaign Chapter 1 delivers 3-4 handcrafted levels followed by the boss
