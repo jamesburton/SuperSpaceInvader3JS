@@ -42,15 +42,15 @@
 ### Enemy System (ENEMY)
 
 - [x] **ENEMY-01**: Grunt enemy type moves in formation grid and fires basic projectiles at random intervals
-- [ ] **ENEMY-02**: Shielder enemy type has a destructible front shield that must be destroyed before the enemy can be killed
-- [ ] **ENEMY-03**: Flanker enemy type detects player position and breaks formation to charge laterally
-- [ ] **ENEMY-04**: Sniper enemy type maintains distance at rear of formation and fires targeted precision shots at player
-- [ ] **ENEMY-05**: Charger enemy type triggers a direct dive at the player when its health drops below a threshold
-- [ ] **ENEMY-06**: Swooper enemy type dives in a swooping chain pattern (leader-follower formation arc)
+- [x] **ENEMY-02**: Shielder enemy type has a destructible front shield that must be destroyed before the enemy can be killed
+- [x] **ENEMY-03**: Flanker enemy type detects player position and breaks formation to charge laterally
+- [x] **ENEMY-04**: Sniper enemy type maintains distance at rear of formation and fires targeted precision shots at player
+- [x] **ENEMY-05**: Charger enemy type triggers a direct dive at the player when its health drops below a threshold
+- [x] **ENEMY-06**: Swooper enemy type dives in a swooping chain pattern (leader-follower formation arc)
 - [x] **ENEMY-07**: Each enemy type has a visually distinct design (unique shape, size, and neon color identity)
 - [x] **ENEMY-08**: Enemies spawn in grid-based formations that can break into dynamic individual behavior mid-wave
 - [x] **ENEMY-09**: Wave escalation increases enemy count, movement speed, and firing rate across waves
-- [ ] **ENEMY-10**: Enemy formation-breaking behavior is triggered by conditions (player position, health threshold, wave timer)
+- [x] **ENEMY-10**: Enemy formation-breaking behavior is triggered by conditions (player position, health threshold, wave timer)
 
 ### Visual & Aesthetic (VIS)
 
@@ -193,15 +193,15 @@ Deferred — build after v1 is validated.
 | FEEL-06 | Phase 2 | Complete |
 | FEEL-07 | Phase 2 | Complete |
 | ENEMY-01 | Phase 3 | Complete |
-| ENEMY-02 | Phase 3 | Pending |
-| ENEMY-03 | Phase 3 | Pending |
-| ENEMY-04 | Phase 3 | Pending |
-| ENEMY-05 | Phase 3 | Pending |
-| ENEMY-06 | Phase 3 | Pending |
+| ENEMY-02 | Phase 3 | Complete |
+| ENEMY-03 | Phase 3 | Complete |
+| ENEMY-04 | Phase 3 | Complete |
+| ENEMY-05 | Phase 3 | Complete |
+| ENEMY-06 | Phase 3 | Complete |
 | ENEMY-07 | Phase 3 | Complete |
 | ENEMY-08 | Phase 3 | Complete |
 | ENEMY-09 | Phase 3 | Complete |
-| ENEMY-10 | Phase 3 | Pending |
+| ENEMY-10 | Phase 3 | Complete |
 | PWR-01 | Phase 3 | Complete |
 | PWR-02 | Phase 3 | Complete |
 | PWR-03 | Phase 3 | Complete |

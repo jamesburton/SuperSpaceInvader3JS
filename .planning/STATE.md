@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T01:03:00.325Z"
+last_updated: "2026-03-03T02:49:48.549Z"
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 20
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # Project State
@@ -54,6 +54,7 @@ Progress: [██████░░░░] 40% (2/5 phases complete; Phase 3 in 
 | Phase 02-visual-identity-game-feel P04 | 3 | 2 tasks | 8 files |
 | Phase 03-enemy-depth-wave-systems-power-ups P01 | 4 | 3 tasks | 8 files |
 | Phase 03-enemy-depth-wave-systems-power-ups P03 | 27 | 3 tasks | 3 files |
+| Phase 03-enemy-depth-wave-systems-power-ups P02 | 44 | 3 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -110,6 +111,10 @@ Recent decisions affecting current work:
 - [Phase 03-enemy-depth-wave-systems-power-ups]: Shield power-up modelled as absorb charge (shieldCharges=1) not a duration — consumeShieldCharge() returns bool for CollisionSystem
 - [Phase 03-enemy-depth-wave-systems-power-ups]: trySpawnDrop() takes dropChance float — caller (CollisionSystem) owns enemy-specific drop probability, PowerUpManager stays generic
 - [Phase 03-enemy-depth-wave-systems-power-ups]: getActiveTokens() returns readonly array — prevents CollisionSystem from mutating pool-internal list directly
+- [Phase 03-enemy-depth-wave-systems-power-ups]: typeMeshes Map<EnemyType, InstancedMesh> replaces rowMeshes[]: 6 archetype meshes (up from 4 row meshes); rowMeshes getter preserves bloom registration API
+- [Phase 03-enemy-depth-wave-systems-power-ups]: meshSlot field on Enemy: sequential index within type's InstancedMesh, assigned during spawnWave() for killEnemy() and matrix updates
+- [Phase 03-enemy-depth-wave-systems-power-ups]: Row-homogeneous archetype assignment (row % allowedTypes.length): each row gets one type, creating clear visual threat groupings
+- [Phase 03-enemy-depth-wave-systems-power-ups]: spawnWave() default param getWaveConfig(1): zero-arg calls from Game.ts constructor path remain valid with no call-site changes
 
 ### Pending Todos
 
