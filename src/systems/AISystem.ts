@@ -3,9 +3,11 @@ import type { ObjectPool } from '../core/ObjectPool';
 import type { Bullet } from '../entities/Bullet';
 import { ENEMY_FIRE_RATE } from '../utils/constants';
 
+const BASE_FIRE_INTERVAL = 1 / ENEMY_FIRE_RATE;
+
 export class AISystem {
   private fireAccumulator: number = 0;
-  private readonly fireInterval: number = 1 / ENEMY_FIRE_RATE; // seconds between formation shots
+  private fireInterval: number = BASE_FIRE_INTERVAL; // seconds between formation shots
 
   /**
    * Update formation march and enemy firing.
@@ -48,8 +50,17 @@ export class AISystem {
     activeBullets.push(bullet);
   }
 
-  /** Reset fire accumulator on wave start */
+  /**
+   * Set fire rate multiplier from WaveConfig.
+   * Higher multiplier = faster fire rate (shorter interval).
+   */
+  public setFireRateMultiplier(multiplier: number): void {
+    this.fireInterval = BASE_FIRE_INTERVAL / multiplier;
+  }
+
+  /** Reset fire accumulator and multiplier on wave start */
   public reset(): void {
     this.fireAccumulator = 0;
+    this.fireInterval = BASE_FIRE_INTERVAL;
   }
 }
