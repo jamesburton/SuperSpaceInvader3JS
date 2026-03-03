@@ -24,8 +24,8 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 
 Phase: 3 of 5 (Enemy Depth + Wave Systems + Power-Ups) — IN PROGRESS
 Next: Phase 4 (Boss Encounter + Meta Progression) — pending Phase 3 fun bar gate
-Status: Phase 3 executing — 4/9 plans complete (03-01, 03-02, 03-03, 03-04, 03-05 done)
-Last activity: 2026-03-03 — 03-05 complete: SpawnSystem data-driven refactor, AISystem.setFireRateMultiplier, shop pending flag
+Status: Phase 3 executing — 5/9 plans complete (03-01, 03-02, 03-03, 03-04, 03-05 done)
+Last activity: 2026-03-03 — 03-04 complete: AISystem per-archetype behaviors (Flanker charge, Sniper aim, Charger dive, Swooper loop), setEnemyWorldPos
 
 Progress: [██████░░░░] 40% (2/5 phases complete; Phase 3 in progress 2/9 plans)
 
@@ -56,6 +56,7 @@ Progress: [██████░░░░] 40% (2/5 phases complete; Phase 3 in 
 | Phase 03-enemy-depth-wave-systems-power-ups P03 | 27 | 3 tasks | 3 files |
 | Phase 03-enemy-depth-wave-systems-power-ups P02 | 44 | 3 tasks | 1 files |
 | Phase 03-enemy-depth-wave-systems-power-ups P05 | 4 | 3 tasks | 3 files |
+| Phase 03-enemy-depth-wave-systems-power-ups P04 | 8 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,11 @@ Recent decisions affecting current work:
 - [Phase 03-enemy-depth-wave-systems-power-ups]: spawnWave() default param getWaveConfig(1): zero-arg calls from Game.ts constructor path remain valid with no call-site changes
 - [Phase 03-enemy-depth-wave-systems-power-ups]: shopPending captured from currentConfig BEFORE runState.nextWave() — shopAfterThisWave belongs to wave just cleared
 - [Phase 03-enemy-depth-wave-systems-power-ups]: aiSystem.reset() before setFireRateMultiplier() in startNextWave(): clears accumulator then applies new interval
+- [Phase 03-enemy-depth-wave-systems-power-ups 03-04]: Flanker reuses chargerTargetX and chargerDiveTimer fields — avoids adding new Enemy fields for single use case; documented in AISystem comments
+- [Phase 03-enemy-depth-wave-systems-power-ups 03-04]: Aimed bullet pattern: bullet.init() then manual vx/vy override — init() is allocation hook, vx/vy are public for direction override
+- [Phase 03-enemy-depth-wave-systems-power-ups 03-04]: Swooper group ID = instanceIndex % 4 computed at dispatch time — no extra field needed on Enemy
+- [Phase 03-enemy-depth-wave-systems-power-ups 03-04]: Swooper returns via killEnemy on bottom exit in 'returning' phase — simpler than re-integrating into tight formation grid
+- [Phase 03-enemy-depth-wave-systems-power-ups 03-04]: Independent-movement pattern: AISystem calls formation.setEnemyWorldPos(); getEnemyWorldPos() detects and returns stored x/y for Flanker/Charger/Swooper
 
 ### Pending Todos
 
@@ -130,7 +136,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 03-05-PLAN.md — SpawnSystem data-driven refactor, AISystem.setFireRateMultiplier, shop pending flag (ENEMY-08, ENEMY-09, INRUN-02)
+Stopped at: Completed 03-04-PLAN.md — AISystem per-archetype AI behaviors, setEnemyWorldPos, playerX pass-through (ENEMY-03,04,05,06,10)
 Resume file: none
 
 ## Phase 3 Plan Index
