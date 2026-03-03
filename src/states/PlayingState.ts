@@ -108,6 +108,7 @@ export class PlayingState implements IGameState {
         ctx.formation,
         ctx.enemyBulletPool,
         ctx.activeBullets,
+        ctx.player.x,
       );
       if (reachedBottom) {
         this.triggerGameOver();
