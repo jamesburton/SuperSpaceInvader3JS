@@ -86,10 +86,10 @@
 
 ### Game Modes (MODE)
 
-- [ ] **MODE-01**: Endless mode — infinite procedurally escalating waves, score-chase focused, always available
-- [ ] **MODE-02**: Campaign mode — handcrafted Chapter 1 with 3-4 levels followed by boss fight
-- [ ] **MODE-03**: Main menu clearly presents mode selection (Campaign, Endless)
-- [ ] **MODE-04**: Campaign progress is saved to localStorage and resumable from main menu
+- [x] **MODE-01**: Endless mode — infinite procedurally escalating waves, score-chase focused, always available
+- [x] **MODE-02**: Campaign mode — handcrafted Chapter 1 with 3-4 levels followed by boss fight
+- [x] **MODE-03**: Main menu clearly presents mode selection (Campaign, Endless)
+- [x] **MODE-04**: Campaign progress is saved to localStorage and resumable from main menu
 
 ### Boss Encounter (BOSS)
 
@@ -100,8 +100,8 @@
 
 ### Campaign Structure (CAMP)
 
-- [ ] **CAMP-01**: Campaign wave scripts are data-driven (TypeScript objects/arrays, not hardcoded logic)
-- [ ] **CAMP-02**: Chapter 1 contains 3-4 handcrafted levels before the boss encounter
+- [x] **CAMP-01**: Campaign wave scripts are data-driven (TypeScript objects/arrays, not hardcoded logic)
+- [x] **CAMP-02**: Chapter 1 contains 3-4 handcrafted levels before the boss encounter
 - [ ] **CAMP-03**: Brief atmospheric text overlay displays between campaign levels (mission briefing style)
 
 ---
@@ -221,12 +221,12 @@ Deferred — build after v1 is validated.
 | META-05 | Phase 4 | Complete |
 | META-06 | Phase 4 | Complete |
 | META-07 | Phase 4 | Complete |
-| MODE-01 | Phase 5 | Pending |
-| MODE-02 | Phase 5 | Pending |
-| MODE-03 | Phase 5 | Pending |
-| MODE-04 | Phase 5 | Pending |
-| CAMP-01 | Phase 5 | Pending |
-| CAMP-02 | Phase 5 | Pending |
+| MODE-01 | Phase 5 | Complete |
+| MODE-02 | Phase 5 | Complete |
+| MODE-03 | Phase 5 | Complete |
+| MODE-04 | Phase 5 | Complete |
+| CAMP-01 | Phase 5 | Complete |
+| CAMP-02 | Phase 5 | Complete |
 | CAMP-03 | Phase 5 | Pending |
 
 **Coverage:**

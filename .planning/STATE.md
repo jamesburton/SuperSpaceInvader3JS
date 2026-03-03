@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T19:23:49.499Z"
+last_updated: "2026-03-03T19:28:52.448Z"
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 32
-  completed_plans: 28
+  completed_plans: 29
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 
 ## Current Position
 
-Phase: 5 of 5 (Campaign Mode + Game Modes) — IN PROGRESS (Plan 2 of 6 complete)
-Next: Execute 05-03 — TitleState mode select
-Status: Phase 5 executing — 05-02 complete: InputManager.anyKeyJustPressed(), SpawnSystem campaign wave override, GameOverState returnToMenu bug fix
-Last activity: 2026-03-03 — 05-02 complete: infrastructure primitives for campaign mode (MODE-01, MODE-02, CAMP-01)
+Phase: 5 of 5 (Campaign Mode + Game Modes) — IN PROGRESS (Plan 3 of 6 complete)
+Next: Execute 05-04 — Campaign level progression
+Status: Phase 5 executing — 05-03 complete: TitleState rewritten with mode selection menu (Campaign/Endless/Upgrades), arrow-key nav, letter shortcuts, _resetAllSystems()
+Last activity: 2026-03-03 — 05-03 complete: TitleState mode select menu with full system reset (MODE-03, MODE-01, MODE-04)
 
-Progress: [██████████] 84% (Phase 4 impl done + Phase 5 plan 2/6 complete)
+Progress: [██████████] 86% (Phase 4 impl done + Phase 5 plan 3/6 complete)
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [██████████] 84% (Phase 4 impl done + Phase 5 plan
 | Phase 04-boss-encounter-meta-progression P05 | 4 | 2 tasks | 6 files |
 | Phase 05-campaign-mode-game-modes P01 | 216 | 2 tasks | 3 files |
 | Phase 05-campaign-mode-game-modes P02 | 3 | 3 tasks | 3 files |
+| Phase 05-campaign-mode-game-modes P03 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -163,6 +164,8 @@ Recent decisions affecting current work:
 - [Phase 05-campaign-mode-game-modes]: getNextWaveConfig() private helper dispatches campaign vs endless — single call site in startNextWave()
 - [Phase 05-campaign-mode-game-modes]: levelCompletePending early-return in startNextWave() — sets flag then returns without spawning, PlayingState handles routing
 - [Phase 05-campaign-mode-game-modes]: runState.reset() as FIRST line in returnToMenu() — consistent with restartGame() ordering, ensures clean state before system cleanup
+- [Phase 05-campaign-mode-game-modes]: selectedOption persists on TitleState instance — Campaign is default; remembered on return-from-run
+- [Phase 05-campaign-mode-game-modes]: OPTIONS array drives arrow-key cycle: campaign, endless, upgrades — extensible without changing cycle logic
 
 ### Pending Todos
 
@@ -175,9 +178,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Phase 5 context gathered — 05-CONTEXT.md written, ready for planning
-Resume file: .planning/phases/05-campaign-mode-game-modes/05-CONTEXT.md
-Resume file: none
+Stopped at: Completed 05-03-PLAN.md — TitleState mode selection menu
+Resume file: .planning/phases/05-campaign-mode-game-modes/05-04-PLAN.md
 
 ## Phase 3 Plan Index
 
