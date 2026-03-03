@@ -70,6 +70,17 @@ export class PowerUpManager {
   }
 
   /**
+   * Directly activate a timed power-up with a custom duration.
+   * Used by applyMetaBonuses() to apply meta loadout upgrades at run start.
+   * Shield type is not supported here (use grantShieldCharge() instead).
+   */
+  public activate(type: PowerUpType, duration: number): void {
+    if (type === 'shield') return; // shield uses charge model, not timed
+    this.activePowerUp = type;
+    this.activeDuration = duration;
+  }
+
+  /**
    * Query whether a power-up type is currently active.
    * WeaponSystem calls isActive('spreadShot') / isActive('rapidFire') each fixed step.
    * CollisionSystem calls isActive('shield') before applying player damage.

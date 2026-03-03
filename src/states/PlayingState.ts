@@ -70,6 +70,7 @@ export class PlayingState implements IGameState {
     runState.setPhase('playing');
     this.hud.hideOverlay();
     this.ctx.cameraShake.reset(); // Phase 2: clear any residual shake
+    this.applyMetaBonuses();      // Phase 4: apply persistent meta upgrades at run start
   }
 
   update(dt: number): void {
@@ -305,9 +306,11 @@ export class PlayingState implements IGameState {
   private triggerVictory(): void {
     const { ctx } = this;
     // Award SI$ meta currency and score bonus for boss defeat
-    const siEarned = BOSS_DEF.metaCurrencyReward;
+    const waveSI = runState.siEarnedThisRun;       // SI$ from wave clears
+    const bossReward = BOSS_DEF.metaCurrencyReward; // SI$ from boss defeat
+    const totalSIEarned = waveSI + bossReward;
     runState.addScore(BOSS_DEF.scoreValue);
-    useMetaStore.getState().addMetaCurrency(siEarned);
+    useMetaStore.getState().addMetaCurrency(totalSIEarned);
     useMetaStore.getState().updateHighScore(runState.score);
 
     const totalSI = useMetaStore.getState().metaCurrency;
@@ -318,7 +321,7 @@ export class PlayingState implements IGameState {
       <p style="font-size:24px;margin:8px 0;">SCORE: ${runState.score}</p>
       <p style="font-size:24px;margin:8px 0;">WAVE: ${runState.wave}</p>
       <p style="font-size:24px;margin:8px 0;">KILLS: ${runState.enemiesKilled}</p>
-      <p style="font-size:20px;margin:16px 0;color:#ffd700;">SI$ EARNED: ${siEarned} | TOTAL: ${totalSI}</p>
+      <p style="font-size:20px;margin:16px 0;color:#ffd700;">SI$ EARNED: ${totalSIEarned} (${waveSI} waves + ${bossReward} boss) | TOTAL: ${totalSI}</p>
       <p style="font-size:18px;margin-top:40px;opacity:0.7;letter-spacing:2px;">PRESS R TO PLAY AGAIN</p>
     `);
 
@@ -342,6 +345,11 @@ export class PlayingState implements IGameState {
   private triggerGameOver(): void {
     runState.setPhase('gameover');
     useMetaStore.getState().updateHighScore(runState.score);
+    // Award SI$ earned this run to MetaStore (META-01) — must happen before GameOverState reads it
+    const siEarned = runState.siEarnedThisRun;
+    if (siEarned > 0) {
+      useMetaStore.getState().addMetaCurrency(siEarned);
+    }
     this.stateManager.replace(
       new GameOverState(
         this.input,
@@ -355,6 +363,50 @@ export class PlayingState implements IGameState {
         },
       ),
     );
+  }
+
+  /**
+   * Apply purchased meta upgrades at run start (META-03, META-04).
+   * Reads MetaStore.purchasedUpgrades and applies passive stat bonuses and starting loadouts.
+   * Called from enter() each time PlayingState becomes active (new run or restart).
+   */
+  private applyMetaBonuses(): void {
+    const { purchasedUpgrades } = useMetaStore.getState();
+    const { player, powerUpManager } = this.ctx;
+
+    // Count tiers for multiplicative passives
+    let fireRateTiers = 0;
+    let moveSpeedTiers = 0;
+
+    for (const id of purchasedUpgrades) {
+      if (id.startsWith('passive_fireRate_')) fireRateTiers++;
+      if (id.startsWith('passive_moveSpeed_')) moveSpeedTiers++;
+    }
+
+    // Apply passive fire rate: +10% per tier (compound) — shorter cooldown = multiplier < 1
+    if (fireRateTiers > 0) {
+      const rateMultiplier = Math.pow(1.10, fireRateTiers); // e.g., 3 tiers = 1.331x faster
+      player.setFireCooldownMultiplier(1 / rateMultiplier);
+    }
+
+    // Apply passive move speed: +8% per tier (compound)
+    if (moveSpeedTiers > 0) {
+      const speedMultiplier = Math.pow(1.08, moveSpeedTiers);
+      player.setSpeedMultiplier(speedMultiplier);
+    }
+
+    // Apply starting life bonus (+1 life, capped at MAX_LIVES_CAP)
+    if (purchasedUpgrades.includes('passive_startingLife')) {
+      runState.addLife();
+    }
+
+    // Apply starting loadout power-ups (timed, 30s duration)
+    if (purchasedUpgrades.includes('loadout_spread_start')) {
+      powerUpManager.activate('spreadShot', 30); // spread shot for 30s at run start
+    }
+    if (purchasedUpgrades.includes('loadout_rapid_start')) {
+      powerUpManager.activate('rapidFire', 30);  // rapid fire for 30s at run start
+    }
   }
 
   render(alpha: number): void {

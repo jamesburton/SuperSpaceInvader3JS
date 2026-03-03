@@ -3,11 +3,14 @@ import type { InputManager } from '../core/InputManager';
 import type { HUD } from '../ui/HUD';
 import type { PlayingStateContext } from './PlayingState';
 import { runState } from '../state/RunState';
+import { useMetaStore } from '../state/MetaState';
 
 export class GameOverState implements IGameState {
   private readonly finalScore: number;
   private readonly finalWave: number;
   private readonly finalKills: number;
+  private readonly siEarned: number;  // SI$ earned this run (META-06)
+  private readonly totalSI: number;   // Total accumulated SI$ after award (META-06)
 
   constructor(
     private readonly input: InputManager,
@@ -16,9 +19,13 @@ export class GameOverState implements IGameState {
     private readonly onRestart: () => void,
   ) {
     // Capture final stats before runState is potentially reset
+    // SI$ must be awarded to MetaStore BEFORE GameOverState is constructed
+    // (triggerGameOver() in PlayingState awards it first)
     this.finalScore = runState.score;
     this.finalWave = runState.wave;
     this.finalKills = runState.enemiesKilled;
+    this.siEarned = runState.siEarnedThisRun;
+    this.totalSI = useMetaStore.getState().metaCurrency;
   }
 
   enter(): void {
@@ -27,6 +34,7 @@ export class GameOverState implements IGameState {
       <p style="font-size:28px;margin:12px 0;">SCORE: ${this.finalScore}</p>
       <p style="font-size:28px;margin:12px 0;">WAVE: ${this.finalWave}</p>
       <p style="font-size:28px;margin:12px 0;">KILLS: ${this.finalKills}</p>
+      <p style="font-size:20px;margin:12px 0;color:#ffd700;">SI$ EARNED: ${this.siEarned} | TOTAL: ${this.totalSI}</p>
       <p style="font-size:18px;margin-top:40px;opacity:0.7;letter-spacing:2px;">PRESS R TO RESTART</p>
     `);
   }
