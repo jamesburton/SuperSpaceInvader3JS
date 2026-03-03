@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T12:22:08.783Z"
+last_updated: "2026-03-03T12:26:00Z"
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 26
-  completed_plans: 21
+  completed_plans: 22
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 ## Current Position
 
 Phase: 4 of 5 (Boss Encounter + Meta Progression) — IN PROGRESS
-Next: 04-03 (next plan in Phase 4)
-Status: Phase 4 executing — 2/6 plans complete (04-02 done: BossEnemy entity + BossSystem)
-Last activity: 2026-03-03 — 04-02 complete: BossEnemy (80x60 angular hull, activate/deactivate/takeDamage), BossSystem (two-phase attack machine, aimed spread + sweeping beam, phase transition flash), BOSS_DEF config
+Next: 04-05 (next plan in Phase 4)
+Status: Phase 4 executing — 4/6 plans complete (04-04 done: META_UPGRADES catalog + MetaShopUI + TitleState UPGRADES button)
+Last activity: 2026-03-03 — 04-04 complete: META_UPGRADES catalog (2 loadouts + 7 passives), MetaShopUI DOM overlay with purchase/owned state, TitleState UPGRADES button (U key)
 
-Progress: [████████░░] 62% (Phase 3 complete + Phase 4 in progress — 2/6 plans done)
+Progress: [█████████░] 68% (Phase 3 complete + Phase 4 in progress — 4/6 plans done)
 
 ## Performance Metrics
 
@@ -145,6 +145,9 @@ Recent decisions affecting current work:
 - [Phase 04-boss-encounter-meta-progression]: Boss bullet speed 280 (vs 300 regular) for readability in multi-bullet patterns
 - [Phase 04-boss-encounter-meta-progression]: phaseJustChanged auto-reset-on-read getter — identical to wasHitThisStep() pattern, consumer polls once per step
 - [Phase 04-boss-encounter-meta-progression]: BossEnemy starts inactive (active=false, mesh.visible=false) — SpawnSystem activates at encounter start in 04-03
+- [Phase 04-boss-encounter-meta-progression 04-04]: window.__metaShopBuy global for onclick handlers in innerHTML-rendered upgrade cards — simpler than event delegation for static list
+- [Phase 04-boss-encounter-meta-progression 04-04]: MetaShopUI lazy-init in TitleState.enter() via document.getElementById('hud') — constructor-time DOM access unreliable
+- [Phase 04-boss-encounter-meta-progression 04-04]: MetaShopUI appended to #hud at z-index:200 — renders above existing overlay without HUD API changes
 
 ### Pending Todos
 
@@ -157,7 +160,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 04-02-PLAN.md — BossEnemy entity (80x60 angular hull), BossSystem (two-phase attack machine: aimed spread + sweeping beam, transition at 50% HP), BOSS_DEF config
+Stopped at: Completed 04-04-PLAN.md — META_UPGRADES catalog (9 items: 2 loadouts + 7 passives), MetaShopUI DOM overlay, TitleState UPGRADES button (U key, ESC to close)
 Resume file: none
 
 ## Phase 3 Plan Index

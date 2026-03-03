@@ -77,9 +77,9 @@
 ### Meta Progression (META)
 
 - [x] **META-01**: Meta currency is earned at run end (based on score/waves reached) and persists via localStorage
-- [ ] **META-02**: Main menu provides access to the meta shop UI
-- [ ] **META-03**: Meta shop offers at least 2 starting weapon loadout unlocks (purchasable alternatives to default weapon)
-- [ ] **META-04**: Meta shop offers a limited set of passive stat upgrades (small % bonuses to fire rate, speed, or shield capacity; capped to prevent balance inflation)
+- [x] **META-02**: Main menu provides access to the meta shop UI
+- [x] **META-03**: Meta shop offers at least 2 starting weapon loadout unlocks (purchasable alternatives to default weapon)
+- [x] **META-04**: Meta shop offers a limited set of passive stat upgrades (small % bonuses to fire rate, speed, or shield capacity; capped to prevent balance inflation)
 - [x] **META-05**: All meta shop purchases persist across browser sessions via localStorage
 - [ ] **META-06**: Run-end screen displays meta currency earned this run alongside total meta currency
 - [x] **META-07**: localStorage schema is versioned (v1) to enable future migration without data loss
@@ -215,9 +215,9 @@ Deferred — build after v1 is validated.
 | BOSS-03 | Phase 4 | Pending |
 | BOSS-04 | Phase 4 | Complete |
 | META-01 | Phase 4 | Complete |
-| META-02 | Phase 4 | Pending |
-| META-03 | Phase 4 | Pending |
-| META-04 | Phase 4 | Pending |
+| META-02 | Phase 4 | Complete |
+| META-03 | Phase 4 | Complete |
+| META-04 | Phase 4 | Complete |
 | META-05 | Phase 4 | Complete |
 | META-06 | Phase 4 | Pending |
 | META-07 | Phase 4 | Complete |
