@@ -12,14 +12,27 @@ import type { EnemyType } from '../config/enemies';
 import {
   WORLD_WIDTH,
   WORLD_HEIGHT,
-  ENEMY_COLS,
-  ENEMY_ROWS,
   ENEMY_BASE_MARCH_SPEED,
   ENEMY_MARCH_SPEEDUP,
   ENEMY_DROP_DISTANCE,
   ENEMY_POOL_SIZE,
 } from '../utils/constants';
 import { ENEMY_DEFS, ROW_SIZES } from '../config/enemies';
+import type { FormationLayout, WaveConfig } from '../config/waveConfig';
+import { getWaveConfig } from '../config/waveConfig';
+
+// ---------------------------------------------------------------------------
+// Type-to-row-index map for AABB sizing.
+// Grunt size varies by formation row; all other archetypes use fixed row-index.
+// ---------------------------------------------------------------------------
+const TYPE_ROW_INDEX: Record<EnemyType, number | null> = {
+  grunt:    null, // varies by row — computed dynamically
+  shielder: 3,    // large
+  flanker:  1,    // medium-small
+  sniper:   2,    // medium-large
+  charger:  3,    // large
+  swooper:  1,    // medium-small
+};
 
 /** Per-enemy data. Held in a flat array — EnemyFormation manages them. */
 export class Enemy {
@@ -29,24 +42,86 @@ export class Enemy {
   public readonly height: number;   // AABB half-height
   public health: number = 1;
   public maxHealth: number = 1;
-  public readonly type: EnemyType = 'grunt';
+  public readonly type: EnemyType;
   public readonly row: number;
   public readonly col: number;
   public readonly instanceIndex: number;
   public active: boolean = true;
 
-  constructor(row: number, col: number, instanceIndex: number) {
+  /** Slot within this enemy's type-specific InstancedMesh. Set by EnemyFormation.spawnWave(). */
+  public meshSlot: number = 0;
+
+  // ---- Archetype-specific state ----
+
+  /** Shielder: shield is active while shieldHp > 0 */
+  public shieldActive: boolean = false;
+  /** Shielder: remaining shield HP */
+  public shieldHp: number = 0;
+
+  /** Swooper: true when entity has exited screen bounds and is looping back */
+  public offScreen: boolean = false;
+  /** Swooper state machine */
+  public swooperPhase: 'formation' | 'diving' | 'looping' | 'returning' = 'formation';
+  /** Swooper re-entry position target */
+  public swooperLoopX: number = 0;
+  public swooperLoopY: number = 0;
+
+  /** Flanker: true after it breaks formation */
+  public flankerCharging: boolean = false;
+
+  /** Charger: countdown until next dive; reset after each dive */
+  public chargerDiveTimer: number = 0;
+  /** Charger: true during active dive */
+  public chargerDiving: boolean = false;
+  /** Charger: player X at moment dive triggered */
+  public chargerTargetX: number = 0;
+
+  /**
+   * @param row          Formation row index (0 = top)
+   * @param col          Formation column index
+   * @param instanceIndex Flat index in enemies[] array (row * cols + col)
+   * @param type         Enemy archetype — determines geometry, stats, and AI behavior
+   * @param hpMultiplier Wave HP scaling factor (default 1.0)
+   */
+  constructor(
+    row: number,
+    col: number,
+    instanceIndex: number,
+    type: EnemyType = 'grunt',
+    hpMultiplier: number = 1.0,
+  ) {
     this.row = row;
     this.col = col;
     this.instanceIndex = instanceIndex;
-    const rowSize = ROW_SIZES[Math.min(row, ROW_SIZES.length - 1)];
+    this.type = type;
+
+    // Determine AABB size: Grunt size varies by row; other types use fixed row-index
+    const fixedRowIndex = TYPE_ROW_INDEX[type];
+    const rowSizeIndex = fixedRowIndex !== null ? fixedRowIndex : Math.min(row, ROW_SIZES.length - 1);
+    const rowSize = ROW_SIZES[rowSizeIndex];
     this.width = rowSize.halfW;
     this.height = rowSize.halfH;
-    const def = ENEMY_DEFS[this.type];
-    this.health = def.hp;
-    this.maxHealth = def.hp;
+
+    const def = ENEMY_DEFS[type];
+    this.health = Math.ceil(def.hp * hpMultiplier);
+    this.maxHealth = this.health;
+
+    // Archetype-specific initialization
+    if (type === 'shielder' && def.shieldHp !== undefined) {
+      this.shieldActive = true;
+      this.shieldHp = def.shieldHp;
+    }
+
+    if (type === 'charger') {
+      // Randomize first dive delay: 3–7 seconds
+      this.chargerDiveTimer = 3 + Math.random() * 4;
+    }
   }
 }
+
+// ---------------------------------------------------------------------------
+// Geometry helpers
+// ---------------------------------------------------------------------------
 
 /**
  * Build a BufferGeometry from vertex positions and triangle indices.
@@ -62,6 +137,10 @@ function buildGeometry(
   geo.computeVertexNormals();
   return geo;
 }
+
+// ---------------------------------------------------------------------------
+// Row-based geometry factories (Grunt rendering — one geometry per row)
+// ---------------------------------------------------------------------------
 
 /**
  * Row 0 (small, top): Diamond — rotated square, 4 vertices.
@@ -100,7 +179,7 @@ function makeRow1Geometry(): BufferGeometry {
    -midX,-midY, 0, // 4 bottom-left
    -midX, midY, 0, // 5 top-left
   ]);
-  // CCW fan from vertex 0: flip each triangle to face toward +Z camera
+  // CCW fan from vertex 0
   const indices = new Uint16Array([0, 2, 1, 0, 3, 2, 0, 4, 3, 0, 5, 4]);
   return buildGeometry(positions, indices);
 }
@@ -121,7 +200,7 @@ function makeRow2Geometry(): BufferGeometry {
    -hw * 0.4, -hh * 0.3, 0, // 4 left inner notch
      -hw,  -hh, 0, // 5 left wing tip (bottom left)
   ]);
-  // CCW fan from nose: flip each triangle to face toward +Z camera
+  // CCW fan from nose
   const indices = new Uint16Array([0, 2, 1, 0, 3, 2, 0, 4, 3, 0, 5, 4]);
   return buildGeometry(positions, indices);
 }
@@ -144,7 +223,7 @@ function makeRow3Geometry(): BufferGeometry {
          -hw,    -hh, 0, // 6 left pincer tip
          -hw, hh * 0.3, 0, // 7 left mid-outer
   ]);
-  // CCW fan from vertex 0: flip each triangle to face toward +Z camera
+  // CCW fan from vertex 0
   const indices = new Uint16Array([
     0, 2, 1,
     0, 3, 2,
@@ -156,7 +235,7 @@ function makeRow3Geometry(): BufferGeometry {
   return buildGeometry(positions, indices);
 }
 
-/** Create per-row geometry factory array */
+/** Create per-row geometry factory array (used for Grunt rendering) */
 const ROW_GEOMETRY_FACTORIES: Array<() => BufferGeometry> = [
   makeRow0Geometry,
   makeRow1Geometry,
@@ -164,57 +243,290 @@ const ROW_GEOMETRY_FACTORIES: Array<() => BufferGeometry> = [
   makeRow3Geometry,
 ];
 
+// ---------------------------------------------------------------------------
+// Archetype-specific geometry factories
+// ---------------------------------------------------------------------------
+
 /**
- * EnemyFormation: manages per-row InstancedMesh objects and formation march logic.
+ * Grunt: delegates to row-based factory (row determines shape).
+ */
+function makeGruntGeometry(row: number): BufferGeometry {
+  return ROW_GEOMETRY_FACTORIES[Math.min(row, ROW_GEOMETRY_FACTORIES.length - 1)]();
+}
+
+/**
+ * Shielder: Wide rectangular hull 40×28 with a flat front shield bar.
+ * Body: slightly inset rectangle. Shield: thick top band.
+ * Color identity: bright magenta (0xff00ff).
+ * 8 vertices — body (4) + shield top bar (4, sharing top edge of body).
+ */
+function makeShielderGeometry(): BufferGeometry {
+  const hw = 20;   // half-width (40 total)
+  const hh = 14;   // half-height (28 total)
+  const shieldH = hh * 0.3; // shield band height
+  const bodyTop = hh - shieldH; // body inset below shield
+
+  // Shield band: full-width bar at top
+  // Body: inset rectangle below shield
+  const positions = new Float32Array([
+    // Shield top bar (vertices 0-3)
+    -hw,      hh, 0,  // 0 shield top-left
+     hw,      hh, 0,  // 1 shield top-right
+     hw, bodyTop, 0,  // 2 shield bottom-right
+    -hw, bodyTop, 0,  // 3 shield bottom-left
+    // Body rectangle (vertices 4-7)
+    -hw * 0.85, bodyTop, 0,  // 4 body top-left (inset)
+     hw * 0.85, bodyTop, 0,  // 5 body top-right (inset)
+     hw * 0.85,     -hh, 0,  // 6 body bottom-right
+    -hw * 0.85,     -hh, 0,  // 7 body bottom-left
+  ]);
+  const indices = new Uint16Array([
+    // Shield band (CCW)
+    0, 2, 1,  0, 3, 2,
+    // Body (CCW)
+    4, 6, 5,  4, 7, 6,
+  ]);
+  return buildGeometry(positions, indices);
+}
+
+/**
+ * Flanker: Sideways-swept wing — asymmetric arrowhead suggesting lateral movement.
+ * 6 vertices. Narrow vertically, wide horizontally.
+ * Color identity: electric yellow (0xffff00).
+ */
+function makeFlankerGeometry(): BufferGeometry {
+  const hw = 15;  // half-width
+  const hh = 10;  // half-height
+  // Asymmetric arrowhead: sharp left point, swept right trailing edges
+  const positions = new Float32Array([
+    -hw,       0, 0,  // 0 left tip (leading edge)
+      0,      hh, 0,  // 1 top-center
+     hw * 0.6, hh * 0.5, 0,  // 2 top-right
+     hw,       0, 0,  // 3 right tip
+     hw * 0.6,-hh * 0.5, 0,  // 4 bottom-right
+      0,     -hh, 0,  // 5 bottom-center
+  ]);
+  // CCW fan from left tip
+  const indices = new Uint16Array([0, 2, 1, 0, 3, 2, 0, 4, 3, 0, 5, 4]);
+  return buildGeometry(positions, indices);
+}
+
+/**
+ * Sniper: Tall thin cross/plus shape with elongated top barrel.
+ * 16 vertices forming a clean + with the top arm extended.
+ * Color identity: deep purple (0x9900ff).
+ *
+ * Layout (cross arms, CCW winding):
+ *   Barrel (top arm), Center square, Horizontal arms, Base (bottom arm)
+ */
+function makeSniperGeometry(): BufferGeometry {
+  const armW = 5;     // arm half-width
+  const barrelH = 17; // top of barrel above center
+  const baseH = 8;    // base of bottom arm below center
+  const hArmW = 14;   // horizontal arm reach left/right
+  const hArmH = 5;    // horizontal arm half-height (same as armW)
+
+  // 12-vertex cross: barrel + left arm + right arm + base
+  // Center region is implicitly covered by overlapping rectangles
+  const positions = new Float32Array([
+    // Barrel rect: top arm from y=hArmH to y=barrelH
+    -armW,  hArmH,   0,  // 0
+     armW,  hArmH,   0,  // 1
+     armW,  barrelH, 0,  // 2
+    -armW,  barrelH, 0,  // 3
+
+    // Horizontal bar: full width from -hArmW to +hArmW, y in [-hArmH..+hArmH]
+    -hArmW,  hArmH, 0,  // 4
+     hArmW,  hArmH, 0,  // 5
+     hArmW, -hArmH, 0,  // 6
+    -hArmW, -hArmH, 0,  // 7
+
+    // Base rect: bottom arm from y=-hArmH to y=-baseH
+    -armW, -hArmH,  0,  // 8
+     armW, -hArmH,  0,  // 9
+     armW, -baseH,  0,  // 10
+    -armW, -baseH,  0,  // 11
+  ]);
+  const indices = new Uint16Array([
+    // Barrel (CCW)
+    0, 2, 1,  0, 3, 2,
+    // Horizontal bar (CCW)
+    4, 6, 5,  4, 7, 6,
+    // Base (CCW)
+    8, 10, 9,  8, 11, 10,
+  ]);
+  return buildGeometry(positions, indices);
+}
+
+/**
+ * Charger: Heavy rhombus/wedge with nose pointing down (charge direction).
+ * 6 vertices. Wider than tall.
+ * Color identity: hot orange (0xff6600).
+ */
+function makeChargerGeometry(): BufferGeometry {
+  const hw = 19;  // half-width
+  const hh = 13;  // half-height
+  // Wedge: flat top, pointed bottom, wide shoulders
+  const positions = new Float32Array([
+    -hw * 0.5,  hh, 0,  // 0 top-left
+     hw * 0.5,  hh, 0,  // 1 top-right
+          hw,   0,  0,  // 2 right shoulder
+       0,     -hh,  0,  // 3 nose (bottom center)
+         -hw,   0,  0,  // 4 left shoulder
+    -hw * 0.8, hh * 0.3, 0, // 5 upper-left (adds mass)
+  ]);
+  // CCW fan from top-left
+  const indices = new Uint16Array([0, 2, 1, 0, 3, 2, 0, 4, 3, 0, 5, 4]);
+  return buildGeometry(positions, indices);
+}
+
+/**
+ * Swooper: Small arc/crescent shape, concave side facing forward.
+ * 8 vertices forming a curved wing suggesting sweep motion.
+ * Color identity: lime green (0x00ff44).
+ */
+function makeSwooperGeometry(): BufferGeometry {
+  const hw = 13;  // half-width
+  const hh = 10;  // half-height
+  const inset = hh * 0.5; // depth of concave notch
+
+  // Crescent: outer arc (top), inner concave notch (bottom)
+  const positions = new Float32Array([
+    -hw,       0, 0,  // 0 left tip
+    -hw * 0.6, hh, 0,  // 1 upper-left
+     hw * 0.6, hh, 0,  // 2 upper-right
+     hw,       0, 0,  // 3 right tip
+     hw * 0.4,-hh * 0.3, 0,  // 4 lower-right
+         0,  -inset, 0,  // 5 concave center notch
+    -hw * 0.4,-hh * 0.3, 0,  // 6 lower-left
+    // repeat vertex 0 not needed — use fan
+        0,   hh * 0.3, 0,  // 7 inner center (fill concave)
+  ]);
+  const indices = new Uint16Array([
+    0, 2, 1,
+    0, 3, 2,
+    0, 4, 3,
+    0, 7, 4,
+    0, 5, 7,
+    0, 6, 5,
+  ]);
+  return buildGeometry(positions, indices);
+}
+
+// ---------------------------------------------------------------------------
+// Archetype geometry factory map (keyed by EnemyType, excludes grunt which
+// uses makeGruntGeometry(row) with row parameter)
+// ---------------------------------------------------------------------------
+const ARCHETYPE_GEOMETRY_FACTORIES: Partial<Record<EnemyType, () => BufferGeometry>> = {
+  shielder: makeShielderGeometry,
+  flanker:  makeFlankerGeometry,
+  sniper:   makeSniperGeometry,
+  charger:  makeChargerGeometry,
+  swooper:  makeSwooperGeometry,
+};
+
+// ---------------------------------------------------------------------------
+// GridFormationLayout — satisfies FormationLayout from waveConfig.ts
+// ---------------------------------------------------------------------------
+
+/**
+ * Grid-based formation layout: places enemies in a regular rows × cols grid.
+ * Exported so SpawnSystem can reference it if needed.
+ */
+export class GridFormationLayout implements FormationLayout {
+  constructor(
+    public readonly rows: number,
+    public readonly cols: number,
+    public readonly colSpacing: number,
+    public readonly rowSpacing: number,
+  ) {}
+
+  getPosition(
+    row: number,
+    col: number,
+    formationX: number,
+    formationY: number,
+  ): { x: number; y: number } {
+    return {
+      x: formationX + (col - (this.cols - 1) / 2) * this.colSpacing,
+      y: formationY - row * this.rowSpacing,
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Per-archetype emissive accent colors
+// ---------------------------------------------------------------------------
+const ARCHETYPE_COLORS: Record<EnemyType, number> = {
+  grunt:    0x00ffff,
+  shielder: 0xff00ff,
+  flanker:  0xffff00,
+  sniper:   0x9900ff,
+  charger:  0xff6600,
+  swooper:  0x00ff44,
+};
+
+const ENEMY_TYPES_ORDER: EnemyType[] = ['grunt', 'shielder', 'flanker', 'sniper', 'charger', 'swooper'];
+
+/**
+ * EnemyFormation: manages per-archetype InstancedMesh objects and formation march logic.
  * Owns all Enemy instances. AISystem calls updateMarch() each fixed step.
  *
- * Phase 2: replaced single instancedMesh with rowMeshes[4], one per row.
- * Each row has its own BufferGeometry shape and MeshStandardMaterial for emissive neon.
- * Public API remains 100% compatible with Phase 1 — CollisionSystem and AISystem unchanged.
+ * Phase 3: replaced per-row meshes with per-type meshes (6 total, one per archetype).
+ * spawnWave() now accepts a WaveConfig for data-driven formation building.
+ * Public API remains 100% compatible — CollisionSystem and AISystem unchanged.
  */
 export class EnemyFormation {
   public readonly enemies: Enemy[] = [];
 
   /**
-   * Per-row instanced meshes.
-   * rowMeshes[0] = row 0 (top, small diamonds), rowMeshes[3] = row 3 (bottom, crabs).
-   * Each InstancedMesh pre-allocated to ENEMY_POOL_SIZE slots.
+   * Per-archetype instanced meshes. One InstancedMesh per enemy type.
    */
-  public readonly rowMeshes: InstancedMesh[];
+  public readonly typeMeshes: Map<EnemyType, InstancedMesh>;
 
   /**
-   * @deprecated Phase 1 compatibility alias — points to rowMeshes[0].
-   * CollisionSystem and AISystem do not access instancedMesh directly,
-   * but keep it available for any legacy reference.
+   * Backward-compatibility alias: Array.from(typeMeshes.values()).
+   * Game.ts iterates rowMeshes to register bloom — still works.
+   */
+  public get rowMeshes(): InstancedMesh[] {
+    return Array.from(this.typeMeshes.values());
+  }
+
+  /**
+   * @deprecated Phase 1 compatibility alias — points to the grunt mesh.
    */
   public get instancedMesh(): InstancedMesh {
-    return this.rowMeshes[0];
+    return this.typeMeshes.get('grunt')!;
   }
 
   // Formation position — all enemies relative to this anchor
   private formationX: number = 0;
-  private formationY: number = (WORLD_HEIGHT / 2) - 80; // top area, 80 units from top
+  private formationY: number = (WORLD_HEIGHT / 2) - 80;
 
   // March state
-  private marchDir: 1 | -1 = 1;           // 1 = right, -1 = left
+  private marchDir: 1 | -1 = 1;
   private marchSpeed: number = ENEMY_BASE_MARCH_SPEED;
-  private totalEnemies: number = 0;        // initial count for speed calculation
+  private totalEnemies: number = 0;
   private activeEnemyCount: number = 0;
 
-  // Spacing between enemies in formation
-  private readonly colSpacing = 56;        // horizontal gap between columns
-  private readonly rowSpacing = 44;        // vertical gap between rows
+  // Active layout (set on spawnWave)
+  private layout: GridFormationLayout;
 
   private readonly tmpMatrix = new Matrix4();
 
   constructor(scene: Scene) {
-    this.rowMeshes = [];
+    this.typeMeshes = new Map();
 
-    for (let row = 0; row < ENEMY_ROWS; row++) {
-      const geo = ROW_GEOMETRY_FACTORIES[Math.min(row, ROW_GEOMETRY_FACTORIES.length - 1)]();
+    // Create one InstancedMesh per archetype type
+    for (const type of ENEMY_TYPES_ORDER) {
+      // For grunt, use row 0 geometry as default (formation rows use different shapes via Grunt row logic)
+      // Since typeMeshes needs a single geometry per type, grunt uses row 0 (smallest) as default
+      const factory = ARCHETYPE_GEOMETRY_FACTORIES[type];
+      const geo = factory ? factory() : makeGruntGeometry(0);
+
       const mat = new MeshStandardMaterial({
-        color: 0x00ffff,
-        emissive: new Color(0x00ffff),
+        color: ARCHETYPE_COLORS[type],
+        emissive: new Color(ARCHETYPE_COLORS[type]),
         emissiveIntensity: 1.0,
         roughness: 1.0,
         metalness: 0.0,
@@ -223,51 +535,92 @@ export class EnemyFormation {
       const mesh = new InstancedMesh(geo, mat, ENEMY_POOL_SIZE);
       mesh.count = 0;
       scene.add(mesh);
-      this.rowMeshes.push(mesh);
+      this.typeMeshes.set(type, mesh);
     }
+
+    // Default layout (will be replaced on spawnWave)
+    this.layout = new GridFormationLayout(3, 8, 56, 44);
 
     this.spawnWave();
   }
 
   /**
-   * Apply a neon palette color to all row materials.
+   * Apply a neon palette color to all archetype materials.
+   * Non-grunt types keep their distinct accent color blended: 70% palette, 30% type color.
    * Called by SpawnSystem on each new wave spawn.
    */
   public applyPalette(hexColor: number): void {
-    const c = new Color(hexColor);
-    for (const mesh of this.rowMeshes) {
+    const palette = new Color(hexColor);
+    for (const [type, mesh] of this.typeMeshes) {
       const mat = mesh.material as MeshStandardMaterial;
-      mat.color.copy(c);
-      mat.emissive.copy(c);
+      if (type === 'grunt') {
+        // Grunt fully adopts wave palette
+        mat.color.copy(palette);
+        mat.emissive.copy(palette);
+      } else {
+        // Non-grunt: blend 70% palette + 30% type accent
+        const accent = new Color(ARCHETYPE_COLORS[type]);
+        const blended = new Color(
+          palette.r * 0.7 + accent.r * 0.3,
+          palette.g * 0.7 + accent.g * 0.3,
+          palette.b * 0.7 + accent.b * 0.3,
+        );
+        mat.color.copy(blended);
+        mat.emissive.copy(blended);
+      }
     }
   }
 
-  /** Spawn a fresh wave of enemies at the top formation position */
-  public spawnWave(): void {
+  /**
+   * Spawn a fresh wave of enemies using the given WaveConfig.
+   * Config defaults to wave 1 for backward compatibility.
+   */
+  public spawnWave(config: WaveConfig = getWaveConfig(1)): void {
     this.enemies.length = 0;
     this.formationX = 0;
     this.formationY = (WORLD_HEIGHT / 2) - 80;
     this.marchDir = 1;
-    this.marchSpeed = ENEMY_BASE_MARCH_SPEED;
+    this.marchSpeed = ENEMY_BASE_MARCH_SPEED * config.speedMultiplier;
 
-    const totalEnemies = ENEMY_ROWS * ENEMY_COLS;
+    // Build GridFormationLayout from config
+    this.layout = new GridFormationLayout(config.rows, config.cols, 56, 44);
+
+    const totalEnemies = config.rows * config.cols;
     this.totalEnemies = totalEnemies;
     this.activeEnemyCount = totalEnemies;
 
-    for (let row = 0; row < ENEMY_ROWS; row++) {
-      for (let col = 0; col < ENEMY_COLS; col++) {
-        // instanceIndex = flat array position (row * ENEMY_COLS + col), used by killEnemy lookup
-        const instanceIndex = row * ENEMY_COLS + col;
-        const enemy = new Enemy(row, col, instanceIndex);
+    // Track mesh slot per type (sequential index within each type's InstancedMesh)
+    const typeSlotCounters = new Map<EnemyType, number>();
+    for (const type of ENEMY_TYPES_ORDER) {
+      typeSlotCounters.set(type, 0);
+    }
+
+    // Build enemies array — row 0..rows-1, col 0..cols-1
+    // Each row gets a homogeneous archetype determined by row index into allowedTypes
+    for (let row = 0; row < config.rows; row++) {
+      const typeIndex = row % config.allowedTypes.length;
+      const type = config.allowedTypes[typeIndex];
+
+      for (let col = 0; col < config.cols; col++) {
+        const instanceIndex = row * config.cols + col;
+        const enemy = new Enemy(row, col, instanceIndex, type, config.hpMultiplier);
+
+        // Assign mesh slot within this type's InstancedMesh
+        const slot = typeSlotCounters.get(type)!;
+        enemy.meshSlot = slot;
+        typeSlotCounters.set(type, slot + 1);
+
         this.enemies.push(enemy);
       }
     }
 
-    // Update per-row mesh counts
-    for (let row = 0; row < ENEMY_ROWS; row++) {
-      this.rowMeshes[row].count = ENEMY_COLS;
+    // Update each typeMesh.count to the number of enemies of that type
+    for (const [type, mesh] of this.typeMeshes) {
+      mesh.count = typeSlotCounters.get(type)!;
     }
 
+    // Hide all mesh slots initially (scale to zero), then updateAllMatrices sets active ones
+    this._hideAllSlots();
     this.updateAllMatrices();
   }
 
@@ -278,19 +631,18 @@ export class EnemyFormation {
   public updateMarch(dt: number): boolean {
     this.formationX += this.marchDir * this.marchSpeed * dt;
 
-    // Find the actual left/right extents of active enemies this frame.
+    // Find actual left/right extents of active enemies
     const wall = WORLD_WIDTH / 2;
     let rightEdge = -Infinity;
     let leftEdge  =  Infinity;
     for (const enemy of this.enemies) {
       if (!enemy.active) continue;
-      const pos = this.getEnemyWorldPos(enemy);
+      const pos = this.layout.getPosition(enemy.row, enemy.col, this.formationX, this.formationY);
       if (pos.x + enemy.width > rightEdge) rightEdge = pos.x + enemy.width;
       if (pos.x - enemy.width < leftEdge)  leftEdge  = pos.x - enemy.width;
     }
 
     if (this.marchDir === 1 && rightEdge >= wall) {
-      // Clamp so the outermost enemy sits exactly at the wall, then drop and reverse.
       this.formationX -= rightEdge - wall;
       this.formationY -= ENEMY_DROP_DISTANCE;
       this.marchDir = -1;
@@ -302,20 +654,19 @@ export class EnemyFormation {
 
     this.updateAllMatrices();
 
-    // Check if any enemy has reached the bottom (game over condition)
-    const bottomBound = -(WORLD_HEIGHT / 2) + 60; // 60 units from bottom
+    // Check if any enemy has reached the bottom
+    const bottomBound = -(WORLD_HEIGHT / 2) + 60;
     for (const enemy of this.enemies) {
       if (!enemy.active) continue;
-      const worldY = this.formationY - enemy.row * this.rowSpacing;
-      if (worldY <= bottomBound) return true;
+      const pos = this.layout.getPosition(enemy.row, enemy.col, this.formationX, this.formationY);
+      if (pos.y <= bottomBound) return true;
     }
     return false;
   }
 
   /**
    * Kill an enemy by instanceIndex. Updates march speed and deactivates instance.
-   * instanceIndex here is the flat index (row * ENEMY_COLS + col) — same as Phase 1 API.
-   * Internally maps to per-row instancedMesh column index.
+   * instanceIndex is the flat index (row * cols + col) — same as Phase 1 API.
    */
   public killEnemy(instanceIndex: number): void {
     const enemy = this.enemies[instanceIndex];
@@ -324,17 +675,17 @@ export class EnemyFormation {
     enemy.active = false;
     this.activeEnemyCount = Math.max(0, this.activeEnemyCount - 1);
 
-    // Classic Space Invaders: speed increases 8% per enemy destroyed
-    // Recalculate from base to avoid floating point drift
+    // Classic Space Invaders: speed increases per enemy destroyed
     const killed = this.totalEnemies - this.activeEnemyCount;
     this.marchSpeed = ENEMY_BASE_MARCH_SPEED * Math.pow(1 + ENEMY_MARCH_SPEEDUP, killed);
 
-    // Hide this instance by scaling it to zero in the row's InstancedMesh
-    // Use enemy.col as the per-row InstancedMesh slot index (0–9 within each row mesh)
+    // Hide this instance by scaling to zero in the type's InstancedMesh
     this.tmpMatrix.makeScale(0, 0, 0);
-    const rowMesh = this.rowMeshes[enemy.row];
-    rowMesh.setMatrixAt(enemy.col, this.tmpMatrix);
-    rowMesh.instanceMatrix.needsUpdate = true;
+    const typeMesh = this.typeMeshes.get(enemy.type);
+    if (typeMesh) {
+      typeMesh.setMatrixAt(enemy.meshSlot, this.tmpMatrix);
+      typeMesh.instanceMatrix.needsUpdate = true;
+    }
   }
 
   public get activeCount(): number {
@@ -342,18 +693,27 @@ export class EnemyFormation {
   }
 
   /**
+   * Get all active enemies of a given type. Used by AISystem for per-archetype behavior dispatch.
+   */
+  public getActiveEnemiesByType(type: EnemyType): Enemy[] {
+    return this.enemies.filter(e => e.active && e.type === type);
+  }
+
+  /**
    * Get a random active enemy for firing purposes.
-   * Front-row preference: tries to pick an enemy in the lowest active row of each column.
+   * Front-row preference: picks from lowest active row of each column.
    */
   public getRandomFiringEnemy(): Enemy | null {
     if (this.activeEnemyCount === 0) return null;
 
-    // Build list of front-row enemies (lowest row per column that is still active)
+    const cols = this.layout.cols;
+    const rows = this.layout.rows;
+
+    // Build list of front-row enemies (lowest row per column)
     const frontEnemies: Enemy[] = [];
-    for (let col = 0; col < ENEMY_COLS; col++) {
-      // Scan from bottom row upward to find the lowest active enemy in this column
-      for (let row = ENEMY_ROWS - 1; row >= 0; row--) {
-        const enemy = this.enemies[row * ENEMY_COLS + col];
+    for (let col = 0; col < cols; col++) {
+      for (let row = rows - 1; row >= 0; row--) {
+        const enemy = this.enemies[row * cols + col];
         if (enemy && enemy.active) {
           frontEnemies.push(enemy);
           break;
@@ -367,10 +727,7 @@ export class EnemyFormation {
 
   /** Get world position of an enemy (for bullet spawn, collision) */
   public getEnemyWorldPos(enemy: Enemy): { x: number; y: number } {
-    return {
-      x: this.formationX + (enemy.col - (ENEMY_COLS - 1) / 2) * this.colSpacing,
-      y: this.formationY - enemy.row * this.rowSpacing,
-    };
+    return this.layout.getPosition(enemy.row, enemy.col, this.formationX, this.formationY);
   }
 
   /** Get world AABB for an enemy (for collision detection) */
@@ -379,16 +736,29 @@ export class EnemyFormation {
     return { x: pos.x, y: pos.y, w: enemy.width, h: enemy.height };
   }
 
+  /** Scale all mesh slots to zero before a fresh wave spawn */
+  private _hideAllSlots(): void {
+    this.tmpMatrix.makeScale(0, 0, 0);
+    for (const [, mesh] of this.typeMeshes) {
+      for (let i = 0; i < mesh.count; i++) {
+        mesh.setMatrixAt(i, this.tmpMatrix);
+      }
+      mesh.instanceMatrix.needsUpdate = true;
+    }
+  }
+
   private updateAllMatrices(): void {
     for (const enemy of this.enemies) {
       if (!enemy.active) continue;
-      const pos = this.getEnemyWorldPos(enemy);
+      const pos = this.layout.getPosition(enemy.row, enemy.col, this.formationX, this.formationY);
       this.tmpMatrix.makeTranslation(pos.x, pos.y, 0);
-      // Each row has its own InstancedMesh; use enemy.col (0-9) as the slot index within that mesh
-      this.rowMeshes[enemy.row].setMatrixAt(enemy.col, this.tmpMatrix);
+      const typeMesh = this.typeMeshes.get(enemy.type);
+      if (typeMesh) {
+        typeMesh.setMatrixAt(enemy.meshSlot, this.tmpMatrix);
+      }
     }
-    // Mark all row meshes as needing update
-    for (const mesh of this.rowMeshes) {
+    // Mark all type meshes as needing update
+    for (const [, mesh] of this.typeMeshes) {
       mesh.instanceMatrix.needsUpdate = true;
     }
   }
