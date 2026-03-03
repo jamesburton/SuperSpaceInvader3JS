@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T02:49:48.549Z"
+last_updated: "2026-03-03T02:53:48.848Z"
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 20
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 # Project State
@@ -24,8 +24,8 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 
 Phase: 3 of 5 (Enemy Depth + Wave Systems + Power-Ups) — IN PROGRESS
 Next: Phase 4 (Boss Encounter + Meta Progression) — pending Phase 3 fun bar gate
-Status: Phase 3 executing — 2/9 plans complete
-Last activity: 2026-03-03 — 03-03 complete: PickupToken, PowerUpManager, powerups config (PWR-01..04)
+Status: Phase 3 executing — 4/9 plans complete (03-01, 03-02, 03-03, 03-04, 03-05 done)
+Last activity: 2026-03-03 — 03-05 complete: SpawnSystem data-driven refactor, AISystem.setFireRateMultiplier, shop pending flag
 
 Progress: [██████░░░░] 40% (2/5 phases complete; Phase 3 in progress 2/9 plans)
 
@@ -55,6 +55,7 @@ Progress: [██████░░░░] 40% (2/5 phases complete; Phase 3 in 
 | Phase 03-enemy-depth-wave-systems-power-ups P01 | 4 | 3 tasks | 8 files |
 | Phase 03-enemy-depth-wave-systems-power-ups P03 | 27 | 3 tasks | 3 files |
 | Phase 03-enemy-depth-wave-systems-power-ups P02 | 44 | 3 tasks | 1 files |
+| Phase 03-enemy-depth-wave-systems-power-ups P05 | 4 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,8 @@ Recent decisions affecting current work:
 - [Phase 03-enemy-depth-wave-systems-power-ups]: meshSlot field on Enemy: sequential index within type's InstancedMesh, assigned during spawnWave() for killEnemy() and matrix updates
 - [Phase 03-enemy-depth-wave-systems-power-ups]: Row-homogeneous archetype assignment (row % allowedTypes.length): each row gets one type, creating clear visual threat groupings
 - [Phase 03-enemy-depth-wave-systems-power-ups]: spawnWave() default param getWaveConfig(1): zero-arg calls from Game.ts constructor path remain valid with no call-site changes
+- [Phase 03-enemy-depth-wave-systems-power-ups]: shopPending captured from currentConfig BEFORE runState.nextWave() — shopAfterThisWave belongs to wave just cleared
+- [Phase 03-enemy-depth-wave-systems-power-ups]: aiSystem.reset() before setFireRateMultiplier() in startNextWave(): clears accumulator then applies new interval
 
 ### Pending Todos
 
@@ -127,7 +130,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 03-03-PLAN.md — PickupToken, PowerUpManager, powerups config (PWR-01..04)
+Stopped at: Completed 03-05-PLAN.md — SpawnSystem data-driven refactor, AISystem.setFireRateMultiplier, shop pending flag (ENEMY-08, ENEMY-09, INRUN-02)
 Resume file: none
 
 ## Phase 3 Plan Index
