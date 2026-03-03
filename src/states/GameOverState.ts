@@ -65,6 +65,11 @@ export class GameOverState implements IGameState {
     this.ctx.shopSystem.reset();
     this.ctx.powerUpManager.releaseAll();
 
+    // Phase 4: reset boss state (deactivate mesh, clear system timers, hide health bar)
+    this.ctx.boss.deactivate();
+    this.ctx.bossSystem.reset();
+    this.ctx.bossHealthBar.hide();
+
     // Spawn fresh enemy wave
     this.ctx.formation.spawnWave();
 

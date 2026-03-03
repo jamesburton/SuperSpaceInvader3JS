@@ -16,6 +16,8 @@ import { ParticleManager } from '../effects/ParticleManager';
 import { CameraShake } from '../effects/CameraShake';
 import { BossHealthBar } from '../ui/BossHealthBar';
 import { PickupFeedback } from '../ui/PickupFeedback';
+import { BossEnemy } from '../entities/Boss';
+import { BossSystem } from '../systems/BossSystem';
 import { ShopUI } from '../ui/ShopUI';
 import { HUD } from '../ui/HUD';
 import { TitleState } from '../states/TitleState';
@@ -73,6 +75,10 @@ export class Game {
       powerUpManager.grantShieldCharge();
     };
 
+    // Phase 4: construct boss entity and system
+    const boss = new BossEnemy(this.scene.scene);
+    const bossSystem = new BossSystem();
+
     // PlayingStateContext — shared across all states
     const ctx: PlayingStateContext = {
       scene: this.scene,
@@ -88,11 +94,13 @@ export class Game {
       spawnSystem,
       particleManager,   // Phase 2
       cameraShake,       // Phase 2
-      bossHealthBar,     // Phase 2 stub (Phase 4 activates)
+      bossHealthBar,     // Phase 4: fully implemented
       pickupFeedback,    // Phase 2 stub (Phase 3 activates)
       powerUpManager,    // Phase 3
       shopSystem,        // Phase 3
       shopUI,            // Phase 3
+      boss,              // Phase 4
+      bossSystem,        // Phase 4
     };
 
     // Apply Wave 1 palette so initial enemy formation spawns cyan (not gray default)
@@ -119,6 +127,9 @@ export class Game {
 
     // Phase 3: register pickup token meshes with bloom so tokens glow
     powerUpManager.registerBloom((mesh) => bloom.bloomEffect.selection.add(mesh));
+
+    // Phase 4: register boss mesh with bloom so it glows during encounter
+    bloom.bloomEffect.selection.add(boss.mesh);
 
     // Phase 2: wire particle manager into collision system for death burst effects
     collisionSystem.setParticleManager(particleManager);

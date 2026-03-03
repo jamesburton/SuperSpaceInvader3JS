@@ -18,9 +18,12 @@ import type { PickupFeedback } from '../ui/PickupFeedback';
 import type { PowerUpManager } from '../systems/PowerUpManager';
 import type { ShopSystem } from '../systems/ShopSystem';
 import type { ShopUI } from '../ui/ShopUI';
+import type { BossEnemy } from '../entities/Boss';
+import type { BossSystem } from '../systems/BossSystem';
 import { runState } from '../state/RunState';
 import { useMetaStore } from '../state/MetaState';
 import { FIXED_STEP } from '../utils/constants';
+import { BOSS_DEF } from '../config/boss';
 import { PausedState } from './PausedState';
 import { GameOverState } from './GameOverState';
 
@@ -46,6 +49,9 @@ export interface PlayingStateContext {
   powerUpManager: PowerUpManager;
   shopSystem: ShopSystem;
   shopUI: ShopUI;
+  // Phase 4 additions (Plan 04-03 boss wiring)
+  boss: BossEnemy;
+  bossSystem: BossSystem;
 }
 
 export class PlayingState implements IGameState {
@@ -135,6 +141,63 @@ export class PlayingState implements IGameState {
       return; // skip rest of update this step — shop is now open
     }
 
+    // Phase 4: check if boss encounter should start
+    if (ctx.spawnSystem.bossPending && !ctx.boss.active) {
+      ctx.spawnSystem.clearBossPending();
+      ctx.boss.activate();
+      ctx.bossHealthBar.show(2, 1);
+      // No new wave spawns — boss replaces normal wave progression
+      return;
+    }
+
+    // Phase 4: boss mode — route to BossSystem instead of normal enemy update
+    if (ctx.boss.active) {
+      // Update boss movement and attacks
+      ctx.bossSystem.update(dt, ctx.boss, ctx.player.x, ctx.enemyBulletPool, ctx.activeBullets);
+
+      // Update boss health bar fill and phase label
+      ctx.bossHealthBar.update(ctx.boss.healthFraction(), ctx.boss.currentPhase);
+
+      // Camera shake on phase change
+      if (ctx.bossSystem.phaseJustChanged) {
+        ctx.cameraShake.triggerLarge();
+      }
+
+      // Bullet movement + culling (still needed for boss bullets)
+      ctx.movementSystem.updateBullets(dt, ctx.activeBullets, ctx.playerBulletPool, ctx.enemyBulletPool);
+
+      // Collision: player bullets vs boss AABB
+      this.updateBossCollision();
+
+      // Camera shake on player hit
+      if (ctx.collisionSystem.wasHitThisStep()) {
+        ctx.cameraShake.triggerSmall();
+      }
+
+      ctx.particleManager.update(dt);
+      ctx.powerUpManager.update(dt);
+
+      // Lives check — boss fight game over
+      if (runState.lives <= 0) {
+        ctx.boss.deactivate();
+        ctx.bossHealthBar.hide();
+        this.triggerGameOver();
+        return;
+      }
+
+      // Boss defeated — trigger victory
+      if (!ctx.boss.isAlive()) {
+        ctx.bossHealthBar.hide();
+        ctx.boss.deactivate();
+        this.triggerVictory();
+        return;
+      }
+
+      hud.sync(runState.snapshot());
+      input.clearJustPressed();
+      return; // skip normal enemy update when boss is active
+    }
+
     if (!isTransitioning) {
       // 4. Enemy AI
       const reachedBottom = ctx.aiSystem.update(
@@ -204,6 +267,76 @@ export class PlayingState implements IGameState {
 
     // 9. Clear just-pressed
     input.clearJustPressed();
+  }
+
+  /** Detect player bullet vs boss AABB collisions. Damages boss and releases hit bullets. */
+  private updateBossCollision(): void {
+    const { ctx } = this;
+    const boss = ctx.boss;
+    if (!boss.active) return;
+    const toRelease: Bullet[] = [];
+    for (const bullet of ctx.activeBullets) {
+      if (!bullet.active || !bullet.isPlayerBullet) continue;
+      const dx = Math.abs(bullet.x - boss.x);
+      const dy = Math.abs(bullet.y - boss.y);
+      if (dx < boss.width + 2 && dy < boss.height + 2) {
+        boss.takeDamage(1);
+        runState.addScore(5); // small score per hit (main reward is scoreValue on defeat)
+        bullet.active = false;
+        toRelease.push(bullet);
+        ctx.particleManager.spawnDeathBurst(bullet.x, bullet.y, 0xFF1133);
+      }
+    }
+    for (const b of toRelease) {
+      ctx.playerBulletPool.release(b);
+    }
+    // Remove inactive bullets (released bullets have active=false)
+    const len = ctx.activeBullets.length;
+    let write = 0;
+    for (let i = 0; i < len; i++) {
+      if (ctx.activeBullets[i].active) {
+        ctx.activeBullets[write++] = ctx.activeBullets[i];
+      }
+    }
+    ctx.activeBullets.length = write;
+  }
+
+  /** Award SI$ meta currency, update high score, show victory screen, then enter GameOverState for restart flow. */
+  private triggerVictory(): void {
+    const { ctx } = this;
+    // Award SI$ meta currency and score bonus for boss defeat
+    const siEarned = BOSS_DEF.metaCurrencyReward;
+    runState.addScore(BOSS_DEF.scoreValue);
+    useMetaStore.getState().addMetaCurrency(siEarned);
+    useMetaStore.getState().updateHighScore(runState.score);
+
+    const totalSI = useMetaStore.getState().metaCurrency;
+
+    // Show victory overlay — reuse hud.showOverlay (same pattern as GameOverState)
+    this.hud.showOverlay(`
+      <h1 style="font-size:48px;margin-bottom:24px;text-shadow:0 0 20px #ffd700;letter-spacing:4px;color:#ffd700;">VICTORY!</h1>
+      <p style="font-size:24px;margin:8px 0;">SCORE: ${runState.score}</p>
+      <p style="font-size:24px;margin:8px 0;">WAVE: ${runState.wave}</p>
+      <p style="font-size:24px;margin:8px 0;">KILLS: ${runState.enemiesKilled}</p>
+      <p style="font-size:20px;margin:16px 0;color:#ffd700;">SI$ EARNED: ${siEarned} | TOTAL: ${totalSI}</p>
+      <p style="font-size:18px;margin-top:40px;opacity:0.7;letter-spacing:2px;">PRESS R TO PLAY AGAIN</p>
+    `);
+
+    runState.setPhase('gameover');
+
+    // Transition to GameOverState to reuse the restart flow (R key handler)
+    this.stateManager.replace(
+      new GameOverState(
+        this.input,
+        this.hud,
+        ctx,
+        () => {
+          this.stateManager.replace(
+            new PlayingState(this.stateManager, this.input, this.hud, ctx),
+          );
+        },
+      ),
+    );
   }
 
   private triggerGameOver(): void {
