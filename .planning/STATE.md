@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in-progress
-last_updated: "2026-03-03T12:42:00.000Z"
+status: unknown
+last_updated: "2026-03-03T19:23:49.499Z"
 progress:
-  total_phases: 4
-  completed_phases: 2
-  total_plans: 26
-  completed_plans: 25
+  total_phases: 5
+  completed_phases: 4
+  total_plans: 32
+  completed_plans: 28
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-02)
 
 **Core value:** The thrill of arcade shooting elevated — every run feels different because of layered in-run progression, meta-unlocks that evolve your build over time, and enemies smart enough to keep you on your toes.
-**Current focus:** Phase 4 - Boss Encounter + Meta Progression
+**Current focus:** Phase 5 - Campaign Mode + Game Modes
 
 ## Current Position
 
-Phase: 4 of 5 (Boss Encounter + Meta Progression) — AWAITING HUMAN VERIFICATION
-Next: Human verifies all 11 Phase 4 requirements (BOSS-01..04, META-01..07) then Phase 4 is complete
-Status: Phase 4 executing — 04-06 checkpoint reached: awaiting human sign-off on boss encounter + meta progression
-Last activity: 2026-03-03 — 04-06 checkpoint: human verification of all Phase 4 systems (boss encounter, dual-currency, meta shop, persistence)
+Phase: 5 of 5 (Campaign Mode + Game Modes) — IN PROGRESS (Plan 2 of 6 complete)
+Next: Execute 05-03 — TitleState mode select
+Status: Phase 5 executing — 05-02 complete: InputManager.anyKeyJustPressed(), SpawnSystem campaign wave override, GameOverState returnToMenu bug fix
+Last activity: 2026-03-03 — 05-02 complete: infrastructure primitives for campaign mode (MODE-01, MODE-02, CAMP-01)
 
-Progress: [██████████] 77% (Phase 3 complete + Phase 4 impl done — awaiting human verification)
+Progress: [██████████] 84% (Phase 4 impl done + Phase 5 plan 2/6 complete)
 
 ## Performance Metrics
 
@@ -64,6 +64,8 @@ Progress: [██████████] 77% (Phase 3 complete + Phase 4 impl 
 | Phase 04-boss-encounter-meta-progression P02 | 11 | 2 tasks | 3 files |
 | Phase 04-boss-encounter-meta-progression P03 | 7 | 2 tasks | 6 files |
 | Phase 04-boss-encounter-meta-progression P05 | 4 | 2 tasks | 6 files |
+| Phase 05-campaign-mode-game-modes P01 | 216 | 2 tasks | 3 files |
+| Phase 05-campaign-mode-game-modes P02 | 3 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -156,6 +158,11 @@ Recent decisions affecting current work:
 - [Phase 04-boss-encounter-meta-progression 04-05]: triggerVictory() combines waveSI + bossReward in one addMetaCurrency() call — avoids double-counting
 - [Phase 04-boss-encounter-meta-progression 04-05]: PowerUpManager.activate(type, duration) uses same activePowerUp/activeDuration fields as collectPickup() — WeaponSystem.isActive() unchanged
 - [Phase 04-boss-encounter-meta-progression 04-05]: applyMetaBonuses() compound multiplier: Math.pow(1.10, tiers) fire rate, Math.pow(1.08, tiers) speed — applies 0 tiers if no upgrades purchased
+- [Phase 05-campaign-mode-game-modes]: mode and campaignLevelIndex stored as module-level private vars in RunState (not RunStateData) — mode is routing state, not HUD display data; snapshot() correctly omits it
+- [Phase 05-campaign-mode-game-modes]: CAMPAIGN_CHAPTER_1 uses direct WAVE_CONFIGS array index references (not getWaveConfig()) — ensures campaign uses exact authored configs, not derived escalation values
+- [Phase 05-campaign-mode-game-modes]: getNextWaveConfig() private helper dispatches campaign vs endless — single call site in startNextWave()
+- [Phase 05-campaign-mode-game-modes]: levelCompletePending early-return in startNextWave() — sets flag then returns without spawning, PlayingState handles routing
+- [Phase 05-campaign-mode-game-modes]: runState.reset() as FIRST line in returnToMenu() — consistent with restartGame() ordering, ensures clean state before system cleanup
 
 ### Pending Todos
 
