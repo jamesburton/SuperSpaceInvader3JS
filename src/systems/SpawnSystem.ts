@@ -6,6 +6,7 @@ import type { AISystem } from './AISystem';
 import { runState } from '../state/RunState';
 import { wavePalette } from '../config/palettes';
 import { getWaveConfig } from '../config/waveConfig';
+import { BOSS_TRIGGER_WAVE } from '../utils/constants';
 
 export class SpawnSystem {
   private waveTransitioning: boolean = false;
@@ -20,6 +21,15 @@ export class SpawnSystem {
 
   /** Call after PlayingState has handled the shop (clears the flag) */
   public clearShopPending(): void { this._shopPending = false; }
+
+  // Boss trigger state
+  private _bossPending: boolean = false;
+
+  /** Readable by PlayingState to know when boss encounter should start */
+  public get bossPending(): boolean { return this._bossPending; }
+
+  /** Call after PlayingState has handled the boss encounter start (clears the flag) */
+  public clearBossPending(): void { this._bossPending = false; }
 
   /**
    * Apply Wave 1 palette to the formation at game start.
@@ -67,6 +77,13 @@ export class SpawnSystem {
         // Small buffer: extend transition to give shop time before wave spawns
         this.transitionTimer = this.TRANSITION_DELAY + 0.5;
       }
+
+      // Check if boss encounter should trigger (wave just cleared was BOSS_TRIGGER_WAVE)
+      // runState.nextWave() has already been called — wave just cleared is runState.wave - 1
+      const clearedWave = runState.wave - 1;
+      if (clearedWave === BOSS_TRIGGER_WAVE) {
+        this._bossPending = true;
+      }
     }
 
     return false;
@@ -102,5 +119,6 @@ export class SpawnSystem {
     this.waveTransitioning = false;
     this.transitionTimer = 0;
     this._shopPending = false;
+    this._bossPending = false;
   }
 }

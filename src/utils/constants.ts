@@ -46,3 +46,6 @@ export const SHOP_TRIGGER_INTERVAL = 5;
 // Currency symbols
 export const GOLD_SYMBOL = 'Gold';        // In-run currency (resets each run)
 export const META_CURRENCY_SYMBOL = 'SI$'; // Meta/persistent currency (accumulates across runs)
+
+// Boss encounter
+export const BOSS_TRIGGER_WAVE = 10;      // wave number after which boss encounter starts
