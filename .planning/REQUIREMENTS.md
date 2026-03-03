@@ -72,7 +72,7 @@
 - [x] **INRUN-01**: Enemies drop in-run currency (distinct from meta currency) on kill
 - [x] **INRUN-02**: Between-wave upgrade shop presents 3 random upgrade choices costing in-run currency
 - [x] **INRUN-03**: In-run currency resets to zero at run end (not carried to meta)
-- [ ] **INRUN-04**: Between-wave shop upgrades persist for the current run only
+- [x] **INRUN-04**: Between-wave shop upgrades persist for the current run only
 
 ### Meta Progression (META)
 
@@ -209,7 +209,7 @@ Deferred — build after v1 is validated.
 | INRUN-01 | Phase 3 | Complete |
 | INRUN-02 | Phase 3 | Complete |
 | INRUN-03 | Phase 3 | Complete |
-| INRUN-04 | Phase 3 | Pending |
+| INRUN-04 | Phase 3 | Complete |
 | BOSS-01 | Phase 4 | Pending |
 | BOSS-02 | Phase 4 | Pending |
 | BOSS-03 | Phase 4 | Pending |
