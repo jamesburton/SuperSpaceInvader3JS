@@ -94,7 +94,12 @@ export class PlayingState implements IGameState {
       ctx.enemyBulletPool,
       ctx.activeBullets,
       hud,
+      ctx.aiSystem,
     );
+
+    // Phase 3: shop trigger (wiring completed in Plan 03-07)
+    // if (ctx.spawnSystem.shopPending && ctx.shopSystem) { ... }
+    // Left as comment — ShopSystem added to ctx in Plan 03-07
 
     if (!isTransitioning) {
       // 4. Enemy AI
