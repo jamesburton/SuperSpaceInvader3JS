@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T19:28:52.448Z"
+last_updated: "2026-03-03T19:39:49.512Z"
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 32
-  completed_plans: 30
+  completed_plans: 31
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 
 ## Current Position
 
-Phase: 5 of 5 (Campaign Mode + Game Modes) — IN PROGRESS (Plan 4 of 6 complete)
-Next: Execute 05-05 — MetaStore campaign progress tracking
-Status: Phase 5 executing — 05-04 complete: LevelBriefingState + PlayingState campaign orchestration (_setupCampaignLevel, _onLevelComplete)
-Last activity: 2026-03-03 — 05-04 complete: Campaign loop orchestration (MODE-02, CAMP-01, CAMP-02, CAMP-03)
+Phase: 5 of 5 (Campaign Mode + Game Modes) — IN PROGRESS (Plan 5 of 6 complete)
+Next: Execute 05-06 — Human verification checkpoint for full campaign mode
+Status: Phase 5 executing — 05-05 complete: MetaStore SAVE_VERSION 3 + TitleState level select overlay
+Last activity: 2026-03-03 — 05-05 complete: Campaign progress persistence + level select resume flow (MODE-03, MODE-04)
 
-Progress: [██████████] 88% (Phase 4 impl done + Phase 5 plan 4/6 complete)
+Progress: [██████████] 92% (Phase 4 impl done + Phase 5 plan 5/6 complete)
 
 ## Performance Metrics
 
@@ -68,6 +68,7 @@ Progress: [██████████] 88% (Phase 4 impl done + Phase 5 plan
 | Phase 05-campaign-mode-game-modes P02 | 3 | 3 tasks | 3 files |
 | Phase 05-campaign-mode-game-modes P04 | 3 | 2 tasks | 2 files |
 | Phase 05-campaign-mode-game-modes P03 | 2 | 1 tasks | 1 files |
+| Phase 05-campaign-mode-game-modes P05 | 4 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -170,6 +171,8 @@ Recent decisions affecting current work:
 - [Phase 05-campaign-mode-game-modes 05-04]: setLevelWaves(null) called explicitly for endless mode in enter() — prevents stale level override if mode switches between runs
 - [Phase 05-campaign-mode-game-modes]: selectedOption persists on TitleState instance — Campaign is default; remembered on return-from-run
 - [Phase 05-campaign-mode-game-modes]: OPTIONS array drives arrow-key cycle: campaign, endless, upgrades — extensible without changing cycle logic
+- [Phase 05-campaign-mode-game-modes]: campaignProgress[chapterNumber] stores highest 0-based levelIndex completed; highestUnlockedStart = progress + 1 for level select display
+- [Phase 05-campaign-mode-game-modes]: Level select shown only when highestUnlockedStart > 0 AND < levels.length — prevents spurious overlay after all levels complete
 
 ### Pending Todos
 
@@ -182,8 +185,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 05-04-PLAN.md — LevelBriefingState + PlayingState campaign orchestration
-Resume file: .planning/phases/05-campaign-mode-game-modes/05-05-PLAN.md
+Stopped at: Completed 05-05-PLAN.md — MetaStore campaign progress tracking + TitleState level select
+Resume file: .planning/phases/05-campaign-mode-game-modes/05-06-PLAN.md
 
 ## Phase 3 Plan Index
 
