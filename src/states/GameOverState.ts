@@ -41,7 +41,7 @@ export class GameOverState implements IGameState {
   }
 
   private restartGame(): void {
-    // Reset all game state
+    // Reset all game state (includes inRunCurrency via runState.reset())
     runState.reset();
 
     // Reset entities
@@ -60,6 +60,10 @@ export class GameOverState implements IGameState {
     this.ctx.collisionSystem.reset();
     this.ctx.spawnSystem.reset();
     this.ctx.aiSystem.reset();
+
+    // Phase 3: reset in-run shop and power-up state (INRUN-03, INRUN-04)
+    this.ctx.shopSystem.reset();
+    this.ctx.powerUpManager.releaseAll();
 
     // Spawn fresh enemy wave
     this.ctx.formation.spawnWave();
