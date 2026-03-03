@@ -8,7 +8,7 @@ progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 32
-  completed_plans: 29
+  completed_plans: 30
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 
 ## Current Position
 
-Phase: 5 of 5 (Campaign Mode + Game Modes) — IN PROGRESS (Plan 3 of 6 complete)
-Next: Execute 05-04 — Campaign level progression
-Status: Phase 5 executing — 05-03 complete: TitleState rewritten with mode selection menu (Campaign/Endless/Upgrades), arrow-key nav, letter shortcuts, _resetAllSystems()
-Last activity: 2026-03-03 — 05-03 complete: TitleState mode select menu with full system reset (MODE-03, MODE-01, MODE-04)
+Phase: 5 of 5 (Campaign Mode + Game Modes) — IN PROGRESS (Plan 4 of 6 complete)
+Next: Execute 05-05 — MetaStore campaign progress tracking
+Status: Phase 5 executing — 05-04 complete: LevelBriefingState + PlayingState campaign orchestration (_setupCampaignLevel, _onLevelComplete)
+Last activity: 2026-03-03 — 05-04 complete: Campaign loop orchestration (MODE-02, CAMP-01, CAMP-02, CAMP-03)
 
-Progress: [██████████] 86% (Phase 4 impl done + Phase 5 plan 3/6 complete)
+Progress: [██████████] 88% (Phase 4 impl done + Phase 5 plan 4/6 complete)
 
 ## Performance Metrics
 
@@ -66,6 +66,7 @@ Progress: [██████████] 86% (Phase 4 impl done + Phase 5 plan
 | Phase 04-boss-encounter-meta-progression P05 | 4 | 2 tasks | 6 files |
 | Phase 05-campaign-mode-game-modes P01 | 216 | 2 tasks | 3 files |
 | Phase 05-campaign-mode-game-modes P02 | 3 | 3 tasks | 3 files |
+| Phase 05-campaign-mode-game-modes P04 | 3 | 2 tasks | 2 files |
 | Phase 05-campaign-mode-game-modes P03 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
@@ -164,6 +165,9 @@ Recent decisions affecting current work:
 - [Phase 05-campaign-mode-game-modes]: getNextWaveConfig() private helper dispatches campaign vs endless — single call site in startNextWave()
 - [Phase 05-campaign-mode-game-modes]: levelCompletePending early-return in startNextWave() — sets flag then returns without spawning, PlayingState handles routing
 - [Phase 05-campaign-mode-game-modes]: runState.reset() as FIRST line in returnToMenu() — consistent with restartGame() ordering, ensures clean state before system cleanup
+- [Phase 05-campaign-mode-game-modes 05-04]: LevelBriefingState uses `as unknown as Record<string, unknown>` for MetaStore to access future Plan 05-05 fields (briefingAutoDismiss, toggleBriefingAutoDismiss) without TypeScript errors
+- [Phase 05-campaign-mode-game-modes 05-04]: onDismiss callback only calls _setupCampaignLevel() — SpawnSystem naturally spawns first wave when formation is empty on next update() tick, no manual wave spawn needed
+- [Phase 05-campaign-mode-game-modes 05-04]: setLevelWaves(null) called explicitly for endless mode in enter() — prevents stale level override if mode switches between runs
 - [Phase 05-campaign-mode-game-modes]: selectedOption persists on TitleState instance — Campaign is default; remembered on return-from-run
 - [Phase 05-campaign-mode-game-modes]: OPTIONS array drives arrow-key cycle: campaign, endless, upgrades — extensible without changing cycle logic
 
@@ -178,8 +182,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 05-03-PLAN.md — TitleState mode selection menu
-Resume file: .planning/phases/05-campaign-mode-game-modes/05-04-PLAN.md
+Stopped at: Completed 05-04-PLAN.md — LevelBriefingState + PlayingState campaign orchestration
+Resume file: .planning/phases/05-campaign-mode-game-modes/05-05-PLAN.md
 
 ## Phase 3 Plan Index
 

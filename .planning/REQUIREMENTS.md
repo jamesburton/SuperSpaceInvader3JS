@@ -102,7 +102,7 @@
 
 - [x] **CAMP-01**: Campaign wave scripts are data-driven (TypeScript objects/arrays, not hardcoded logic)
 - [x] **CAMP-02**: Chapter 1 contains 3-4 handcrafted levels before the boss encounter
-- [ ] **CAMP-03**: Brief atmospheric text overlay displays between campaign levels (mission briefing style)
+- [x] **CAMP-03**: Brief atmospheric text overlay displays between campaign levels (mission briefing style)
 
 ---
 
@@ -227,7 +227,7 @@ Deferred — build after v1 is validated.
 | MODE-04 | Phase 5 | Complete |
 | CAMP-01 | Phase 5 | Complete |
 | CAMP-02 | Phase 5 | Complete |
-| CAMP-03 | Phase 5 | Pending |
+| CAMP-03 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 64 total
