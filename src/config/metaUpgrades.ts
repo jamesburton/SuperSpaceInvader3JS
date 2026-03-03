@@ -7,7 +7,7 @@ export interface MetaUpgrade {
   /** Cost in SI$ */
   cost: number;
   /** Category for grouping in the shop UI */
-  category: 'loadout' | 'passive';
+  category: 'loadout' | 'passive' | 'bunker';
   /**
    * Effect type for PlayingState to read on run start.
    * 'loadout_spread': start with 30s spread shot active
@@ -15,9 +15,20 @@ export interface MetaUpgrade {
    * 'passive_fireRate': +10% fire rate per tier (stacks multiplicatively)
    * 'passive_moveSpeed': +8% move speed per tier
    * 'passive_startingLife': +1 starting life (once)
+   * 'passive_maxBullets': raise in-flight bullet cap (sequential tiers)
+   * 'passive_siConversion': % of end-run gold converted to SI$
+   * 'passive_siTaxReduction': reduce the SI$ start-run tax
+   * 'bunker_slot': deploy N bunkers per run
+   * 'bunker_autorepair': auto-repair 1 segment/wave on most damaged bunker
+   * 'bunker_forceshield': player bullets pass through bunkers (enemy bullets still destroy)
    */
-  effectType: 'loadout_spread' | 'loadout_rapid' | 'passive_fireRate' | 'passive_moveSpeed' | 'passive_startingLife';
-  /** Tier within its effect group (1, 2, or 3) — 0 for loadouts */
+  effectType:
+    | 'loadout_spread' | 'loadout_rapid'
+    | 'passive_fireRate' | 'passive_moveSpeed' | 'passive_startingLife' | 'passive_continue'
+    | 'passive_maxBullets'
+    | 'passive_siConversion' | 'passive_siTaxReduction'
+    | 'bunker_slot' | 'bunker_autorepair' | 'bunker_forceshield';
+  /** Tier within its effect group (1, 2, or 3) — 0 for loadouts/once-only upgrades */
   tier: number;
 }
 
@@ -43,7 +54,6 @@ export const META_UPGRADES: MetaUpgrade[] = [
   },
 
   // --- Passive Stat Upgrades: Fire Rate (META-04) ---
-  // 3 tiers — each increases fire rate by 10% (multiplicative, capped at tier 3)
   {
     id: 'passive_fireRate_1',
     displayName: 'TRIGGER TUNE I',
@@ -110,5 +120,197 @@ export const META_UPGRADES: MetaUpgrade[] = [
     category: 'passive',
     effectType: 'passive_startingLife',
     tier: 1,
+  },
+
+  // --- Continue (META-04) ---
+  {
+    id: 'extra_continue',
+    displayName: 'EMERGENCY RECALL',
+    description: 'Once per run: restore full lives instead of game over',
+    cost: 80,
+    category: 'passive',
+    effectType: 'passive_continue',
+    tier: 0,
+  },
+
+  // --- Bullet Capacity (Fibonacci SI$ costs: 1, 1, 2, 3, 5, 8) ---
+  {
+    id: 'passive_maxBullets_2',
+    displayName: 'DUAL STREAM',
+    description: 'Raise bullet cap to 2 in-flight',
+    cost: 1,
+    category: 'passive',
+    effectType: 'passive_maxBullets',
+    tier: 2,
+  },
+  {
+    id: 'passive_maxBullets_3',
+    displayName: 'TRIPLE STREAM',
+    description: 'Raise bullet cap to 3 in-flight',
+    cost: 1,
+    category: 'passive',
+    effectType: 'passive_maxBullets',
+    tier: 3,
+  },
+  {
+    id: 'passive_maxBullets_4',
+    displayName: 'QUAD STREAM',
+    description: 'Raise bullet cap to 4 in-flight',
+    cost: 2,
+    category: 'passive',
+    effectType: 'passive_maxBullets',
+    tier: 4,
+  },
+  {
+    id: 'passive_maxBullets_5',
+    displayName: 'PENTA STREAM',
+    description: 'Raise bullet cap to 5 in-flight',
+    cost: 3,
+    category: 'passive',
+    effectType: 'passive_maxBullets',
+    tier: 5,
+  },
+  {
+    id: 'passive_maxBullets_6',
+    displayName: 'HEXA STREAM',
+    description: 'Raise bullet cap to 6 in-flight',
+    cost: 5,
+    category: 'passive',
+    effectType: 'passive_maxBullets',
+    tier: 6,
+  },
+  {
+    id: 'passive_maxBullets_7',
+    displayName: 'HEPTA STREAM',
+    description: 'Raise bullet cap to 7 in-flight',
+    cost: 8,
+    category: 'passive',
+    effectType: 'passive_maxBullets',
+    tier: 7,
+  },
+
+  // --- SI$ Conversion (gold-at-death → SI$) ---
+  {
+    id: 'passive_siConversion_1',
+    displayName: 'SMELTER I',
+    description: 'Raise end-run gold conversion to 15%',
+    cost: 10,
+    category: 'passive',
+    effectType: 'passive_siConversion',
+    tier: 1,
+  },
+  {
+    id: 'passive_siConversion_2',
+    displayName: 'SMELTER II',
+    description: 'Raise end-run gold conversion to 20%',
+    cost: 25,
+    category: 'passive',
+    effectType: 'passive_siConversion',
+    tier: 2,
+  },
+  {
+    id: 'passive_siConversion_3',
+    displayName: 'SMELTER III',
+    description: 'Raise end-run gold conversion to 25%',
+    cost: 40,
+    category: 'passive',
+    effectType: 'passive_siConversion',
+    tier: 3,
+  },
+
+  // --- SI$ Tax Reduction (reduces start-run tax on carried SI$) ---
+  {
+    id: 'passive_siTax_1',
+    displayName: 'TAX SHELTER I',
+    description: 'Keep 25% of SI$ at run start (base: 15%)',
+    cost: 15,
+    category: 'passive',
+    effectType: 'passive_siTaxReduction',
+    tier: 1,
+  },
+  {
+    id: 'passive_siTax_2',
+    displayName: 'TAX SHELTER II',
+    description: 'Keep 35% of SI$ at run start',
+    cost: 28,
+    category: 'passive',
+    effectType: 'passive_siTaxReduction',
+    tier: 2,
+  },
+  {
+    id: 'passive_siTax_3',
+    displayName: 'TAX SHELTER III',
+    description: 'Keep 45% of SI$ at run start',
+    cost: 45,
+    category: 'passive',
+    effectType: 'passive_siTaxReduction',
+    tier: 3,
+  },
+  {
+    id: 'passive_siTax_4',
+    displayName: 'TAX SHELTER IV',
+    description: 'Keep 55% of SI$ at run start',
+    cost: 65,
+    category: 'passive',
+    effectType: 'passive_siTaxReduction',
+    tier: 4,
+  },
+
+  // --- Bunker Slots (deploy N bunkers per run, sequential unlock) ---
+  {
+    id: 'bunker_slot_1',
+    displayName: 'BUNKER I',
+    description: 'Deploy 1 bunker per run',
+    cost: 35,
+    category: 'bunker',
+    effectType: 'bunker_slot',
+    tier: 1,
+  },
+  {
+    id: 'bunker_slot_2',
+    displayName: 'BUNKER II',
+    description: 'Deploy 2 bunkers per run',
+    cost: 35,
+    category: 'bunker',
+    effectType: 'bunker_slot',
+    tier: 2,
+  },
+  {
+    id: 'bunker_slot_3',
+    displayName: 'BUNKER III',
+    description: 'Deploy 3 bunkers per run',
+    cost: 35,
+    category: 'bunker',
+    effectType: 'bunker_slot',
+    tier: 3,
+  },
+  {
+    id: 'bunker_slot_4',
+    displayName: 'BUNKER IV',
+    description: 'Deploy 4 bunkers per run',
+    cost: 35,
+    category: 'bunker',
+    effectType: 'bunker_slot',
+    tier: 4,
+  },
+
+  // --- Bunker Upgrades ---
+  {
+    id: 'bunker_autorepair',
+    displayName: 'AUTO-REPAIR',
+    description: 'Restore 1 bunker segment per wave on most damaged bunker',
+    cost: 60,
+    category: 'bunker',
+    effectType: 'bunker_autorepair',
+    tier: 0,
+  },
+  {
+    id: 'bunker_forceshield',
+    displayName: 'FORCE SHIELD',
+    description: 'Your bullets pass through bunkers; only enemy fire destroys segments',
+    cost: 80,
+    category: 'bunker',
+    effectType: 'bunker_forceshield',
+    tier: 0,
   },
 ];

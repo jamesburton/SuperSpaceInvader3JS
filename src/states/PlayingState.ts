@@ -20,6 +20,7 @@ import type { ShopSystem } from '../systems/ShopSystem';
 import type { ShopUI } from '../ui/ShopUI';
 import type { BossEnemy } from '../entities/Boss';
 import type { BossSystem } from '../systems/BossSystem';
+import type { BunkerManager } from '../entities/BunkerManager';
 import { runState } from '../state/RunState';
 import { useMetaStore } from '../state/MetaState';
 import { FIXED_STEP } from '../utils/constants';
@@ -52,6 +53,8 @@ export interface PlayingStateContext {
   // Phase 4 additions (Plan 04-03 boss wiring)
   boss: BossEnemy;
   bossSystem: BossSystem;
+  // Phase 5: bunkers
+  bunkerManager: BunkerManager;
 }
 
 export class PlayingState implements IGameState {
@@ -63,14 +66,18 @@ export class PlayingState implements IGameState {
     private readonly input: InputManager,
     private readonly hud: HUD,
     private readonly ctx: PlayingStateContext,
+    private readonly onReturnToMenu: () => void = () => {},
   ) {}
 
   enter(): void {
     this.lastWasTransitioning = false;
     runState.setPhase('playing');
+    // Apply start-run SI$ tax (skip if this is a continue — currency already taxed)
+    if (!runState.continueUsed) this._applyStartTax();
     this.hud.hideOverlay();
     this.ctx.cameraShake.reset(); // Phase 2: clear any residual shake
     this.applyMetaBonuses();      // Phase 4: apply persistent meta upgrades at run start
+    this._spawnBunkers();         // Spawn bunkers if enabled and slots purchased
   }
 
   update(dt: number): void {
@@ -124,21 +131,31 @@ export class PlayingState implements IGameState {
     );
     this.lastWasTransitioning = isTransitioning;
 
-    // Phase 3: release pickup tokens when wave transition ends (new wave is starting)
+    // Release uncollected tokens when a new wave starts — active effects carry over
     if (wasTransitioning && !isTransitioning) {
-      ctx.powerUpManager.releaseAll();
+      ctx.powerUpManager.releaseTokensOnly();
     }
 
-    // Phase 3: shop trigger — open shop when shopPending flag is set after wave clear
+    // Shop trigger — open shop when shopPending flag is set after wave clear
     if (ctx.spawnSystem.shopPending) {
       ctx.spawnSystem.clearShopPending();
-      const choices = ctx.shopSystem.generateChoices();
-      ctx.shopUI.show(choices, runState.gold, (selectedIndex: number) => {
-        if (selectedIndex >= 0 && selectedIndex < choices.length) {
-          ctx.shopSystem.purchaseItem(choices[selectedIndex], ctx.player);
+
+      // Build live callbacks for multi-buy shop
+      const getItems = () => {
+        const all = ctx.shopSystem.getAvailableItems();
+        // Hide repairBunker if no bunkers are damaged
+        if (!ctx.bunkerManager.hasDamagedBunker()) {
+          return all.filter(i => i.id !== 'repairBunker');
         }
-        ctx.shopUI.hide();
-      });
+        return all;
+      };
+
+      ctx.shopUI.show(
+        getItems,
+        () => runState.gold,
+        (item) => ctx.shopSystem.purchaseItem(item, ctx.player),
+        () => ctx.shopUI.hide(),
+      );
       return; // skip rest of update this step — shop is now open
     }
 
@@ -302,32 +319,19 @@ export class PlayingState implements IGameState {
     ctx.activeBullets.length = write;
   }
 
-  /** Award SI$ meta currency, update high score, show victory screen, then enter GameOverState for restart flow. */
+  /** Award SI$ meta currency, update high score, then enter GameOverState (victory variant). */
   private triggerVictory(): void {
     const { ctx } = this;
-    // Award SI$ meta currency and score bonus for boss defeat
-    const waveSI = runState.siEarnedThisRun;       // SI$ from wave clears
-    const bossReward = BOSS_DEF.metaCurrencyReward; // SI$ from boss defeat
-    const totalSIEarned = waveSI + bossReward;
     runState.addScore(BOSS_DEF.scoreValue);
-    useMetaStore.getState().addMetaCurrency(totalSIEarned);
+
+    // Gold → SI$ conversion at end of run
+    const convRate = this._getConversionRate();
+    runState.convertGoldToSI(convRate);
+
+    useMetaStore.getState().addMetaCurrency(runState.siEarnedThisRun);
     useMetaStore.getState().updateHighScore(runState.score);
-
-    const totalSI = useMetaStore.getState().metaCurrency;
-
-    // Show victory overlay — reuse hud.showOverlay (same pattern as GameOverState)
-    this.hud.showOverlay(`
-      <h1 style="font-size:48px;margin-bottom:24px;text-shadow:0 0 20px #ffd700;letter-spacing:4px;color:#ffd700;">VICTORY!</h1>
-      <p style="font-size:24px;margin:8px 0;">SCORE: ${runState.score}</p>
-      <p style="font-size:24px;margin:8px 0;">WAVE: ${runState.wave}</p>
-      <p style="font-size:24px;margin:8px 0;">KILLS: ${runState.enemiesKilled}</p>
-      <p style="font-size:20px;margin:16px 0;color:#ffd700;">SI$ EARNED: ${totalSIEarned} (${waveSI} waves + ${bossReward} boss) | TOTAL: ${totalSI}</p>
-      <p style="font-size:18px;margin-top:40px;opacity:0.7;letter-spacing:2px;">PRESS R TO PLAY AGAIN</p>
-    `);
-
     runState.setPhase('gameover');
 
-    // Transition to GameOverState to reuse the restart flow (R key handler)
     this.stateManager.replace(
       new GameOverState(
         this.input,
@@ -335,9 +339,12 @@ export class PlayingState implements IGameState {
         ctx,
         () => {
           this.stateManager.replace(
-            new PlayingState(this.stateManager, this.input, this.hud, ctx),
+            new PlayingState(this.stateManager, this.input, this.hud, ctx, this.onReturnToMenu),
           );
         },
+        null, // no continue after a win
+        this.onReturnToMenu,
+        'victory',
       ),
     );
   }
@@ -345,24 +352,96 @@ export class PlayingState implements IGameState {
   private triggerGameOver(): void {
     runState.setPhase('gameover');
     useMetaStore.getState().updateHighScore(runState.score);
+
+    // Gold → SI$ conversion at end of run
+    const convRate = this._getConversionRate();
+    runState.convertGoldToSI(convRate);
+
     // Award SI$ earned this run to MetaStore (META-01) — must happen before GameOverState reads it
     const siEarned = runState.siEarnedThisRun;
     if (siEarned > 0) {
       useMetaStore.getState().addMetaCurrency(siEarned);
     }
+
+    const onContinue = () => {
+      runState.useContinue(); // marks used + restores lives to PLAYER_LIVES
+      this.ctx.player.active = true;
+      this.ctx.player.mesh.visible = true;
+      this.ctx.activeBullets.forEach((b) => {
+        if (b.isPlayerBullet) this.ctx.playerBulletPool.release(b);
+        else this.ctx.enemyBulletPool.release(b);
+      });
+      this.ctx.activeBullets.length = 0;
+      this.ctx.collisionSystem.reset();
+      this.ctx.spawnSystem.reset();
+      this.ctx.aiSystem.reset();
+      this.ctx.shopSystem.reset();
+      this.ctx.powerUpManager.releaseAll();
+      this.ctx.boss.deactivate();
+      this.ctx.bossSystem.reset();
+      this.ctx.bossHealthBar.hide();
+      // Reset and re-spawn bunkers for the continue
+      this.ctx.bunkerManager.reset();
+      runState.setPhase('playing');
+      this.ctx.formation.spawnWave();
+      const newState = new PlayingState(this.stateManager, this.input, this.hud, this.ctx, this.onReturnToMenu);
+      this.stateManager.replace(newState);
+    };
+
     this.stateManager.replace(
       new GameOverState(
         this.input,
         this.hud,
         this.ctx,
         () => {
-          // Restart: go back to PlayingState fresh
           this.stateManager.replace(
-            new PlayingState(this.stateManager, this.input, this.hud, this.ctx),
+            new PlayingState(this.stateManager, this.input, this.hud, this.ctx, this.onReturnToMenu),
           );
         },
+        onContinue,
+        this.onReturnToMenu,
+        'defeat',
       ),
     );
+  }
+
+  /**
+   * Compute the gold→SI$ conversion rate from owned meta upgrades.
+   * Base rate: 5%. Each passive_siConversion_N tier adds 5%.
+   */
+  private _getConversionRate(): number {
+    const { purchasedUpgrades } = useMetaStore.getState();
+    const convTier = [3, 2, 1].find(t => purchasedUpgrades.includes(`passive_siConversion_${t}`)) ?? 0;
+    return 0.10 + convTier * 0.05; // 10% base, up to 25% at tier 3
+  }
+
+  /**
+   * Apply SI$ start-run tax. Players keep only a fraction of their SI$ balance.
+   * Base: keep 10% (90% tax). Each passive_siTax_N tier adds 10% kept.
+   * Skipped on continue (continueUsed is true at entry time).
+   */
+  private _applyStartTax(): void {
+    const { purchasedUpgrades, metaCurrency } = useMetaStore.getState();
+    if (metaCurrency <= 0) return;
+    const maxTier = [4, 3, 2, 1].find(t => purchasedUpgrades.includes(`passive_siTax_${t}`)) ?? 0;
+    const keepFraction = 0.15 + maxTier * 0.10; // tier 0 = 15% keep (85% tax), tier 4 = 55% keep
+    const taxAmount = Math.floor(metaCurrency * (1 - keepFraction));
+    if (taxAmount > 0) {
+      useMetaStore.getState().addMetaCurrency(-taxAmount);
+    }
+  }
+
+  /**
+   * Spawn bunkers at run start if bunkersEnabled and at least one bunker slot is owned.
+   */
+  private _spawnBunkers(): void {
+    const { purchasedUpgrades, bunkersEnabled } = useMetaStore.getState();
+    if (!bunkersEnabled) return;
+    // Count highest owned bunker_slot_N tier
+    const slotCount = [4, 3, 2, 1].find(t => purchasedUpgrades.includes(`bunker_slot_${t}`)) ?? 0;
+    if (slotCount > 0) {
+      this.ctx.bunkerManager.spawnForRun(slotCount);
+    }
   }
 
   /**
@@ -400,12 +479,23 @@ export class PlayingState implements IGameState {
       runState.addLife();
     }
 
+    // Apply bullet cap from highest owned passive_maxBullets_N tier
+    const maxBulletTier = [7, 6, 5, 4, 3, 2].find(t => purchasedUpgrades.includes(`passive_maxBullets_${t}`)) ?? 1;
+    player.setMaxBulletsInFlight(maxBulletTier);
+
     // Apply starting loadout power-ups (timed, 30s duration)
     if (purchasedUpgrades.includes('loadout_spread_start')) {
       powerUpManager.activate('spreadShot', 30); // spread shot for 30s at run start
     }
     if (purchasedUpgrades.includes('loadout_rapid_start')) {
       powerUpManager.activate('rapidFire', 30);  // rapid fire for 30s at run start
+    }
+
+    // Wire bunker auto-repair: restore 1 segment per wave if upgrade owned
+    if (purchasedUpgrades.includes('bunker_autorepair')) {
+      this.ctx.spawnSystem.onWaveCleared = () => {
+        this.ctx.bunkerManager.autoRepairBetweenWaves(1);
+      };
     }
   }
 

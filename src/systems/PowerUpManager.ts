@@ -159,14 +159,23 @@ export class PowerUpManager {
   }
 
   /**
-   * Release all active tokens and reset power-up state.
-   * Call on wave reset or run end.
+   * Release only the uncollected pickup tokens floating on screen.
+   * Does NOT clear active power-up effects or shield charges.
+   * Call at wave transition so effects carry over to the next wave.
    */
-  public releaseAll(): void {
+  public releaseTokensOnly(): void {
     for (const token of this.activeTokens) {
       this.pool.release(token);
     }
     this.activeTokens.length = 0;
+  }
+
+  /**
+   * Release all active tokens AND reset all power-up state (effects + charges).
+   * Call on run end, continue, or full reset — not between waves.
+   */
+  public releaseAll(): void {
+    this.releaseTokensOnly();
     this.activePowerUp = null;
     this.activeDuration = 0;
     this.shieldCharges = 0;
