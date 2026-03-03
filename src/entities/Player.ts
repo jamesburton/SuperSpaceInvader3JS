@@ -58,6 +58,8 @@ export class Player {
   public active: boolean = true;
 
   private fireCooldown: number = 0;
+  private fireCooldownMultiplier: number = 1.0;
+  private speedMultiplier: number = 1.0;
   public readonly mesh: Mesh;
 
   constructor(scene: Scene) {
@@ -82,8 +84,8 @@ export class Player {
    * @param rightHeld Whether right key is currently held
    */
   public update(dt: number, leftHeld: boolean, rightHeld: boolean): void {
-    if (leftHeld) this.x -= PLAYER_SPEED * dt;
-    if (rightHeld) this.x += PLAYER_SPEED * dt;
+    if (leftHeld) this.x -= PLAYER_SPEED * this.speedMultiplier * dt;
+    if (rightHeld) this.x += PLAYER_SPEED * this.speedMultiplier * dt;
 
     // Clamp to world bounds
     this.x = Math.max(-PLAYER_MOVE_BOUNDS, Math.min(PLAYER_MOVE_BOUNDS, this.x));
@@ -103,6 +105,22 @@ export class Player {
 
   /** Resets the fire cooldown timer — call after successfully spawning a bullet */
   public recordFire(): void {
-    this.fireCooldown = FIRE_COOLDOWN;
+    this.fireCooldown = FIRE_COOLDOWN * this.fireCooldownMultiplier;
+  }
+
+  /**
+   * Set fire cooldown multiplier from shop upgrade (fireRateUp).
+   * A multiplier < 1.0 shortens the cooldown (faster fire rate).
+   */
+  public setFireCooldownMultiplier(m: number): void {
+    this.fireCooldownMultiplier = m;
+  }
+
+  /**
+   * Set movement speed multiplier from shop upgrade (moveSpeed).
+   * A multiplier > 1.0 increases the speed.
+   */
+  public setSpeedMultiplier(m: number): void {
+    this.speedMultiplier = m;
   }
 }

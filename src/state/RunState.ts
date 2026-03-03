@@ -1,4 +1,4 @@
-import { PLAYER_LIVES } from '../utils/constants';
+import { PLAYER_LIVES, MAX_LIVES_CAP } from '../utils/constants';
 import type { GamePhase, RunStateData } from '../utils/types';
 
 // Singleton module-level state — intentionally NOT using Zustand
@@ -38,6 +38,11 @@ export const runState = {
 
   setPhase(phase: GamePhase): void {
     _state.gamePhase = phase;
+  },
+
+  /** Add one life, capped at MAX_LIVES_CAP */
+  addLife(): void {
+    _state.lives = Math.min(MAX_LIVES_CAP, _state.lives + 1);
   },
 
   /** Add SI$ in-run currency (floors to integer) */
