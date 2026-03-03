@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T03:10:15Z"
+last_updated: "2026-03-03T12:08:14.326Z"
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 2
-  total_plans: 20
-  completed_plans: 19
+  total_plans: 26
+  completed_plans: 20
 ---
 
 # Project State
@@ -18,16 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-02)
 
 **Core value:** The thrill of arcade shooting elevated — every run feels different because of layered in-run progression, meta-unlocks that evolve your build over time, and enemies smart enough to keep you on your toes.
-**Current focus:** Phase 3 - Enemy Depth + Wave Systems + Power-Ups
+**Current focus:** Phase 4 - Boss Encounter + Meta Progression
 
 ## Current Position
 
-Phase: 3 of 5 (Enemy Depth + Wave Systems + Power-Ups) — IN PROGRESS
-Next: Phase 4 (Boss Encounter + Meta Progression) — pending Phase 3 fun bar gate
-Status: Phase 3 executing — 8/9 plans complete (03-01 through 03-08 done; 03-09 human verification pending)
-Last activity: 2026-03-03 — 03-08 complete: Phase 3 final wiring (Game.ts, PlayingState, GameOverState) — all Phase 3 systems integrated
+Phase: 4 of 5 (Boss Encounter + Meta Progression) — IN PROGRESS
+Next: 04-02 (next plan in Phase 4)
+Status: Phase 4 executing — 1/6 plans complete (04-01 done: dual currency system)
+Last activity: 2026-03-03 — 04-01 complete: dual currency system (Gold in-run, SI$ meta), MetaStore with purchasedUpgrades/purchaseUpgrade, ssi-meta-v1 schema with migration hook
 
-Progress: [██████░░░░] 40% (2/5 phases complete; Phase 3 in progress — 1 plan remaining: 03-09 human verification)
+Progress: [████████░░] 60% (Phase 3 complete + Phase 4 in progress — 1/6 plans done)
 
 ## Performance Metrics
 
@@ -60,6 +60,7 @@ Progress: [██████░░░░] 40% (2/5 phases complete; Phase 3 in 
 | Phase 03-enemy-depth-wave-systems-power-ups P07 | 2 | 3 tasks | 5 files |
 | Phase 03-enemy-depth-wave-systems-power-ups P06 | 3 | 2 tasks | 5 files |
 | Phase 03-enemy-depth-wave-systems-power-ups P08 | 3 | 3 tasks | 4 files |
+| Phase 04-boss-encounter-meta-progression P01 | 139 | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -137,6 +138,9 @@ Recent decisions affecting current work:
 - [Phase 03-enemy-depth-wave-systems-power-ups 03-08]: wasTransitioning+isTransitioning delta in PlayingState tracks wave-end for releaseAll() without SpawnSystem API change
 - [Phase 03-enemy-depth-wave-systems-power-ups 03-08]: shopPending check placed after transition delta so releaseAll() fires before shop opens on same wave-clear event
 - [Phase 03-enemy-depth-wave-systems-power-ups 03-08]: grantShieldCharge() added to PowerUpManager capped at 3; WeaponSystem.setPowerUpManager() not needed (receives via update() optional param)
+- [Phase 04-boss-encounter-meta-progression]: Dual currency: Gold for in-run shop (volatile), SI$ for meta shop (persistent Zustand)
+- [Phase 04-boss-encounter-meta-progression]: META_STORAGE_KEY changed from ssix_v1 to ssi-meta-v1; SID_SYMBOL replaced by GOLD_SYMBOL+META_CURRENCY_SYMBOL
+- [Phase 04-boss-encounter-meta-progression]: purchaseUpgrade() is idempotent — re-purchasing same id does not double-add to purchasedUpgrades array
 
 ### Pending Todos
 
