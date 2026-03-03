@@ -9,7 +9,7 @@ export const WORLD_HEIGHT = 600;
 // Object pool sizes — pre-allocated at startup
 export const PLAYER_BULLET_POOL_SIZE = 64;
 export const ENEMY_BULLET_POOL_SIZE = 128;
-export const ENEMY_POOL_SIZE = 256;        // max instances in InstancedMesh
+export const ENEMY_POOL_SIZE = 512;        // max instances per InstancedMesh row (5×10=50 enemies + Swooper headroom)
 
 // Player
 export const PLAYER_SPEED = 300;           // units/second
@@ -36,3 +36,12 @@ export const HUD_Z = 0;                    // Z-layer for HUD elements
 
 // LocalStorage
 export const META_STORAGE_KEY = 'ssix_v1';
+
+// Lives cap (for shop upgrades)
+export const MAX_LIVES_CAP = 9;
+
+// Shop trigger interval (every N waves)
+export const SHOP_TRIGGER_INTERVAL = 5;
+
+// SI$ in-run currency symbol
+export const SID_SYMBOL = 'SI$';

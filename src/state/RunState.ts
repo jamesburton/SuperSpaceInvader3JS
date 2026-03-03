@@ -9,6 +9,7 @@ const _state: RunStateData = {
   wave: 1,
   enemiesKilled: 0,
   gamePhase: 'playing' as GamePhase,
+  inRunCurrency: 0,
 };
 
 export const runState = {
@@ -17,6 +18,7 @@ export const runState = {
   get wave() { return _state.wave; },
   get enemiesKilled() { return _state.enemiesKilled; },
   get gamePhase() { return _state.gamePhase; },
+  get inRunCurrency() { return _state.inRunCurrency; },
 
   addScore(amount: number): void {
     _state.score += amount;
@@ -38,6 +40,16 @@ export const runState = {
     _state.gamePhase = phase;
   },
 
+  /** Add SI$ in-run currency (floors to integer) */
+  addCurrency(amount: number): void {
+    _state.inRunCurrency += Math.floor(amount);
+  },
+
+  /** Zero the in-run currency (called explicitly or via reset()) */
+  resetCurrency(): void {
+    _state.inRunCurrency = 0;
+  },
+
   /** Reset for new run */
   reset(): void {
     _state.score = 0;
@@ -45,6 +57,7 @@ export const runState = {
     _state.wave = 1;
     _state.enemiesKilled = 0;
     _state.gamePhase = 'playing';
+    _state.inRunCurrency = 0;
   },
 
   snapshot(): RunStateData {

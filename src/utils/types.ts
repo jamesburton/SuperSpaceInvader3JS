@@ -1,4 +1,5 @@
 import type { Mesh, InstancedMesh } from 'three';
+import type { EnemyType } from '../config/enemies';
 
 // Base interface for all poolable objects
 export interface PooledObject {
@@ -27,7 +28,7 @@ export interface BulletEntity extends Entity {
 export interface EnemyEntity extends Entity {
   health: number;
   maxHealth: number;
-  type: 'grunt';       // Phase 1 has only grunt; Phase 3 adds archetypes
+  type: EnemyType;     // Phase 3: all six archetypes
   row: number;         // Formation row (0 = top)
   col: number;         // Formation column (0 = left)
   instanceIndex: number; // Index into InstancedMesh for matrix/color updates
@@ -43,6 +44,7 @@ export interface RunStateData {
   wave: number;
   enemiesKilled: number;
   gamePhase: GamePhase;
+  inRunCurrency: number;  // SI$ accumulated during this run (INRUN-01)
 }
 
 // InstancedMesh wrapper for enemy rendering
