@@ -29,6 +29,15 @@ export class InputManager {
     return this.justPressedKeys.has(code);
   }
 
+  /**
+   * True if any key was pressed this step (justPressedKeys is non-empty).
+   * Used by LevelBriefingState to dismiss on any keypress.
+   * MUST call clearJustPressed() after reading, same as justPressed().
+   */
+  public anyKeyJustPressed(): boolean {
+    return this.justPressedKeys.size > 0;
+  }
+
   /** Call once per fixed update step, AFTER all input reads */
   public clearJustPressed(): void {
     this.justPressedKeys.clear();
