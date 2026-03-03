@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-03T03:00:30.123Z"
+last_updated: "2026-03-03T03:05:50.436Z"
 progress:
   total_phases: 3
   completed_phases: 2
   total_plans: 20
-  completed_plans: 17
+  completed_plans: 18
 ---
 
 # Project State
@@ -24,8 +24,8 @@ See: .planning/PROJECT.md (updated 2026-03-02)
 
 Phase: 3 of 5 (Enemy Depth + Wave Systems + Power-Ups) — IN PROGRESS
 Next: Phase 4 (Boss Encounter + Meta Progression) — pending Phase 3 fun bar gate
-Status: Phase 3 executing — 6/9 plans complete (03-01, 03-02, 03-03, 03-04, 03-05, 03-07 done)
-Last activity: 2026-03-03 — 03-07 complete: ShopSystem (6-item pool, generateChoices, purchaseItem), ShopUI (DOM modal, keyboard nav), HUD (SI$ counter + power-up timer bar)
+Status: Phase 3 executing — 7/9 plans complete (03-01, 03-02, 03-03, 03-04, 03-05, 03-06, 03-07 done)
+Last activity: 2026-03-03 — 03-06 complete: CollisionSystem+WeaponSystem power-up wiring, Shielder phasing, spread/rapid fire (ENEMY-02, PWR-01,02,03,04)
 
 Progress: [██████░░░░] 40% (2/5 phases complete; Phase 3 in progress 2/9 plans)
 
@@ -58,6 +58,7 @@ Progress: [██████░░░░] 40% (2/5 phases complete; Phase 3 in 
 | Phase 03-enemy-depth-wave-systems-power-ups P05 | 4 | 3 tasks | 3 files |
 | Phase 03-enemy-depth-wave-systems-power-ups P04 | 8 | 3 tasks | 3 files |
 | Phase 03-enemy-depth-wave-systems-power-ups P07 | 2 | 3 tasks | 5 files |
+| Phase 03-enemy-depth-wave-systems-power-ups P06 | 3 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -128,6 +129,9 @@ Recent decisions affecting current work:
 - [Phase 03-enemy-depth-wave-systems-power-ups 03-07]: ShopSystem holds stat multipliers as public fields; PlayingState reads directly in 03-08
 - [Phase 03-enemy-depth-wave-systems-power-ups 03-07]: _onShieldChargePurchased callback injected by PlayingState to avoid circular import (ShopSystem vs PowerUpManager)
 - [Phase 03-enemy-depth-wave-systems-power-ups 03-07]: HUD.syncPowerUp() takes explicit params (type, remaining, full, shieldCharges) — keeps HUD decoupled from PowerUpManager class
+- [Phase 03-enemy-depth-wave-systems-power-ups 03-06]: WeaponSystem.update() replaces PlayingState inline fire block — Phase 3 canonical fire path with optional particleManager and powerUpManager params
+- [Phase 03-enemy-depth-wave-systems-power-ups 03-06]: Rapid fire uses player.setFireCooldown(0.08) after recordFire() — overrides cooldown without disrupting fireCooldownMultiplier shop stat
+- [Phase 03-enemy-depth-wave-systems-power-ups 03-06]: Shielder shield pop burst uses 0xff00ff magenta hardcoded — distinct from wave palette death burst, visually signals shield destruction not kill
 
 ### Pending Todos
 
@@ -140,7 +144,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: Completed 03-07-PLAN.md — ShopSystem, ShopUI, HUD extensions (SI$ counter + power-up bar) (INRUN-02,04)
+Stopped at: Completed 03-06-PLAN.md — CollisionSystem+WeaponSystem power-up wiring, Shielder phasing, spread shot (3-way), rapid fire 0.08s (ENEMY-02, PWR-01,02,03,04)
 Resume file: none
 
 ## Phase 3 Plan Index
