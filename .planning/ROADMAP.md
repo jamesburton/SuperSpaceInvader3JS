@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Engine + Core Combat** - Three.js foundation with object pooling, fixed-timestep loop, and a fully playable shoot-em-up combat loop
 - [x] **Phase 2: Visual Identity + Game Feel** - Neon Tokyo cyberpunk aesthetic, bloom post-processing, particle effects, and the feedback systems that make the game feel responsive
 - [ ] **Phase 3: Enemy Depth + Wave Systems + Power-Ups** - Six enemy archetypes, formation-breaking AI, wave escalation, power-up drops, and in-run between-wave shop (the "fun bar" gate)
-- [ ] **Phase 4: Boss Encounter + Meta Progression** - Chapter 1 boss with multi-phase attack patterns, persistent meta shop, and the roguelite economy that connects runs
+- [x] **Phase 4: Boss Encounter + Meta Progression** - Chapter 1 boss with multi-phase attack patterns, persistent meta shop, and the roguelite economy that connects runs (completed 2026-03-03)
 - [ ] **Phase 5: Campaign Mode + Game Modes** - Handcrafted Campaign Chapter 1 with data-driven wave scripts, full mode selection, and campaign progress persistence
 
 ## Phase Details
@@ -123,5 +123,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Engine + Core Combat | 6/6 | Complete | 2026-03-02 |
 | 2. Visual Identity + Game Feel | 5/5 | Complete | 2026-03-02 |
 | 3. Enemy Depth + Wave Systems + Power-Ups | 8/9 | In Progress|  |
-| 4. Boss Encounter + Meta Progression | 5/6 | In Progress|  |
+| 4. Boss Encounter + Meta Progression | 6/6 | Complete   | 2026-03-03 |
 | 5. Campaign Mode + Game Modes | 0/TBD | Not started | - |
