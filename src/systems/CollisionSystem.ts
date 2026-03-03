@@ -3,6 +3,7 @@ import type { Player } from '../entities/Player';
 import type { EnemyFormation } from '../entities/Enemy';
 import type { ObjectPool } from '../core/ObjectPool';
 import type { ParticleManager } from '../effects/ParticleManager';
+import type { PowerUpManager } from './PowerUpManager';
 import { runState } from '../state/RunState';
 import { ENEMY_DEFS } from '../config/enemies';
 import { PLAYER_INVINCIBILITY_DURATION } from '../utils/constants';
@@ -19,7 +20,9 @@ function aabbOverlap(
 export class CollisionSystem {
   private playerInvincibility: number = 0; // countdown timer in seconds
   private particleManager: ParticleManager | null = null;
+  private powerUpManager: PowerUpManager | null = null;
   private hitThisStep: boolean = false;    // flag for camera shake trigger
+  private collectedPickupName: string | null = null; // set when pickup collected this step
 
   /**
    * Inject ParticleManager for death burst effects.
@@ -28,6 +31,15 @@ export class CollisionSystem {
    */
   public setParticleManager(pm: ParticleManager): void {
     this.particleManager = pm;
+  }
+
+  /**
+   * Inject PowerUpManager for pickup collision, shield absorb, and SID drops.
+   * Called from Game.ts during init() after PowerUpManager is created.
+   * Using setter injection to avoid circular constructor dependencies.
+   */
+  public setPowerUpManager(pm: PowerUpManager): void {
+    this.powerUpManager = pm;
   }
 
   /**
@@ -41,7 +53,17 @@ export class CollisionSystem {
   }
 
   /**
-   * Check player bullets vs enemies, enemy bullets vs player.
+   * Returns the display name of a pickup collected during the last update() call, or null.
+   * Auto-resets on read — call once per fixed step from PlayingState to show PickupFeedback.
+   */
+  public consumePickupName(): string | null {
+    const n = this.collectedPickupName;
+    this.collectedPickupName = null; // auto-reset on read
+    return n;
+  }
+
+  /**
+   * Check player bullets vs enemies, enemy bullets vs player, and player vs pickup tokens.
    * Mutates runState.score, runState.lives, and formation on hits.
    */
   public update(
@@ -74,9 +96,25 @@ export class CollisionSystem {
 
           if (aabbOverlap(bullet.x, bullet.y, bullet.width, bullet.height,
                           aabb.x, aabb.y, aabb.w, aabb.h)) {
-            // Hit registered
-            enemy.health -= 1;
+            // Hit registered — consume bullet regardless of shield state
             bulletsToRelease.push({ bullet, pool: playerBulletPool });
+
+            // Shielder shield phasing: reduce shieldHp before body damage
+            if (enemy.type === 'shielder' && enemy.shieldActive) {
+              enemy.shieldHp -= 1;
+              if (enemy.shieldHp <= 0) {
+                // Shield destroyed — show visual burst but DO NOT kill body yet
+                enemy.shieldActive = false;
+                if (this.particleManager) {
+                  const worldPos = formation.getEnemyWorldPos(enemy);
+                  this.particleManager.spawnDeathBurst(worldPos.x, worldPos.y + enemy.height, 0xff00ff);
+                }
+              }
+              break; // bullet consumed
+            }
+
+            // Normal body damage (shield inactive or non-Shielder)
+            enemy.health -= 1;
 
             if (enemy.health <= 0) {
               // Capture world position BEFORE killEnemy() scales matrix to zero
@@ -84,6 +122,16 @@ export class CollisionSystem {
               formation.killEnemy(enemy.instanceIndex);
               runState.addScore(ENEMY_DEFS[enemy.type].scoreValue);
               runState.recordKill();
+
+              // INRUN-01: drop SI$ on kill
+              const def = ENEMY_DEFS[enemy.type];
+              runState.addCurrency(def.sidDropAmount);
+
+              // Try to spawn a power-up drop at kill position
+              if (this.powerUpManager) {
+                this.powerUpManager.trySpawnDrop(worldPos.x, worldPos.y, def.dropChance);
+              }
+
               // Spawn death particle burst at kill position with current wave palette color
               if (this.particleManager) {
                 const paletteColor = wavePalette.getColor(runState.wave);
@@ -99,6 +147,14 @@ export class CollisionSystem {
           if (aabbOverlap(bullet.x, bullet.y, bullet.width, bullet.height,
                           player.x, player.y, player.width, player.height)) {
             bulletsToRelease.push({ bullet, pool: enemyBulletPool });
+
+            // Shield power-up absorb: consume one charge to skip life loss
+            if (this.powerUpManager && this.powerUpManager.consumeShieldCharge()) {
+              // Hit absorbed by shield — still shake camera but skip loseLife()
+              this.hitThisStep = true;
+              continue; // skip loseLife
+            }
+
             runState.loseLife();
             this.playerInvincibility = PLAYER_INVINCIBILITY_DURATION;
             this.hitThisStep = true; // signal PlayingState to trigger camera shake
@@ -113,9 +169,24 @@ export class CollisionSystem {
       const idx = activeBullets.indexOf(bullet);
       if (idx !== -1) activeBullets.splice(idx, 1);
     }
+
+    // Pickup token collision — detect player-vs-token AABB overlap
+    if (this.powerUpManager && this.playerInvincibility <= 0) {
+      for (const token of this.powerUpManager.getActiveTokens()) {
+        if (!token.active) continue;
+        if (aabbOverlap(player.x, player.y, player.width, player.height,
+                        token.x, token.y, token.width, token.height)) {
+          const displayName = this.powerUpManager.collectPickup(token);
+          this.collectedPickupName = displayName; // readable by PlayingState for PickupFeedback
+          break; // one pickup per step
+        }
+      }
+    }
   }
 
   public reset(): void {
     this.playerInvincibility = 0;
+    this.collectedPickupName = null;
+    this.hitThisStep = false;
   }
 }
