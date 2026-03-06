@@ -1,319 +1,197 @@
 # Stack Research
 
-**Domain:** Browser-based arcade space shooter with roguelite meta-progression and neon cyberpunk visual effects
-**Researched:** 2026-03-02
-**Confidence:** HIGH (core stack verified via npm registry + official Three.js docs + multiple corroborating sources)
+**Domain:** Browser-based arcade space shooter — v1.1 additions: audio, gamepad, ship skins, new power-ups, CRT post-processing
+**Researched:** 2026-03-06
+**Confidence:** HIGH (all new additions verified; CRT/Scanline confirmed built into already-installed postprocessing@6.38.3)
 
 ---
 
-## Recommended Stack
+## Context: What Already Exists (Do Not Re-research)
 
-### Core Technologies
+The following are committed, validated, and in production. This file only covers **new additions** needed for v1.1.
+
+| Already In Stack | Version | Status |
+|-----------------|---------|--------|
+| Three.js | 0.183.2 | Production — InstancedMesh, OrthographicCamera, WebGL |
+| postprocessing (pmndrs) | 6.38.3 | Production — SelectiveBloomEffect, EffectComposer |
+| Zustand | 5.0.11 | Production — MetaState persist, RunState volatile |
+| TypeScript | 5.9.3 | Production — `"lib": ["ESNext", "DOM"]` |
+| Vite | 7.3.1 | Production |
+| three.quarks | 0.17.0 | Production — particle effects |
+
+---
+
+## New Additions Required for v1.1
+
+### Audio
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| Three.js | 0.183.2 | WebGL renderer, 3D scene graph, post-processing | Committed stack choice; provides InstancedMesh for bulk enemies/bullets, EffectComposer for bloom pipeline, built-in OrthographicCamera for 2.5D gameplay. Current as of March 2026. |
-| TypeScript | 5.9.3 | Type safety across game systems | Game state (roguelite progression, artifact slots, wave scripting) is complex enough that type errors at compile time — not runtime mid-demo — are non-negotiable. Named Three.js imports work cleanly with TS. |
-| Vite | 7.3.1 | Build tool, dev server, HMR | Industry standard for Three.js TypeScript projects in 2025-26; faster than Webpack, native ESM support for Three.js tree-shaking, sub-second HMR for shader/scene iteration. Node.js 20.19+ required. |
-| Zustand | 5.0.11 | Game state management (meta-progression, UI state) | Minimal boilerplate for non-React state; persist middleware handles localStorage serialization out of the box; state slices map cleanly to game domains (meta shop, run state, settings). |
+| Howler.js | 2.2.4 | BGM loop + all SFX playback | 7KB gzipped, zero dependencies, single API for both Web Audio (primary) and HTML5 Audio (fallback). Audio sprites pack all SFX into one file/one `<audio>` tag — critical because browsers limit simultaneous `<audio>` elements. Web Audio API directly is achievable but requires building sprite scheduling, volume management, AudioContext unlock-on-interaction, and cross-browser quirks by hand. Howler handles all of this. @types/howler 2.2.12 covers TypeScript. Used by hundreds of browser games. No external deps align well with the zero-backend constraint. |
 
-### Rendering Pipeline
+**Why not raw Web Audio API:** The Web Audio API is powerful but low-level. For this project (BGM loop + ~15 SFX) the required primitives — AudioContext unlock on first user gesture, audio sprite scheduling, looping with correct loop points, volume control, pause/resume — are all boilerplate that Howler.js encapsulates cleanly. Raw Web Audio saves 7KB but costs 200+ lines of plumbing. Not worth it for a portfolio scope game.
 
-| Library | Version | Purpose | Why |
-|---------|---------|---------|-----|
-| postprocessing (pmndrs) | 6.38.3 | Bloom, glitch, scanline effects | Outperforms Three.js built-in EffectComposer by merging multiple effects into a single shader pass; single-triangle fullscreen rendering; BloomEffect with luminanceThreshold controls exactly which neon elements glow. Latest: Feb 2026. |
-| three.quarks | 0.17.0 | Particle systems (explosions, trails, muzzle flash) | High-performance batch-rendered particle system for Three.js; handles billboard, stretched-billboard, trail, and mesh render modes; visual editor at quarks.art for designing VFX without code iteration; MIT licensed, actively maintained. |
+**Why not Tone.js:** Tone.js is a music synthesis/sequencing framework (~100KB gzipped). This project needs playback and looping, not synthesis. Tone.js is the right tool for a music creation app; Howler.js is the right tool for a game.
 
-### State & Persistence
+### Gamepad
 
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| Zustand persist middleware | (bundled with zustand 5.x) | localStorage auto-save/restore for meta-progression | Meta shop currency, unlocks, cosmetics, high scores — anything that must survive browser close. Use JSON serialization; stays within 5MB localStorage limit easily. |
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| Web Gamepad API (built-in) | — | Read controller buttons and axes | Zero install — `navigator.getGamepads()` is W3C standard, baseline-supported across all modern browsers. TypeScript types ship with `lib.dom.d.ts` which the project already includes (`"lib": ["ESNext", "DOM"]` in tsconfig.json). No npm package needed. Polling integrates directly into the existing fixed-timestep game loop. |
 
-### Development Tools
+**Pattern:** Gamepad API is polled (not event-driven) — call `navigator.getGamepads()` once per fixed-update frame and read button/axes state. This is the same model as the existing `InputManager` which already reads `Set<string>` for held keys per frame. Extend `InputManager` with a `pollGamepad()` method; the rest of the game consumes the same `isDown()`/`justPressed()` interface.
 
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| stats-gl | Frame rate + GPU timing display | Use during development to profile actual bottlenecks — target under 100 draw calls per frame. Install as dev dep; strip from production build via Vite env flags. |
-| lil-gui | 0.21.0 | Runtime parameter tweaking | Tune bloom threshold/intensity, particle counts, enemy speed, wave timing during dev without code restarts. Strip from prod build. |
-| @types/three | 0.183.1 | TypeScript types for Three.js | Version-locked to three 0.183.x; critical — version mismatch between three and @types/three causes phantom TS errors. |
+**No third-party library needed.** Libraries like `gamecontroller.js` add gamepad mapping and vibration APIs, but the project needs Standard Gamepad layout only (Xbox/PS4/Switch Pro all map to the standard 16-button layout in modern browsers). The TypeScript `Gamepad` and `GamepadButton` interfaces in `lib.dom.d.ts` are complete.
+
+**Dead-zone:** Analog stick axes require a dead-zone threshold (typically ±0.15) to suppress drift noise. This is 3 lines of code, not a library.
+
+### CRT / Scanline Post-Processing
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| `ScanlineEffect` (pmndrs/postprocessing) | Already installed — 6.38.3 | CRT scanline overlay | **Zero new install.** `ScanlineEffect` is already exported from the `postprocessing` package that is installed and in use. Just import and add to the existing `EffectPass`. Merges into the single-pass pipeline at no extra GPU cost. |
+| `VignetteEffect` (pmndrs/postprocessing) | Already installed — 6.38.3 | Screen edge darkening for CRT feel | Same package — zero install cost. Adds authenticity to CRT preset without any extra render pass. |
+| `ChromaticAberrationEffect` (pmndrs/postprocessing) | Already installed — 6.38.3 | RGB fringe for CRT aberration | Same package — zero install cost. Optional addition to higher-tier CRT unlocks. |
+
+**Integration:** The existing `BloomEffect.ts` wraps a single `EffectComposer` with a `RenderPass` and one `EffectPass(camera, bloom)`. The CRT effects merge into the same `EffectPass` — add them as additional arguments:
+
+```typescript
+const effectPass = new EffectPass(
+  camera,
+  bloom,          // already present
+  scanline,       // new — add when unlocked
+  vignette,       // new — add when unlocked
+);
+```
+
+Multiple effects in a single `EffectPass` compile into **one merged shader** — no extra fullscreen render pass cost per effect added.
+
+**Intensity slider:** `ScanlineEffect` takes `{ density: number }` (higher = tighter scanlines). `VignetteEffect` takes `{ darkness: number, offset: number }`. Both properties are mutable at runtime — no need to rebuild the pipeline, just update `scanlineEffect.density = value` and the effect adjusts immediately.
+
+### New Power-Up Visual Effects
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| `three.quarks` (already installed) | 0.17.0 | Beam laser trail, homing missile exhaust, time-slow pulse aura | Already in the stack for particle effects. Extend the existing `ParticleManager` with new `ParticleSystem` configs per power-up type. No new dependency. |
+| Custom `Line` / `LineSegments` (Three.js built-in) | 0.183.2 | Continuous beam laser geometry | Three.js `Line` with `LineBasicMaterial` or a thin `PlaneGeometry` quad is the right primitive for a beam laser — cheaper than a particle trail for a sustained line. Add to bloom selection for the neon glow. |
+
+**Time-slow visual:** A full-screen desaturation pulse fits `pmndrs/postprocessing` — either a brief `HueSaturationEffect` (also already in postprocessing) lerped to grayscale, or a simple custom `Effect` subclass. No new library.
 
 ---
 
-## Three.js Patterns for This Project
+## Supporting Libraries (New Installs)
 
-### Game Loop Pattern
+| Library | Version | Purpose | Install |
+|---------|---------|---------|---------|
+| howler | 2.2.4 | Audio playback (BGM + SFX) | `npm install howler` |
+| @types/howler | 2.2.12 | TypeScript types for Howler.js | `npm install -D @types/howler` |
 
-Use `renderer.setAnimationLoop()` — not `requestAnimationFrame()` directly. It's the official Three.js pattern, handles XR integration (future-proof), and works correctly with both WebGL and WebGPU backends.
-
-```typescript
-// Correct: Three.js-idiomatic game loop
-let lastTime = 0;
-const FIXED_STEP = 1 / 60; // 60Hz fixed update
-let accumulator = 0;
-
-renderer.setAnimationLoop((time: number) => {
-  const delta = Math.min((time - lastTime) / 1000, 0.1); // cap at 100ms to avoid spiral of death
-  lastTime = time;
-
-  accumulator += delta;
-  while (accumulator >= FIXED_STEP) {
-    update(FIXED_STEP); // fixed timestep for physics/movement
-    accumulator -= FIXED_STEP;
-  }
-
-  render(accumulator / FIXED_STEP); // interpolation alpha for smooth visuals
-  composer.render(); // postprocessing renders last
-});
-```
-
-**Why fixed timestep:** Enemy movement, bullet physics, and collision detection must be deterministic. Variable delta causes bullets to tunnel through enemies at low frame rates. The accumulator pattern costs nothing and prevents an entire class of frame-rate-dependent bugs.
-
-### Import Pattern (Three.js 0.160+)
-
-```typescript
-// Named imports — tree-shakeable, TypeScript-friendly
-import {
-  Scene,
-  PerspectiveCamera,
-  OrthographicCamera,
-  WebGLRenderer,
-  InstancedMesh,
-  PlaneGeometry,
-  MeshBasicMaterial,
-  Matrix4,
-  Color,
-  LoadingManager,
-  TextureLoader,
-} from 'three';
-
-// Addons use three/addons path (NOT three/examples/jsm — that path is deprecated since r150+)
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-```
-
-**Do not use:** `import * as THREE from 'three'` — imports the entire 600KB+ library, defeats tree-shaking.
-
-### Camera Setup for This Game
-
-Use **OrthographicCamera** — Space Invaders is a 2D-plane game. OrthographicCamera eliminates perspective distortion, making hit detection and grid-based formation positioning trivial. Set Z-depth to position layering (background, enemies, player, UI).
-
-```typescript
-const aspect = window.innerWidth / window.innerHeight;
-const viewHeight = 20; // world units visible vertically
-const camera = new OrthographicCamera(
-  -viewHeight * aspect / 2, // left
-  viewHeight * aspect / 2,  // right
-  viewHeight / 2,            // top
-  -viewHeight / 2,           // bottom
-  0.1,
-  100
-);
-camera.position.z = 10;
-```
-
-### InstancedMesh for Performance
-
-Use `InstancedMesh` for enemies, bullets, and particles that share the same geometry/material. Reduces draw calls from O(n) to O(1).
-
-```typescript
-// Pre-allocate pool for 200 enemies (max simultaneous in any wave)
-const enemyMesh = new InstancedMesh(
-  new PlaneGeometry(1, 1),
-  new MeshBasicMaterial({ map: enemyTexture, transparent: true }),
-  200
-);
-scene.add(enemyMesh);
-
-// Per-frame: update only active slots
-const matrix = new Matrix4();
-for (let i = 0; i < activeCount; i++) {
-  matrix.setPosition(enemies[i].x, enemies[i].y, 0);
-  enemyMesh.setMatrixAt(i, matrix);
-  enemyMesh.setColorAt(i, enemies[i].color);
-}
-enemyMesh.instanceMatrix.needsUpdate = true;
-enemyMesh.instanceColor.needsUpdate = true;
-```
-
-### Post-Processing Pipeline (Bloom for Neon Aesthetic)
-
-Use `pmndrs/postprocessing` — not Three.js built-in `UnrealBloomPass`. The pmndrs library merges multiple effects into one shader pass, critical for hitting 60fps with bloom + glitch + scanline all active.
-
-```typescript
-import { EffectComposer, RenderPass, EffectPass, BloomEffect, GlitchEffect } from 'postprocessing';
-
-const composer = new EffectComposer(renderer);
-composer.addPass(new RenderPass(scene, camera));
-composer.addPass(new EffectPass(
-  camera,
-  new BloomEffect({
-    luminanceThreshold: 0.8,  // only surfaces emitting > 0.8 brightness bloom
-    luminanceSmoothing: 0.025,
-    intensity: 2.5,           // strong glow for neon Tokyo aesthetic
-    radius: 0.75,
-  }),
-  // Additional effects in SAME pass = single shader = no extra draw call
-));
-```
-
-**Neon emissive pattern:** All neon-glowing objects use `MeshBasicMaterial` (or `MeshStandardMaterial` with `emissiveIntensity > 1.0`). Colors above 1.0 luminance threshold glow through bloom. Enemy wave color palettes are assigned at wave spawn time.
-
-### Asset Loading Pattern
-
-Use `THREE.LoadingManager` for coordinated preloading before game starts. All textures load before first frame renders — no pop-in during play.
-
-```typescript
-const manager = new LoadingManager();
-const textureLoader = new TextureLoader(manager);
-
-manager.onProgress = (url, loaded, total) => {
-  updateLoadingBar(loaded / total);
-};
-manager.onLoad = () => {
-  hideLoadingScreen();
-  startGame();
-};
-
-// Queue all assets
-const shipTexture = textureLoader.load('/assets/ship.png');
-const enemySheet = textureLoader.load('/assets/enemies.png');
-```
-
-### State Management Pattern
-
-Zustand with domain slices — not one monolithic store. Each domain is an independent store slice.
-
-```typescript
-// Meta-progression store (persisted to localStorage)
-const useMetaStore = create(
-  persist(
-    (set, get) => ({
-      currency: 0,
-      unlocks: {} as Record<string, boolean>,
-      addCurrency: (amount: number) => set(s => ({ currency: s.currency + amount })),
-      unlock: (id: string) => set(s => ({ unlocks: { ...s.unlocks, [id]: true } })),
-    }),
-    { name: 'super-space-invaders-meta' } // localStorage key
-  )
-);
-
-// In-run state (NOT persisted — resets on browser close by design)
-const useRunStore = create((set) => ({
-  score: 0,
-  lives: 3,
-  wave: 1,
-  inRunCurrency: 0,
-  // ...
-}));
-```
+**That's it. Two packages.** Everything else (Gamepad API, CRT effects, power-up visuals) uses what is already installed.
 
 ---
 
 ## Installation
 
 ```bash
-# Core runtime
-npm install three postprocessing three.quarks zustand
+# New runtime dependency
+npm install howler
 
-# TypeScript support
-npm install -D typescript @types/three
-
-# Build tooling
-npm install -D vite
-
-# Dev tools (strip from prod)
-npm install -D stats-gl lil-gui
+# New dev dependency (TypeScript types only)
+npm install -D @types/howler
 ```
 
-**Vite config for Three.js:**
-
-```typescript
-// vite.config.ts
-import { defineConfig } from 'vite';
-
-export default defineConfig({
-  build: {
-    target: 'esnext',        // Three.js 0.160+ requires ES2017+
-    rollupOptions: {
-      treeshake: {
-        moduleSideEffects: false, // enable aggressive Three.js tree-shaking
-      },
-    },
-  },
-  server: {
-    open: true,
-  },
-});
-```
+No other changes to package.json.
 
 ---
 
-## WebGL vs WebGPU Decision
+## What NOT to Add
 
-**Recommendation: Use WebGL 2 (default Three.js renderer) for v1.**
-
-Three.js r171+ has production-ready WebGPU via `three/webgpu` import path with automatic WebGL 2 fallback. However:
-
-- WebGPU performance in 2025 is inconsistent — some benchmarks show 2-4x LESS fps than WebGL on the same scene (GitHub issue #31055, Three.js forum)
-- Safari WebGPU (launched Safari 26, September 2025) is new and unproven in production games
-- This game's visual requirements (bloom + instanced enemies + particles) are achievable at 60fps with WebGL 2
-
-**When to migrate to WebGPU:** If particle count needs to exceed ~50,000 simultaneous particles (WebGPU compute shaders unlock GPU-side particle simulation at millions). For this game's scale, WebGL 2 is sufficient.
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| Tone.js | ~100KB gzipped synthesis/sequencing framework. This project needs playback, not synthesis. Massive overkill. | `howler` (7KB) |
+| Raw Web Audio API (no library) | Requires building AudioContext unlock handler, sprite scheduler, looping, and cross-browser quirks from scratch — ~200 lines of plumbing for the same result | `howler` |
+| `gamecontroller.js` or `mmk.gamepad` | Adds abstraction over an already-simple polling API. The Standard Gamepad layout is already normalized by modern browsers; no mapping library needed | `navigator.getGamepads()` directly |
+| Additional postprocessing passes for CRT | Each new `EffectPass` is a fullscreen render operation. CRT effects must go in the **same** `EffectPass` as bloom, not separate passes. | Combine all effects in one `EffectPass` |
+| `three-stdlib` (formerly three/examples/jsm wrappers) | Unnecessary abstraction layer; all needed Three.js add-ons already available via `three/addons/` path | Direct `three/addons/` imports |
+| Any physics engine for homing missiles | Homing is a 2D steering/rotation algorithm — angle to target + angular speed cap. Cannon-es or Rapier are not needed. | Atan2-based pure-pursuit in the existing `MovementSystem` |
+| A separate audio sprite generation tool | Only needed if building the sprite sheet from scratch. Just use Audacity or online tools to prepare the audio file; Howler accepts manual sprite offset/duration definitions in TypeScript | Manual sprite config |
 
 ---
 
 ## Alternatives Considered
 
-| Recommended | Alternative | Why Not |
-|-------------|-------------|---------|
-| Three.js (committed) | Phaser, PixiJS | WebGL 3D effects and portfolio differentiation require Three.js; Canvas2D alternatives can't match the visual ceiling |
-| Vite | Webpack, Parcel | Vite's native ESM dev server enables HMR on Three.js shader changes without full rebuild; Webpack is slower and more complex to configure for Three.js |
-| pmndrs/postprocessing | three.js built-in EffectComposer | pmndrs merges multiple effects into one shader pass; built-in stacks passes and pays full cost per effect — bloom + glitch + scanline would be 3 separate fullscreen passes |
-| three.quarks | ShaderParticleEngine, custom GPGPU | three.quarks has active maintenance, TypeScript types, and a visual editor; ShaderParticleEngine has not had a commit since 2020; GPGPU is overkill for this particle scale |
-| Zustand | Redux, Jotai, plain objects | Redux is overengineered for a single-player game; Jotai is React-centric; plain objects don't give the persist middleware for localStorage. Zustand has the smallest API surface for the most capability |
-| OrthographicCamera | PerspectiveCamera | Space Invaders gameplay is on a 2D plane; orthographic removes depth distortion, makes collision hitboxes exact, simplifies formation grid math |
-| TypeScript | Plain JavaScript | Game systems (roguelite state, artifact definitions, enemy wave scripts) are complex enough that runtime type errors during a portfolio demo would be catastrophic |
+| Recommended | Alternative | When Alternative Is Better |
+|-------------|-------------|---------------------------|
+| `howler` 2.2.4 | Raw Web Audio API | When building a music application needing DSP node graphs, custom filters, or synthesis — not a game with fixed SFX clips |
+| `howler` 2.2.4 | Tone.js | When building a music sequencer, live instrument interface, or procedurally generated audio — not an arcade game |
+| Web Gamepad API (built-in) | `gamecontroller.js` | When needing vibration/haptics across many controller models with different vendor IDs, or remapping non-standard controllers |
+| ScanlineEffect (already installed) | Custom GLSL shader `Effect` | When needing effects beyond what pmndrs provides — e.g., pixel-accurate phosphor dot simulation. Not needed here. |
 
 ---
 
-## What NOT to Use
+## Integration Points with Existing Stack
 
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| `import * as THREE from 'three'` | Imports entire 600KB+ library, defeats tree-shaking, larger initial bundle | Named imports: `import { Scene, InstancedMesh } from 'three'` |
-| `three/examples/jsm/` import path | Deprecated since r150, removed in r160; causes bundler warnings | `three/addons/` path (e.g., `three/addons/controls/OrbitControls.js`) |
-| Three.js built-in `UnrealBloomPass` | Each post-processing pass is a full fullscreen render operation; cannot merge with other effects | `BloomEffect` from `pmndrs/postprocessing` which merges into a single EffectPass |
-| Physics engine (cannon-es, rapier) | This is a 2D-plane arcade shooter; all "physics" is kinematic: set position directly each frame | Direct position updates in fixed timestep loop; no physics simulation needed |
-| React / React Three Fiber | R3F abstracts the Three.js API in ways that complicate direct game loop control; setAnimationLoop, InstancedMesh mutation, and custom post-processing are all harder through R3F | Vanilla Three.js with TypeScript; game engines don't need React's reconciler |
-| CSS/HTML for game UI (in-game) | DOM queries in the render loop kill performance; CSS transitions fight with requestAnimationFrame timing | Three.js SpriteMaterial or CanvasTexture for in-world UI; HTML only for main menu and meta shop screens (outside the game loop) |
-| `requestAnimationFrame` directly | Bypasses Three.js's render loop management; requires manual cleanup; doesn't handle tab visibility | `renderer.setAnimationLoop()` — the official Three.js pattern |
-| Variable-delta game loop without fixed timestep | Bullet speed and enemy movement become frame-rate dependent; collision tunneling at low FPS | Fixed timestep accumulator pattern (see Game Loop Pattern above) |
+### Audio + Game Loop
 
----
+Howler.js manages its own AudioContext internally. The only integration points are:
+1. Call `Howl.play()` on game events (shoot, enemy death, power-up pickup, BGM start/stop)
+2. Call `Howler.volume(0)` on pause, restore on resume
+3. AudioContext unlock: Howler auto-handles the "AudioContext requires user gesture" restriction — it queues audio until the first click/keypress
 
-## Stack Patterns by Variant
+No changes to the fixed-timestep game loop. Howler runs independently.
 
-**In-game rendering (battle loop):**
-- Three.js scene with OrthographicCamera
-- InstancedMesh for enemies, player bullets, enemy bullets (separate InstancedMesh per group)
-- three.quarks ParticleSystem for explosions, trails, muzzle flash
-- pmndrs/postprocessing EffectComposer for bloom pipeline
-- All UI (score, lives, wave number) via CanvasTexture updated each frame — no DOM
+### Gamepad + InputManager
 
-**Meta shop / main menu screens:**
-- Plain HTML + CSS (outside the canvas, no Three.js overhead)
-- Zustand store drives the UI state (unlocks, currency)
-- Transition back to game: dispose HTML overlay, resume game renderer
+`InputManager` currently tracks keyboard state with `heldKeys: Set<string>` and `justPressedKeys: Set<string>`. The gamepad extension adds:
 
-**Wave scripting (campaign vs. endless):**
-- Wave definitions as TypeScript data objects (not inline code)
-- Campaign: hand-authored array of wave definition objects
-- Endless: procedural wave generator that reads from the same enemy type definitions
+```typescript
+// InputManager.ts additions
+private gamepad: Gamepad | null = null;
+private prevButtons: readonly GamepadButton[] = [];
 
-**Saving / loading:**
-- Zustand persist middleware auto-serializes meta store to localStorage on every state change
-- In-run state explicitly excluded from persist — roguelite design: runs don't save mid-run
-- localStorage key: `super-space-invaders-meta`; backup to `super-space-invaders-scores` for high scores
+public pollGamepad(): void {
+  const pads = navigator.getGamepads();
+  this.gamepad = pads[0] ?? null; // take first connected gamepad
+}
+
+// Map to same interface: isDown(code) accepts both key codes and gamepad virtual codes
+// e.g., 'GP_A', 'GP_LEFT', 'GP_RIGHT', 'GP_START'
+```
+
+The rest of the game code (states, systems) reads `inputManager.isDown('GP_A')` exactly like `inputManager.isDown('Space')`. The mapping is:
+
+| Gameplay Action | Keyboard | Gamepad (Standard) |
+|-----------------|----------|--------------------|
+| Move left | ArrowLeft | Axis 0 < -0.15 |
+| Move right | ArrowRight | Axis 0 > 0.15 |
+| Fire | Space | Button 0 (A/Cross) |
+| Pause | Escape | Button 9 (Start) |
+| Navigate menus | Arrow keys | D-pad (buttons 12-15) or axis |
+| Confirm | Space/Enter | Button 0 (A/Cross) |
+
+`pollGamepad()` is called once per fixed-update step, before input reads, same as the keyboard clear pattern.
+
+### CRT Effects + BloomEffect.ts
+
+The existing `BloomEffect.ts` constructor builds:
+```
+RenderPass → EffectPass(camera, bloom)
+```
+
+The CRT preset adds effects to the same `EffectPass` argument list:
+```
+RenderPass → EffectPass(camera, bloom, scanline?, vignette?, chromaticAberration?)
+```
+
+Since `EffectPass` must be rebuilt when effect composition changes (the library compiles a merged shader), the `BloomEffect` class needs to expose a `setPreset(preset: CRTPreset)` method that rebuilds the `EffectPass` when the player unlocks a new CRT tier. This rebuild is a one-time operation (not per-frame), so performance is not a concern.
+
+**CRT intensity at runtime:** After EffectPass construction, individual effect properties are mutable:
+```typescript
+scanlineEffect.density = 1.0 + (tier * 0.25);  // tier 0-3
+vignetteEffect.darkness = 0.3 + (tier * 0.1);
+```
+
+CRT tier is stored in `MetaState.purchasedUpgrades[]` (existing field, same pattern as other unlocks).
 
 ---
 
@@ -321,29 +199,55 @@ Three.js r171+ has production-ready WebGPU via `three/webgpu` import path with a
 
 | Package | Compatible With | Notes |
 |---------|-----------------|-------|
-| three@0.183.2 | @types/three@0.183.1 | Keep minor versions in sync. Mismatched @types/three causes phantom TS errors. |
-| postprocessing@6.38.3 | three@0.183.x | pmndrs postprocessing tracks Three.js releases closely; check peer deps on upgrade |
-| three.quarks@0.17.0 | three@0.17x-0.18x | Verify on install; API stable but check Three.js peer dep requirement |
-| vite@7.3.1 | Node.js 20.19+ | Vite 7.x requires Node 20.19 or 22.12+; confirm CI/local Node version |
-| zustand@5.0.11 | TypeScript 5.x | Zustand 5 drops React as a required peer dep; works standalone in non-React projects |
+| howler@2.2.4 | All modern browsers (Chrome, Firefox, Safari, Edge) | No Three.js interaction. AudioContext is independent of WebGL context. |
+| @types/howler@2.2.12 | TypeScript 5.x | Provides `Howl`, `HowlOptions`, `Howler` global types |
+| Web Gamepad API | TypeScript via `lib.dom.d.ts` | Already included — `"lib": ["ESNext", "DOM"]` in tsconfig.json; no `@types/gamepad` needed |
+| ScanlineEffect (postprocessing@6.38.3) | Already installed | No version change needed |
+| VignetteEffect (postprocessing@6.38.3) | Already installed | No version change needed |
+| ChromaticAberrationEffect (postprocessing@6.38.3) | Already installed | No version change needed |
+
+---
+
+## Stack Patterns by Feature
+
+**If adding audio:**
+- Use `Howl` for SFX sprites (one JSON config object with all sound offsets)
+- Use a separate looping `Howl` for BGM with `loop: true`
+- Store the `Howl` instances in a singleton `AudioManager` class (not in Zustand — audio state is volatile)
+- Expose `AudioManager.sfx('shoot')`, `AudioManager.bgm.play()`, `AudioManager.setVolume(v)` — clean interface for all systems
+
+**If adding gamepad:**
+- Extend `InputManager.pollGamepad()` — called once per fixed step
+- Map gamepad input to virtual action codes (`GP_A`, `GP_LEFT`, etc.)
+- All existing `isDown()`/`justPressed()` call sites need no changes if virtual codes are added alongside keyboard codes
+- Register `gamepadconnected`/`gamepaddisconnected` events to show/hide a controller icon in HUD
+
+**If adding CRT presets:**
+- Add `crtTier: 0 | 1 | 2 | 3` to `MetaState` (new persisted field, add to migration as v4)
+- Expose `BloomEffect.setCRTTier(tier)` which rebuilds the `EffectPass` with tier-appropriate effects
+- Tier 0 = no CRT; Tier 1 = ScanlineEffect only; Tier 2 = Scanline + Vignette; Tier 3 = Scanline + Vignette + ChromaticAberration
+- Call `BloomEffect.setCRTTier()` on state restore (game load) and on meta shop purchase
+
+**If adding new power-up visuals:**
+- Homing missile trail: new `three.quarks` `ParticleSystem` config with stretched-billboard mode
+- Beam laser: `PlaneGeometry` quad (1px wide, full screen height) with emissive material + bloom selection
+- Time-slow pulse: brief `HueSaturationEffect` animation (0 saturation → restore over 0.5s), already in postprocessing@6.38.3
 
 ---
 
 ## Sources
 
-- [Three.js r173 release notes — GitHub](https://github.com/mrdoob/three.js/releases/tag/r173) — Confirmed January 2025 release; r173 current at research time; npm shows 0.183.2 as latest
-- [npm registry — three@0.183.2](https://www.npmjs.com/) — Version confirmed via `npm info three version`
-- [npm registry — postprocessing@6.38.3](https://github.com/pmndrs/postprocessing) — Confirmed February 2026 release; peer dep reviewed
-- [pmndrs/postprocessing GitHub](https://github.com/pmndrs/postprocessing) — Effect list, EffectPass shader merging architecture
-- [Three.js InstancedMesh Docs](https://threejs.org/docs/#api/en/objects/InstancedMesh) — setMatrixAt/setColorAt patterns, needsUpdate flag
-- [three.quarks GitHub](https://github.com/Alchemist0823/three.quarks) — 367 commits, MIT license, active Discord, quarks.art visual editor
-- [WebGPU vs WebGL Three.js forum issue #31055](https://github.com/mrdoob/three.js/issues/31055) — Performance inconsistency evidence; basis for WebGL 2 recommendation for v1
-- [Three.js best practices 2026 — utsubo.com](https://www.utsubo.com/blog/threejs-best-practices-100-tips) — "Under 100 draw calls" rule, stats-gl recommendation, particle scaling with WebGPU
-- [Vite official docs — build options](https://vite.dev/config/build-options) — Tree-shaking config, esnext target
-- [Zustand GitHub — pmndrs/zustand](https://github.com/pmndrs/zustand) — Persist middleware pattern, slice architecture
-- [Three.js migration guide — GitHub wiki](https://github.com/mrdoob/three.js/wiki/Migration-Guide) — three/addons path replacing three/examples/jsm since r150+
+- [howler.js npm — howler@2.2.4](https://www.npmjs.com/package/howler) — Version 2.2.4, last published March 2024. 700K weekly downloads. MEDIUM confidence (2 year old release but still dominant game audio library)
+- [@types/howler npm — 2.2.12](https://www.npmjs.com/package/@types/howler) — TypeScript type definitions, last published ~1 year ago
+- [MDN — Web Gamepad API](https://developer.mozilla.org/en-US/docs/Web/API/Gamepad_API) — Authoritative spec; Gamepad, GamepadButton, navigator.getGamepads() documented. HIGH confidence.
+- [MDN — Navigator.getGamepads()](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/getGamepads) — Polling pattern; Standard mapping layout. HIGH confidence.
+- [pmndrs/postprocessing ScanlineEffect docs](https://pmndrs.github.io/postprocessing/public/docs/class/src/effects/ScanlineEffect.js~ScanlineEffect.html) — density parameter, BlendFunction options. MEDIUM confidence (doc page confirmed in search; density: 1.25 usage pattern confirmed from TresJS guide)
+- [pmndrs/postprocessing GitHub](https://github.com/pmndrs/postprocessing) — ScanlineEffect, VignetteEffect, ChromaticAberrationEffect all confirmed exported from package. HIGH confidence.
+- [TypeScript tsconfig.json — DOM lib](C:/Development/SuperSpaceInvader3JS/tsconfig.json) — `"lib": ["ESNext", "DOM"]` confirmed. Gamepad types in lib.dom.d.ts require no additional install. HIGH confidence (first-party verification).
+- [HTML5 Gamepad API Developer Guide 2026](https://gamepadtester.pro/the-html5-gamepad-api-a-developers-guide-to-browser-controllers/) — Standard gamepad layout, polling pattern, dead-zone pattern. MEDIUM confidence.
+- [Howler.js vs Tone.js comparison — UIModule](https://uimodule.com/introduction-to-frontend-web-audio-tools-howler-js-and-tone-js/) — Tone.js = synthesis/sequencing; Howler.js = playback/game audio. HIGH confidence.
 
 ---
 
-*Stack research for: Browser-based arcade space shooter with roguelite meta-progression (Super Space Invaders X)*
-*Researched: 2026-03-02*
+*Stack research for: Super Space Invaders X v1.1 — Audio, Gamepad, CRT shaders, Power-up visuals*
+*Researched: 2026-03-06*

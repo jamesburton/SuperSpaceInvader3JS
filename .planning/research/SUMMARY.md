@@ -1,258 +1,228 @@
 # Project Research Summary
 
-**Project:** Super Space Invaders X
-**Domain:** Browser-based arcade space shooter with roguelite meta-progression (Neon Tokyo cyberpunk aesthetic)
-**Researched:** 2026-03-02
+**Project:** Super Space Invaders X v1.1
+**Domain:** Browser-based arcade space shooter — Three.js/WebGL with roguelite meta-progression (v1.1 feature additions)
+**Researched:** 2026-03-06
 **Confidence:** HIGH
 
 ## Executive Summary
 
-Super Space Invaders X is a WebGL arcade shooter built with Three.js in TypeScript, differentiated by a neon cyberpunk visual identity and a layered roguelite progression system. Research confirms this is a well-trodden architecture domain — Three.js community patterns for game loops, InstancedMesh formation rendering, object pooling, and post-processing pipelines are thoroughly documented and validated. The stack is locked: Three.js 0.183.2 with the pmndrs/postprocessing library for bloom, Zustand 5 for state management, Vite 7 for tooling, and three.quarks for particle effects. The key technical differentiator over generic browser shooters is the full WebGL pipeline enabling bloom/glow effects impossible with Canvas2D.
+Super Space Invaders X v1.1 adds six feature categories to a fully-working v1.0 codebase: audio, gamepad input, ship skins, new laser power-ups, meta shop expansion, and CRT post-processing. The research is unusually clean because the existing stack is production-validated and the v1.1 additions slot into existing architecture without requiring foundational changes. Only two new npm packages are needed (howler@2.2.4 + @types/howler@2.2.12); everything else — CRT scanlines, gamepad TypeScript types, particle effects — already exists in the installed dependencies. The architectural approach is purely additive and dependency-ordered: MetaStore schema v4 migration gates skins, difficulty unlocks, and CRT features, so it must be completed first.
 
-The recommended build order is strict: establish the performance-critical architecture patterns first (object pooling, InstancedMesh, fixed-timestep game loop) before any gameplay content, because retrofitting these onto existing code is a significant rewrite. Core feel — responsive movement, satisfying kill feedback, particle explosions — must be validated in an endless mode before meta-progression systems are touched. The research is clear that developers consistently overbuild meta systems before core feel is proven, producing technically correct roguelite wrappers around gameplay that isn't fun. The "fun bar" milestone — 10 minutes of play without meta unlocks feels engaging — must gate all meta-progression work.
+The recommended build order is: MetaStore v4 schema first, then low-coupling features (audio, gamepad) that wire into existing system boundaries via setter injection and input set synthesis, then isolated visual features (skins, CRT), then ballistic power-up modifiers (additive changes to existing systems), then beam weapons (new BeamSystem + BeamEffect pair — the most technically complex feature category), and finally the meta shop UI expansion that aggregates all prior work. Three laser types — continuous beam, charged burst, sweeping laser — require a dedicated phase because they cannot use the bullet pool model and introduce a new damage domain that does not fit CollisionSystem's existing bullet loop.
 
-The principal risks are performance-related and architectural. Dynamic point lights per bullet can halve frame rate on integrated GPUs; additive-blended sprites replace them with no visual cost. Global bloom without layer separation washes out the scene. O(n) draw calls from individual enemy meshes must be caught at architecture time, not tuned later. Meta shop currency balance requires designing the full unlock tree before implementing drop rates, and localStorage save data requires schema versioning from day one to survive build redeployments on Itch.io. None of these risks are novel — all have documented solutions.
-
----
+The primary risk category is subtle silent failures that pass automated testing and only appear in specific runtime conditions. AudioContext autoplay suspension silently drops all audio without any error (only manifests in a fresh browser tab on Chrome). Zustand field hydration silently produces `undefined` without a schema version bump (only manifests when loading a v3 save file). Gamepad axes produce constant drift without a radial deadzone (only manifests on consumer hardware with loose sticks). The mitigation is explicit "looks done but isn't" checklists per phase — each phase has specific verification conditions that must be confirmed before proceeding.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The stack is a coherent, production-validated combination for 2026 browser game development. Three.js 0.183.2 with TypeScript provides the rendering foundation; named imports (not `import * as THREE`) are mandatory for tree-shaking. Vite 7.3.1 is the correct build tool — native ESM and sub-second HMR for shader iteration are non-negotiable for development velocity on this type of project.
+The v1.1 stack adds exactly two packages to the existing production stack. Howler.js (2.2.4) handles all audio via a 7KB library that wraps AudioContext lifecycle, audio sprite scheduling, and cross-browser quirks — the alternative (raw Web Audio API) requires 200+ lines of boilerplate for the same result. The Web Gamepad API requires no npm install; TypeScript types are already available via `lib.dom.d.ts` because the project's tsconfig already includes `"lib": ["ESNext", "DOM"]`. CRT scanline effects (ScanlineEffect, VignetteEffect, ChromaticAberrationEffect) are all already exported from the installed pmndrs/postprocessing@6.38.3 — zero new install cost.
 
-The rendering pipeline relies on `pmndrs/postprocessing` 6.38.3 (not Three.js built-in EffectComposer) because it merges multiple effects into a single shader pass, enabling bloom + glitch + scanline without the 3x fullscreen render cost. WebGL 2 over WebGPU is the correct decision for v1 — WebGPU performance is inconsistent across hardware in 2026 and this game's entity counts are achievable at 60fps with WebGL 2. Migrate to WebGPU only if particle counts need to exceed ~50,000 simultaneous (GPU-side simulation via compute shaders).
+**Core technologies (v1.1 additions only):**
+- **howler@2.2.4**: BGM loop + all SFX playback — 7KB gzipped; handles AudioContext unlock, audio sprite scheduling, cross-browser quirks automatically; zero dependencies
+- **@types/howler@2.2.12**: TypeScript types for howler — dev dependency only, no runtime cost
+- **Web Gamepad API (built-in browser standard)**: Controller input — zero install; poll via `navigator.getGamepads()` in the fixed-timestep loop; `Gamepad` and `GamepadButton` types already in `lib.dom.d.ts`
+- **ScanlineEffect / VignetteEffect / ChromaticAberrationEffect (pmndrs/postprocessing@6.38.3)**: CRT post-processing — already installed; add to existing EffectPass at zero additional draw-call cost
+- **three.quarks@0.17.0 (already installed)**: New power-up particle trails — extend existing ParticleManager configs; no new dependency
 
-**Core technologies:**
-- **Three.js 0.183.2**: WebGL renderer, scene graph, InstancedMesh for bulk entities — committed stack choice, no alternative considered
-- **TypeScript 5.9.3**: Type safety for complex game systems (roguelite state, artifact definitions, wave scripting) — runtime type errors during a portfolio demo are unacceptable
-- **Vite 7.3.1**: Build tool with native ESM, HMR for shader iteration — requires Node.js 20.19+
-- **pmndrs/postprocessing 6.38.3**: Single-pass bloom, glitch, and scanline effects — outperforms Three.js built-in EffectComposer at equal visual quality
-- **three.quarks 0.17.0**: Batch-rendered particle systems for explosions, trails, muzzle flash — has visual editor at quarks.art
-- **Zustand 5.0.11**: Minimal-boilerplate state management with persist middleware for localStorage serialization — domain-sliced stores (MetaState separate from RunState)
-- **OrthographicCamera**: Required for 2D-plane gameplay — eliminates depth distortion, makes hitbox math exact
-
-**Critical version note:** `@types/three` must be locked to the same minor version as `three` (0.183.x). Mismatch causes phantom TypeScript errors.
-
-See `.planning/research/STACK.md` for full patterns and installation details.
+**What not to add:** Tone.js (100KB synthesis framework — overkill for playback), gamecontroller.js (unnecessary abstraction over already-normalized Standard Gamepad API), any second EffectPass for CRT blended with bloom in the same pass (see Pitfall 6 below), any physics engine for homing missiles (atan2-based steering is 10 lines).
 
 ### Expected Features
 
-Research identifies a clear split between table stakes (genre expectations) and differentiators (what makes this portfolio-worthy). The most important finding: 60fps is not optional — browser shooter research documents a 31% session-length increase at 60fps vs sub-60fps.
+The feature research establishes a clear MVP boundary for v1.1 launch. Every major category must be present at minimum depth — missing a full category (e.g., no audio at all, no skins at all) is worse than having all categories at shallow depth.
 
 **Must have (table stakes):**
-- Responsive ship movement with sub-100ms input response — poll keyboard state each frame, not event-driven
-- Shooting with muzzle flash, projectile travel, and impact effects
-- Enemy death animations and explosion particles — killing into void registers as "broken"
-- Score, wave indicator, and lives HUD — genre DNA
-- Game over screen with run summary — closure and retry motivation
-- Power-up drops during waves (spread shot, rapid fire, shield)
-- Boss encounter with distinct health bar
-- Wave difficulty escalation — same-difficulty waves cause boredom by wave 3
-- Persistent meta-progression via localStorage — demo sessions must survive browser refresh
-- Between-wave upgrade shop (3-choice, in-run currency)
-- Main menu with clear entry points
-- Screen shake and hit flash on player damage
-- Pause functionality
+- Audio: BGM loop + core SFX coverage (shoot, enemy death, player hit, power-up pickup, wave start, boss phase, game over) — silence on any key event reads as broken after audio is in scope
+- Audio: AudioContext unlock on first gesture + master mute toggle — Chrome requires gesture; no mute means no way to silence
+- Gamepad: connect detection + left stick move + A=shoot + Start=pause + disconnect fallback to keyboard — minimum viable controller support
+- Ship skins: 3 distinct geometry shapes + 3-4 color variants per shape — shape variety is the actual differentiator; color-only variants feel cosmetically shallow
+- All 6 power-ups: piercing shot, homing missile, time slow, continuous beam, charged burst, sweeping laser — all must ship in v1.1
+- Meta shop: extra lives (hard cap 2) + starting power-up slot unlock + difficulty Hard unlock
+- CRT scanline: tier 1 unlock in meta shop + real-time intensity slider — at least one preset; slider makes it usable
 
-**Should have (competitive differentiators):**
-- Neon Tokyo multi-hue enemy waves — per-wave color palette assignments with emissive bloom materials
-- Enemy type archetypes with distinct combat roles: shielders, flankers, snipers, chargers
-- Formation-breaking behavior mid-wave (enemies that charge out of formation)
-- Multi-phase boss fight with telegraphed pattern transitions
-- In-run artifact system locked at run start (creates pre-run strategic identity)
-- Full meta shop with functional and cosmetic unlocks (ship skins, color themes, weapon loadouts, artifact slots)
-- Bloom/glow post-processing on projectiles and ships
-- Campaign mode with handcrafted chapter 1 (3-4 levels + boss)
-- Endless mode for always-playable demo sessions
+**Should have (competitive differentiators for v1.1):**
+- Gamepad rumble on player hit — 150ms haptic feedback (GamepadHapticActuator) punches above its implementation cost
+- BGM dynamic intensity on boss phase — subtle filter cutoff modulation during boss transitions
+- Per-weapon SFX with distinct tonal identity — each weapon sounds like itself without reading tooltips
+- Homing missile lock-on reticle — communicates the mechanic passively without UI text
+- Time slow: whole-world visual treatment — desaturation effect + audio cue signals the game state, not just a slowdown
+- CRT tiers 2 and 3 with heavier chromatic aberration
+- Sweeping laser: smart sweep direction weighted toward highest enemy density cluster
 
-**Defer (v2+):**
-- Audio (BGM + SFX) — significant scope, visual feedback compensates in v1
-- Gamepad support — keyboard is sufficient for v1 portfolio demos
-- Touch/mobile controls — separate UX design problem
-- Online leaderboards — requires backend infrastructure
-- Multiplayer — doubles networking complexity
+**Defer (v1.1.x patch / v2+):**
+- Multiple BGM tracks or stems for dynamic music — significant audio production scope; ship one great loop first
+- Full gamepad button remapping UI — low value relative to implementation complexity; hardcoded Standard layout is sufficient
+- Touch/mobile controls — entirely separate UX redesign
+- Online leaderboards — requires backend; out of scope for client-only portfolio piece
 
-**Anti-features to avoid:** Permanent stat power stacking (breaks balance over time — prefer unlocking sidegrades), physics-based movement (introduces input lag in an arcade shooter), procedural campaign levels (less satisfying than handcrafted), mid-run save state (breaks roguelite tension).
-
-See `.planning/research/FEATURES.md` for full dependency tree and prioritization matrix.
+**Anti-features to avoid:**
+- Barrel distortion/screen curvature on game canvas — distorts hitbox readability and introduces motion sickness risk; scanlines + chromatic aberration are sufficient CRT feel
+- Power-up stacking (all three active simultaneously) — implement override-on-pickup instead; visual chaos from combined effects undermines readability
+- Homing missiles that never miss — turn-rate cap + lifetime limit preserves skill expression and prevents trivial kills
+- Analog aim with right stick — breaks Space Invaders game design; left stick X for horizontal movement only, fire always upward
 
 ### Architecture Approach
 
-The architecture follows an ECS-lite pattern: entities hold data (position, velocity, health, mesh reference), systems are stateless processors that iterate entity arrays each frame, and the game loop uses a fixed-timestep accumulator for physics/collision with variable rendering. A pushdown automaton StateManager (stack-based FSM) handles screen transitions: MainMenu → Playing → Paused → RunOver → MetaShop. This pattern enables pause without destroying game state.
+The v1.1 architecture is purely additive to the existing ECS-like layered design. Six integration points cover all six feature categories: AudioManager (new singleton, setter-injected into systems that need to trigger SFX), InputManager extension (gamepad synthesized into existing `heldKeys`/`justPressedKeys` sets so all consumers get gamepad support without modification), Player geometry/material swap in-place (preserves bloom selection registration on the same Mesh object), BloomEffect extended with `addCRTEffect()` method that adds a second EffectPass, MetaStore schema v4 with migration block, and a new BeamSystem+BeamEffect pair that owns laser rendering and damage outside the CollisionSystem bullet loop.
 
-State is strictly segregated: RunState (volatile, discarded on run end) holds in-run data (score, wave, HP, active power-ups); MetaState (persisted to localStorage) holds cross-run data (unlocks, currency, cosmetics, high scores). Systems never access localStorage directly — only MetaState.save() writes to it, only on deliberate save points (run end, shop purchase, beforeunload). Config is read-only data objects in `config/` — entities copy values on spawn, never mutate shared config.
+**Major components (v1.1 additions):**
+1. **AudioManager** (`src/audio/AudioManager.ts`, NEW) — Web Audio API singleton; BGM loop + SFX sprite map; initialized lazily on first user gesture; injected via setter into WeaponSystem, CollisionSystem, PowerUpManager, ShopSystem
+2. **InputManager** (MODIFY only) — `updateGamepad()` synthesizes gamepad axis/button state into existing `heldKeys`/`justPressedKeys` sets; all consumers (WeaponSystem, PlayingState, TitleState, ShopUI) unchanged
+3. **BeamSystem + BeamEffect** (`src/systems/BeamSystem.ts` + `src/entities/BeamEffect.ts`, both NEW) — owns all three laser weapon types; persistent PlaneGeometry mesh with `scale.y = beamLength`; strip AABB damage collision separate from CollisionSystem's bullet loop
+4. **CRTEffect** (`src/effects/CRTEffect.ts`, NEW) — pmndrs/postprocessing Effect subclass; added in a second EffectPass AFTER the bloom EffectPass (not the same pass — see Pitfall 6)
+5. **MetaStore v4** (MODIFY) — schema bump with migration block; new fields: activeShipSkin, activeShipColor, activeDifficulty, crtIntensity
+6. **RunState** (MODIFY) — add `timeScale: number = 1.0`; AISystem and MovementSystem (enemies) multiply dt by timeScale; player movement uses raw dt
 
-**Major components:**
-1. **Game** — top-level orchestrator, owns the render loop, wires all subsystems
-2. **SceneManager** — owns Three.js Scene, WebGLRenderer, OrthographicCamera, EffectComposer; ignorant of game logic
-3. **StateManager** — pushdown FSM for high-level screens (enter/update/exit per state)
-4. **EntityManager** — tracks all live entities, manages lifecycle with object pools
-5. **Systems** (MovementSystem, AISystem, CollisionSystem, SpawnSystem, WeaponSystem, PickupSystem, EscalationSystem) — stateless processors called in order each frame
-6. **ObjectPool** — pre-allocated acquire/release pattern for bullets (200 slots), particles (500-1000 slots), enemies
-7. **RunState** — ephemeral in-run data; discarded at run end
-8. **MetaState** — persistent cross-run data; serialized to localStorage with schema version field
-9. **GameConfig** — static data definitions for enemy types, wave templates, upgrade trees, boss phases; never mutated at runtime
-10. **InputManager** — boolean keymap polled each frame; decouples input from game logic
-11. **PostProcessor** — EffectComposer pipeline; bloom on Layer 1 only (selective bloom via Three.js layers)
-12. **HUD/UI** — DOM overlay for in-run HUD and menus; not Three.js objects (faster for 2D UI)
+**Key patterns:**
+- Setter injection for optional collaborators (AudioManager wired after construction, not in constructors)
+- Gamepad synthesized into existing input sets (not a parallel API — no `isGamepadDown()` method)
+- Geometry swap in-place on player Mesh (dispose old, assign new — Mesh object reference stays constant)
+- BeamSystem as self-contained damage domain (never route beam damage through CollisionSystem)
+- Separate EffectPass per post-processing stage (bloom pass then CRT pass — do not merge into one)
 
-**Build order from architecture research (strict dependencies):**
-SceneManager → InputManager → ObjectPool → Player + basic bullet → Basic enemy + collision → RunState + HUD → SpawnSystem + waves → Enemy AI → Boss → PostProcessor → In-run shop → MetaState + MetaShop → Campaign mode → Cosmetics
-
-See `.planning/research/ARCHITECTURE.md` for full data flow diagrams and pattern examples.
+**Dependency-ordered build sequence:**
+1. MetaStore v4 schema + migration (prerequisite for skins, difficulty, CRT gating)
+2. AudioManager (standalone, no feature dependencies)
+3. Gamepad input extension to InputManager (no feature dependencies)
+4. Ship skins (requires MetaStore v4)
+5. CRTEffect (requires MetaStore v4 for intensity field)
+6. Power-up type extensions: piercing, homing, time slow (additive to existing systems)
+7. Meta shop UI expansion (requires MetaStore v4, new upgrade IDs from steps 4-6)
+8. BeamSystem + BeamEffect (requires extended power-up type registry from step 6)
 
 ### Critical Pitfalls
 
-Research identified 10 critical pitfalls. The top 5 that must be designed around from day one:
+1. **AudioContext created at startup — always suspended in Chrome** — Create AudioContext lazily inside the first user-gesture handler (`TitleState` "press any key" flow). Never instantiate in Game constructor or module init. All `playSfx` calls null-check `_ready` and silently no-op until init runs. Verification: fresh incognito tab — BGM plays after first keypress, not before.
 
-1. **No object pooling for bullets and enemies** — GC pressure from `new THREE.Mesh()` per bullet causes visible frame stutters at 10+ shots/second. Prevention: pre-allocate BulletPool (200), ParticlePool (500-1000) before any game logic is written; toggle `visible` flag, never `scene.remove()` pooled objects. Recovery cost if missed: HIGH (2-3 day rewrite).
+2. **Zustand MetaStore new fields hydrate as `undefined` without version bump** — For every new persistent field in v1.1: bump `SAVE_VERSION` to 4, add `version < 4` migration block setting all new fields to defaults. Test by pasting v3 JSON into localStorage key, refreshing, and verifying v1.0 data intact + new fields at defaults. Never assume Zustand's shallow merge handles new fields correctly without a version bump.
 
-2. **InstancedMesh not used for enemy formations** — Individual Mesh per enemy means O(n) draw calls. At 50 enemies + 100 bullets + particles, exceeds the 100-draw-call budget for 60fps. Prevention: InstancedMesh per enemy type at architecture phase; one draw call for entire formation. Recovery cost if missed: HIGH (structural rewrite).
+3. **BGM loop gap — audible click at loop boundary** — Author BGM as WAV (no encoder padding) or set `AudioBufferSourceNode.loopStart`/`loopEnd` to trim MP3/OGG encoder silence. Verification: 3+ full loop cycles in Chrome and Firefox — no audible click or stutter.
 
-3. **Dynamic PointLight per projectile** — 50 simultaneous lit bullets reduces frame rate 60-80% on integrated GPUs. Prevention: additive-blended sprites (`THREE.AdditiveBlending`) simulate glow at 90% reduced GPU cost; reserve actual lights for player ship (max 2) and boss (max 3).
+4. **Gamepad axis drift without radial deadzone — constant phantom movement** — Apply radial deadzone of 0.12 in InputManager at the axis read site, not in MovementSystem. Radial (not axial per-axis) deadzone avoids diagonal dead corridors that feel wrong. Verification: controller at rest for 10 seconds — ship stationary.
 
-4. **Variable delta without cap and fixed-timestep physics** — Tab switching causes massive delta values; 144Hz monitors run physics 2.4x faster than 60Hz machines. Prevention: cap delta at 50ms (`Math.min(delta, 0.05)`); separate physics update (fixed 60Hz accumulator) from render update (variable).
+5. **Gamepad buttons not visible until first hardware button press** — `navigator.getGamepads()` returns empty entries until user presses a button (browser privacy protection). Listen for `gamepadconnected` event to detect activation, then begin polling. Show "press any button on controller to connect" prompt on title screen. Verification: fresh browser profile, plug in controller, verify input only works after first button press, not before.
 
-5. **Bloom on everything, globally** — Naive global UnrealBloomPass blooms UI text, health bars, backgrounds. Prevention: Three.js Layer separation — neon meshes on Layer 1, bloom pass targets Layer 1 only. Also: use pmndrs/postprocessing not Three.js built-in (performance critical).
+6. **CRT ScanlineEffect in same EffectPass as SelectiveBloomEffect — bloom disappears** — Keep SelectiveBloomEffect in its own dedicated EffectPass. Add ScanlineEffect and other CRT effects in a subsequent EffectPass after bloom resolves. Merging them in one pass causes ordering conflicts where CRT processes un-bloomed pixel data. Verification: CRT at max intensity + bloom both active simultaneously — neon elements still glow correctly.
 
-**Additional critical pitfalls:**
-- **VRAM leaks** from missing `geometry.dispose()` / `material.dispose()` — GPU memory is NOT GC-managed. Monitor `renderer.info.memory` throughout development.
-- **Overbuilding meta before core feel is validated** — build meta systems only after 10 minutes of endless play without upgrades feels engaging.
-- **localStorage schema without version field** — first save must include `saveVersion: number`; implement `migrateSave()` before any schema change. Use stable key prefix (`ssix_v1_save`) for Itch.io deployment.
-- **Meta shop currency unbalanced** — design the full unlock tree and target run-counts before implementing any drop rates; use dev currency cheat toggle for isolated shop testing.
-- **Particle CPU budget exceeded** — use `THREE.Points` (single draw call) not individual `THREE.Sprite` objects; cap global particle count at ~1000 with priority queue.
+7. **Beam laser creating new geometry each frame — GC pressure** — Implement beams as a singleton Mesh with fixed PlaneGeometry (1 unit tall); update `mesh.scale.y = beamLength` each frame. Never create new PlaneGeometry inside the update loop. Verification: `renderer.info.memory.geometries` does not increase during 30 seconds of continuous beam fire.
 
-See `.planning/research/PITFALLS.md` for recovery strategies and phase-to-pitfall mapping.
+8. **Time slow applied globally to all systems — slows player ship** — Apply `timeScale` multiplier per-system selectively. AISystem and MovementSystem (enemies only) receive `dt * runState.timeScale`. Player MovementSystem receives raw `dt`. Particles receive raw `dt`. Verification: player ship moves at full speed inside the time slow window; enemies visibly slower.
 
----
+9. **Homing missile rotation requiring the shared bullet InstancedMesh to be restructured** — Give homing missiles their own dedicated small InstancedMesh (max 10 instances). The shared player bullet InstancedMesh never stores rotation (bullets are always vertical). Use a pre-allocated `dummy: THREE.Object3D` at class level for matrix composition — never create it inside the update loop. Verification: homing missile visibly rotates to track a laterally-moving enemy.
+
+10. **Non-standard gamepad controllers (Firefox + PS5 DualSense) silent failure** — Always check `gamepad.mapping === 'standard'` before using button index assumptions. Firefox has a confirmed DualSense mapping bug (Bugzilla #1922925). Show a "controller may not be fully supported" warning rather than silently failing. Verification: PS5 controller in Firefox — warning displays rather than silent wrong bindings.
 
 ## Implications for Roadmap
 
-Based on the architecture build-order dependencies and pitfall phase warnings, a 7-phase structure is recommended. The first two phases are non-negotiable infrastructure — they cannot be skipped or done later without a rewrite. The "fun bar" gate between Phase 3 and Phase 4 is the single most important milestone.
+Based on research, suggested phase structure for v1.1 (6 phases):
 
-### Phase 1: Engine Foundation
-**Rationale:** Everything visual and logical depends on SceneManager, InputManager, and ObjectPool. InstancedMesh and object pooling must be architecture decisions, not afterthoughts. Fixed-timestep game loop must be correct before any physics or collision logic is written.
-**Delivers:** Three.js scene with OrthographicCamera, WebGLRenderer, Vite dev server, fixed-timestep game loop with delta cap, keyboard InputManager, ObjectPool infrastructure for bullets/particles/enemies.
-**Addresses:** Performance foundation that every subsequent phase builds on.
-**Avoids:** Pitfalls 1 (no pooling), 3 (individual meshes → draw calls), 4 (variable delta), and 9 (retroactive rewrite cost).
-**Research flag:** Standard patterns — skip `/gsd:research-phase`. Three.js game loop and pool patterns are thoroughly documented.
+### Phase 1: Foundation — MetaStore v4 + Audio System
+**Rationale:** MetaStore v4 migration is the prerequisite for ship skins, difficulty unlocks, and CRT gating — all read new persistent fields. Audio is the highest-visibility v1.1 addition and has no feature dependencies beyond the first-user-gesture pattern established here. Both are foundational; building either later introduces rework risk.
+**Delivers:** Persistent save compatibility for v1.0 → v1.1 upgrade, BGM loop with seamless looping, full SFX coverage on all combat events, master mute toggle, audio volume persisted in localStorage.
+**Addresses:** Table stakes audio (BGM loop, SFX, AudioContext unlock, volume control), MetaStore schema v4 with migration block for all new fields.
+**Avoids:** AudioContext autoplay suspension (Pitfall 1), BGM loop gap (Pitfall 3), Zustand undefined fields on v1.0 save load (Pitfall 2).
+**Research flag:** Standard patterns — AudioContext lifecycle is well-documented via MDN + Chrome Developer docs; Zustand migration pattern already used in v1.0. Skip phase research.
 
-### Phase 2: Core Combat Loop
-**Rationale:** Architecture research defines a strict build order: player + bullet → basic enemy + movement → collision → RunState + HUD. This phase validates game feel before any other feature is built. Nothing else matters if shooting feels wrong.
-**Delivers:** Player ship with responsive movement (sub-100ms), shooting with muzzle flash particles, basic enemy grid that moves and fires back, AABB collision detection (bullet-enemy, bullet-player), score/lives/wave HUD as DOM overlay, game over screen.
-**Addresses:** All table-stakes features from FEATURES.md — responsive movement, shooting feedback, enemy death particles, score display, hit confirmation.
-**Avoids:** Pitfall 8 (overbuilding meta before core feel). Phase 2 must deliver a playable combat loop.
-**Research flag:** Standard patterns — skip `/gsd:research-phase`. Collision and movement patterns are well-documented.
+### Phase 2: Input Expansion — Gamepad Support
+**Rationale:** Gamepad changes only InputManager.ts; all existing consumers get gamepad support for free via the synthesize-into-existing-sets pattern. Low-risk, isolated, high user-visible impact. Once a controller is plugged in, players expect it to work.
+**Delivers:** Left stick movement with radial deadzone, A=shoot, Start=pause, D-pad menu navigation, connect/disconnect notification toast, standard mapping check with warning for unsupported controllers, keyboard + gamepad active simultaneously.
+**Addresses:** Gamepad connect/disconnect notification, analog movement, basic button mapping, "press any button to connect" prompt.
+**Avoids:** Gamepad axis drift (Pitfall 4), first-button-press detection requirement (Pitfall 5), non-standard controller silent failure (Pitfall 10).
+**Research flag:** Standard patterns — Web Gamepad API is an authoritative MDN/W3C-documented spec with stable Standard layout. Skip phase research.
 
-### Phase 3: Visual Identity and Effects
-**Rationale:** The neon aesthetic is the portfolio differentiator and must be proven early enough to iterate on it. Post-processing performance must be validated on integrated GPU hardware before it becomes load-bearing for all subsequent content. Performance tier system (HIGH/MEDIUM/LOW) must be built now, not after effects are embedded everywhere.
-**Delivers:** pmndrs/postprocessing bloom pipeline with selective Layer 1 targeting, NeonMaterials factory with MeshBasicMaterial emissive patterns, per-wave enemy color palette system, particle explosions via three.quarks (pooled, globally capped), scrolling background starfield/neon cityscape, screen shake calibrated by event severity, additive-blended sprite glow for projectiles (no PointLights per bullet).
-**Addresses:** Neon Tokyo differentiator, bloom post-processing, particle kill effects from FEATURES.md.
-**Avoids:** Pitfall 5 (bloom kills performance), Pitfall 7 (particle CPU budget), Pitfall 10 (dynamic lights per projectile).
-**Research flag:** May benefit from `/gsd:research-phase` for performance tier detection implementation and selective bloom layer setup specifics.
+### Phase 3: Visual Customization — Ship Skins + CRT Post-Processing
+**Rationale:** Both features require MetaStore v4 (Phase 1 prerequisite) and are isolated visual changes with no gameplay logic dependencies on each other. Grouping them avoids a tiny phase for each cosmetic system. CRT must be validated early enough that intensity tuning can be iterated on without being blocked by other features.
+**Delivers:** 3 ship geometry shapes + 4 color variants purchasable in meta shop; skin persists across runs and applies at PlayingState.enter(); CRTEffect as pmndrs Effect subclass in a separate EffectPass after bloom; tier 1 CRT unlock in meta shop; real-time intensity slider in settings.
+**Addresses:** Ship skin shapes with preview in selection UI, CRT visible at default intensity, CRT intensity real-time preview, meta shop named CRT presets (Arcade 1983 / Consumer 1991).
+**Avoids:** Replacing player.mesh object (breaks bloom selection — use geometry dispose + reassign), CRT in wrong EffectPass (Pitfall 6 — separate passes for bloom and CRT), ship geometry creation mid-run (pre-create all skins at startup, swap reference only).
+**Research flag:** Standard patterns — Three.js geometry swap in-place and pmndrs Effect subclass both documented officially. Skip phase research.
 
-### Phase 4: Enemy Depth and Wave System — "Fun Bar" Gate
-**Rationale:** Enemy variety and wave progression are the gameplay depth that makes the core loop sustainable. This phase must complete before meta-progression is touched — the pitfalls research is explicit that the "fun bar" gate (10 minutes of endless play without upgrades feels engaging) must be passed before Phase 5. SpawnSystem and wave data-driven config also unlock both campaign and endless mode simultaneously.
-**Delivers:** 4-5 enemy type archetypes (shielder, flanker, sniper, charger, basic) with distinct FSM behaviors and visual differentiation, formation-breaking behavior (health-threshold and timer triggers), wave escalation system with data-driven wave definitions in `config/waves.js`, power-up drops (spread shot, rapid fire, shield) with visual pickup feedback, between-wave breathing room (2-3 second pause + "Wave X" display), endless mode functional.
-**Addresses:** Enemy archetypes, formation-breaking, wave escalation, power-up drops from FEATURES.md. Resolves the artifact/upgrade dependency chain from FEATURES.md feature dependency tree.
-**Avoids:** Pitfall 8 (meta before feel) — this phase IS the "fun bar" validation. Pitfall 4 (frame-count-based logic) — all wave timing is elapsed-time-based.
-**Research flag:** Enemy FSM patterns and formation behavior may benefit from `/gsd:research-phase` — moderate complexity, documented but specific to this design.
+### Phase 4: Power-Ups Category A — Ballistic Modifiers (Piercing, Homing, Time Slow)
+**Rationale:** Three power-ups that extend the existing PowerUpType union with additive changes to Bullet, WeaponSystem, MovementSystem, and CollisionSystem. Lower complexity than beam weapons; establishes the power-up expansion pattern before the harder beam phase. Time slow requires RunState.timeScale; piercing requires CollisionSystem bullet-skip logic; homing requires per-bullet steering in MovementSystem.
+**Delivers:** Piercing shot (penetrates enemies, elongated visual trail, scaleY = 2.5x), homing missile with dedicated InstancedMesh and lock-on reticle on nearest enemy, time slow (runState.timeScale = 0.3 on enemies only) with visual desaturation treatment.
+**Addresses:** Piercing visual trail, homing lock-on reticle, time slow whole-world visual treatment, between-wave shop item pool expansion.
+**Avoids:** Time slow slowing player ship (Pitfall 8 — per-system timeScale application), homing missile rotation in shared bullet InstancedMesh (Pitfall 9 — dedicated small InstancedMesh), homing missiles that never miss (turn-rate cap + lifetime limit).
+**Research flag:** Homing missile turn-rate tuning and time-slow per-system timeScale split have multiple valid implementations. Consider light phase research on atan2 steering values and timeScale split architecture before locking implementation.
 
-### Phase 5: Boss Encounter
-**Rationale:** Architecture research places boss implementation after all base systems — it depends on AI, spawning, collision, health tracking, and attack pattern library. A multi-phase boss is the portfolio centerpiece and must be isolated in its own phase to give it proper attention. It is also table stakes per FEATURES.md.
-**Delivers:** Multi-phase boss with distinct visual identity, segmented health bar with phase transition triggers, attack pattern library (telegraphed phase changes), arena-aware targeting, cinematic entry sequence via atmospheric text overlay, full death animation.
-**Addresses:** Boss encounter (table stakes) and multi-phase boss differentiator from FEATURES.md.
-**Avoids:** Rushed boss that doesn't feel distinct from normal waves.
-**Research flag:** Standard patterns for boss FSM — skip `/gsd:research-phase`. Boss state machine is a straightforward extension of enemy AI patterns.
+### Phase 5: Power-Ups Category B — Beam Weapons (Continuous, Charged, Sweeping Laser)
+**Rationale:** Beam weapons cannot use the bullet pool — they are persistent meshes with area damage at intervals, fundamentally different collision semantics. A new BeamSystem + BeamEffect pair owns all three laser types. Building Category A first (Phase 4) establishes the extended power-up type registry and shop item patterns that beam weapons depend on.
+**Delivers:** Continuous beam laser (PlaneGeometry singleton, scale.y = hit distance, damage every 0.1s, bloom-registered), charged burst (ship emissive ramp 1.0→4.0 over charge duration, instant full-column flash on release), sweeping laser (rotating beam parent, arc over 2-3 seconds, optional smart sweep direction).
+**Addresses:** Laser power-ups feel meaningfully different from bullet weapons, charged burst telegraphed charge animation (emissive glow ramp), sweeping laser wide arc satisfaction.
+**Avoids:** Beam geometry allocation per frame (Pitfall 7 — scale.y on fixed geometry only, no new PlaneGeometry in update loop), routing beam damage through CollisionSystem (BeamSystem owns its own strip AABB check), beam mesh missing from bloom selection (register at BeamEffect construction).
+**Research flag:** Charged burst state machine (IDLE → CHARGING → FIRING → COOLDOWN), sweeping laser rotation collision model (rotated rectangle vs strip AABB), and smart sweep direction density sampling are non-trivial. Run phase research before planning execution.
 
-### Phase 6: Roguelite Progression Layer
-**Rationale:** This phase begins only after the fun bar is confirmed. Meta-progression infrastructure requires RunState (already built), MetaState with schema-versioned localStorage persistence, the meta shop unlock tree (designed in full before drop rate implementation), and between-wave upgrade shop. The entire currency economy must be balanced as a system — unlock tree first, then drop rates tuned to target run-counts.
-**Delivers:** MetaState with `saveVersion` field and `migrateSave()` function, localStorage persistence that survives browser close and Itch.io redeploy (stable key prefix), meta shop with 6-8 functional and cosmetic items (weapon loadouts, artifact slots, ship skins, color themes, trail effects), in-run between-wave upgrade shop (3-choice, in-run currency spend), run-end summary screen with currency earned and progress deltas, dev currency cheat toggle for isolated testing, alternate ship options (2 additional with stat variance).
-**Addresses:** Meta shop, persistent currency, between-wave shop, localStorage persistence from FEATURES.md.
-**Avoids:** Pitfall 6 (currency balance designed too late), Pitfall 9 (localStorage schema without versioning).
-**Research flag:** Currency balance model needs careful upfront design — consider `/gsd:research-phase` for roguelite economy calibration patterns.
-
-### Phase 7: Campaign Mode and Polish
-**Rationale:** Campaign chapter 1 depends on the wave scripting system (Phase 4), boss system (Phase 5), and level/chapter state management. Polish — artifact system, cosmetic depth, difficulty unlock system — comes last because it requires all base systems to be stable.
-**Delivers:** Campaign chapter 1 with 3-4 handcrafted wave scripts + boss encounter, chapter/level state management, mission briefing atmospheric text overlays, difficulty unlock system via meta shop, in-run artifact system (slots unlocked via meta shop, artifacts modify base behavior not stats), cosmetic unlock depth (skins, trail effects, color themes applied via meta shop), "Looks Done But Isn't" checklist verification (VRAM stability, run state reset, InstancedMesh cleanup, tab-switch delta cap).
-**Addresses:** Campaign mode, artifact system, cosmetic unlocks, difficulty unlock system from FEATURES.md.
-**Avoids:** All "looks done but isn't" failure modes from PITFALLS.md.
-**Research flag:** Artifact system modifier architecture may benefit from `/gsd:research-phase` — how modifiers compose and apply without coupling to entity internals is a non-trivial design decision.
+### Phase 6: Meta Shop Expansion + Run Start Flow
+**Rationale:** Meta shop expansion ties together all previous phases — it surfaces extra lives, starting power-up slot, difficulty unlocks, and CRT tiers in a coherent purchase flow. The starting power-up pre-run selection screen requires the power-up pool from Phases 4-5 to be meaningful. Build last because all items must exist before the UI aggregates them.
+**Delivers:** Extra lives (capped at 2) purchasable in meta shop; starting power-up slot unlock with pre-run selection screen (default skip allowed — do not require selection); difficulty Hard unlock gating waveConfig multipliers (Hard: +20% enemy speed, +1 enemy per wave, Sniper archetype earlier); CRT tiers 2 and 3; meta shop UI reorganized into categories (Weapons, Ships, Upgrades, Visual) for 10-second glance test navigation.
+**Addresses:** Meta shop overwhelming with 40+ flat items (category tabs), extra lives feel required not optional (tune base difficulty for fresh-player wave-5+ without any unlocks), starting power-up default to no selection.
+**Avoids:** Extra lives stacking to 10+ (hard cap 2), meta shop 40+ flat items overwhelming (tab/category navigation), starting power-up selection blocking run start.
+**Research flag:** Standard patterns — Zustand persist additive upgrade IDs and MetaShopUI extension follow established v1.0 patterns. Skip phase research.
 
 ### Phase Ordering Rationale
 
-- **Phases 1-2 are infrastructure-first:** InstancedMesh, object pooling, and fixed-timestep loop must precede all gameplay logic because retrofitting them is a HIGH-cost rewrite. This ordering is derived directly from the architecture build-order dependency chain.
-- **Phase 3 (visual identity) is early:** The neon aesthetic requires performance validation before it's embedded in all content. Finding that bloom is too expensive on integrated GPUs in Phase 6 would require painful backtracking.
-- **Phase 4 gates Phase 5+:** The fun bar test prevents the most common failure mode in roguelite development — technically correct meta systems wrapped around unsatisfying core gameplay.
-- **Phase 6 (meta) comes after feel is proven:** Forced by Pitfall 8 (overbuild meta before core feel). Currency balance model requires the full unlock tree to exist before a single drop rate is set.
-- **Phase 7 (campaign + polish) is last:** Campaign handcrafting requires stable wave, boss, and meta systems as foundation. Artifacts and cosmetics are depth layers, not core functionality.
+- MetaStore v4 must be first because three features (skins, CRT gating, difficulty selection) read new persistent fields. Undefined fields cause runtime crashes, not compile errors, and only manifest on save files from players who played v1.0.
+- Audio and gamepad have no feature dependencies and can be done in either order, but audio is higher user-visible impact and grouped with MetaStore v4 to make Phase 1 high-value.
+- Visual customization (Phase 3) groups two cosmetic systems that share the MetaStore v4 dependency and have zero gameplay logic dependencies on each other or on power-ups.
+- Power-ups split by complexity tier: ballistic modifiers (additive to existing systems, lower risk) before beam weapons (new system pair, higher risk). This avoids tackling the hardest feature before the power-up architecture patterns are established.
+- Meta shop UI expansion runs last because it aggregates items from all prior phases. Building the UI before the items exist creates partial states and revision churn.
 
 ### Research Flags
 
-Phases likely needing deeper research during planning:
-- **Phase 3:** Selective bloom layer setup and performance tier detection implementation — specific Three.js pattern, moderate complexity
-- **Phase 6:** Roguelite economy calibration — currency drop rate formulas and unlock-rate targeting patterns are sparse in official docs
-- **Phase 7:** Artifact modifier composition architecture — how to apply modifier stacking without coupling to entity internals
+Needs deeper research during planning:
+- **Phase 4 (Homing + Time Slow):** Homing missile turn-rate tuning (120°/sec vs 180°/sec), atan2 rotation offset value (`- Math.PI/2` for upward-facing), and per-system timeScale split have multiple valid implementations with different tradeoffs. Research before planning execution.
+- **Phase 5 (Beam Weapons):** Charged burst state machine transitions, sweeping laser rotation collision model, and smart sweep direction density sampling are non-trivial. This is the highest-complexity phase in v1.1. Run `/gsd:research-phase` before planning.
 
-Phases with standard patterns (skip research-phase):
-- **Phase 1:** Three.js game loop, object pooling, InstancedMesh — thoroughly documented with code examples in official sources
-- **Phase 2:** Core combat loop (movement, collision, HUD) — canonical patterns, well-documented
-- **Phase 5:** Boss FSM — straightforward extension of enemy AI state machine patterns already researched
-
----
+Standard patterns (skip phase research):
+- **Phase 1 (Audio + MetaStore):** Web Audio API + Zustand migration both documented from authoritative sources; howler.js API is simple and well-documented; v1.0 migration pattern already implemented in codebase.
+- **Phase 2 (Gamepad):** Web Gamepad API is a W3C specification with comprehensive MDN documentation; Standard Gamepad layout is stable across Xbox, PS, and Switch Pro controllers in Chrome.
+- **Phase 3 (Skins + CRT):** Three.js geometry swap in-place is documented in official Three.js docs; pmndrs Effect subclass pattern is in the official postprocessing wiki with code examples.
+- **Phase 6 (Meta Shop UI):** Purely additive to existing MetaShopUI and MetaStore patterns established in v1.0; no new architectural patterns required.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All versions verified via npm registry; Three.js, Vite, Zustand, and pmndrs/postprocessing are confirmed current-as-of March 2026. WebGL 2 vs WebGPU decision supported by performance evidence. |
-| Features | MEDIUM-HIGH | Table stakes are well-established genre conventions. Differentiator value is research-supported but ultimately requires playtest validation. Anti-feature rationale is solid (scope, balance, complexity arguments). |
-| Architecture | HIGH | Three.js render loop, InstancedMesh, EffectComposer, and object pool patterns are from official docs and high-confidence community resources. FSM and ECS-lite patterns are canonical game dev patterns. Collision performance at scale (150+ entities) is LOW confidence — no project-specific benchmarks. |
-| Pitfalls | MEDIUM-HIGH | Performance pitfalls (pooling, draw calls, bloom, dynamic lights, delta cap) are HIGH confidence from official Three.js sources. Roguelite balance pitfalls are MEDIUM from community sources. Schema versioning pitfall is HIGH from documented Itch.io deployment patterns. |
+| Stack | HIGH | Two new packages (howler + types) version-verified via npm. Everything else already installed. Gamepad types confirmed present in existing tsconfig lib. CRT effects confirmed exported from installed postprocessing version. |
+| Features | HIGH for patterns, MEDIUM for balance | Table stakes from MDN/Chrome official docs (audio, gamepad). Power-up feel and shop economy tuning are MEDIUM — requires playtest iteration; ship conservative values and tune up. |
+| Architecture | HIGH | Based on direct codebase reading of all modified files. Integration patterns are additive and follow established v1.0 patterns already used in production. BeamSystem pattern validated against pmndrs postprocessing wiki. |
+| Pitfalls | HIGH | Critical pitfalls (AudioContext, Zustand migration, bloom pass ordering) sourced from official Chrome Developers, MDN, and pmndrs docs. Firefox DualSense bug confirmed via official Mozilla Bugzilla. Beam/homing pitfalls from Three.js official docs + Three.js forum. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Collision detection performance at scale:** Research covers broad-phase and spatial grid strategies theoretically, but no benchmark data exists for this specific project's entity counts (50-150 enemies + 100-200 bullets simultaneously). Validate collision system performance with a stress test during Phase 2 before committing to the AABB approach.
-- **three.quarks peer dependency verification:** three.quarks 0.17.0 claims compatibility with three@0.17x-0.18x, but this should be verified on install against Three.js 0.183.2 before Phase 3 begins.
-- **Itch.io localStorage behavior:** Itch.io iframe embedding has documented localStorage path-change issues. The stable key prefix mitigation is recommended but should be tested explicitly against the actual deployment target before Phase 6 ships.
-- **Fun bar threshold calibration:** The "10 minutes of endless play without upgrades" fun bar test is qualitative. Define specific measurable criteria during Phase 4 planning (e.g., "3 external playtesters complete 10 minutes without prompting").
-
----
+- **CRT pass ordering conflict between ARCHITECTURE.md and PITFALLS.md:** ARCHITECTURE.md describes adding CRT to the same EffectPass as bloom (for performance); PITFALLS.md recommends separate EffectPass (for correct visual output). These conflict. The PITFALLS recommendation (separate passes) is safer and should be treated as authoritative — validate during Phase 3 with an explicit "CRT max + bloom active simultaneously — neon elements still glow" test. Accept the minor performance cost of one additional render operation.
+- **Homing missile turn-rate value:** Research recommends 120–180°/sec but notes this requires tuning. Ship conservative (120°/sec) and tune upward based on playtest feel during Phase 4.
+- **Audio asset production scope:** Research documents how to integrate audio but does not include the audio assets themselves (BGM synthwave loop file, SFX sprite file + JSON manifest). These must be sourced or produced before Phase 1 can ship. This is a dependency outside the code implementation — flag it as a blocker for Phase 1 planning.
+- **Sweeping laser smart sweep direction:** FEATURES.md lists this as a HIGH-complexity differentiator that is also a valid v1.1.x patch candidate. Ship base sweep first (Phase 5); add density weighting only if base sweep gameplay warrants the additional implementation cost.
+- **SFX rate-limiting thresholds:** FEATURES.md recommends max 4 SFX triggers/sec for high-frequency events (rapid fire). The specific threshold requires playtest feedback to determine where concurrent AudioBufferSourceNodes become audible as distortion. Set 4/sec initially and tune.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [Three.js r173+ release notes and npm registry](https://www.npmjs.com/) — Version verification for three@0.183.2, @types/three@0.183.1
-- [Three.js InstancedMesh Docs](https://threejs.org/docs/#api/en/objects/InstancedMesh) — setMatrixAt/setColorAt patterns
-- [pmndrs/postprocessing GitHub](https://github.com/pmndrs/postprocessing) — Effect list, EffectPass shader merging architecture, version 6.38.3
-- [Discover Three.js — Tips and Tricks](https://discoverthreejs.com/tips-and-tricks/) — Performance patterns, scene structure
-- [Building Efficient Three.js Scenes (Codrops, Feb 2025)](https://tympanus.net/codrops/2025/02/11/building-efficient-three-js-scenes-optimize-performance-while-maintaining-quality/) — Draw call budgets, instancing guidance
-- [Three.js Forum — Dispose things correctly](https://discourse.threejs.org/t/dispose-things-correctly-in-three-js/6534) — VRAM management patterns
-- [Game Programming Patterns — State](https://gameprogrammingpatterns.com/state.html) — FSM and pushdown automaton patterns
-- [MDN — Bounding volume collision detection with Three.js](https://developer.mozilla.org/en-US/docs/Games/Techniques/3D_collision_detection/Bounding_volume_collision_detection_with_THREE.js) — AABB collision approach
-- [Vite official docs — build options](https://vite.dev/config/build-options) — Tree-shaking config, esnext target
-- [Zustand GitHub — pmndrs/zustand](https://github.com/pmndrs/zustand) — Persist middleware pattern, slice architecture
+- MDN Web Audio API, AudioContext autoplay policy, AudioBufferSourceNode.loop — AudioContext lifecycle and BGM loop patterns
+- MDN Gamepad API, W3C Gamepad Specification — Standard layout mapping, polling pattern, deadzone requirement
+- Chrome Developers: Web Audio Autoplay Policy — Chrome-specific AudioContext suspension behavior
+- pmndrs/postprocessing GitHub and ScanlineEffect official docs — Effect composition, EffectPass merging, density/opacity parameters
+- Zustand persist official docs — schema migration pattern, version bump requirement
+- Three.js docs: InstancedMesh.setMatrixAt, BlendFunction — homing rotation matrix, beam additive blending
+- Direct codebase reading: Game.ts, InputManager.ts, WeaponSystem.ts, CollisionSystem.ts, BloomEffect.ts, Player.ts, MetaState.ts, ShopSystem.ts, PlayingState.ts — first-party verification of integration points
+- Mozilla Bugzilla #1922925 — PS5 DualSense mapping bug in Firefox confirmed open as of early 2026
+- pmndrs/postprocessing Custom Effects wiki — Effect subclass pattern, `mainImage` GLSL signature
 
 ### Secondary (MEDIUM confidence)
-- [100 Three.js Tips That Actually Improve Performance (2026)](https://www.utsubo.com/blog/threejs-best-practices-100-tips) — Under-100-draw-calls rule, stats-gl, WebGPU particle guidance
-- [WebGPU vs WebGL Three.js forum issue #31055](https://github.com/mrdoob/three.js/issues/31055) — Performance inconsistency evidence
-- [three.quarks GitHub](https://github.com/Alchemist0823/three.quarks) — MIT license, active maintenance, quarks.art editor
-- [Beat Invaders (comp) — GamingOnLinux review](https://www.gamingonlinux.com/2022/03/space-invaders-gets-reinvented-with-beat-invaders-and-its-slick/) — Competitor feature analysis
-- [Game Developer — Designing Enemies With Distinct Functions](https://www.gamedeveloper.com/design/designing-enemies-with-distinct-functions) — Enemy archetype design patterns
-- [JavaScript Game Loop timing (Aleksandr Hovhannisyan)](https://www.aleksandrhovhannisyan.com/blog/javascript-game-loop/) — Fixed-timestep accumulator pattern
-- [WebGL 60fps player retention data — Sonnydickson.com](https://sonnydickson.com/2025/08/23/why-browser-performance-still-matters-for-online-gaming-in-2025/) — 31% session-length increase at 60fps
-- [Scope Creep: The Silent Killer of Solo Indie Development (Wayline)](https://www.wayline.io/blog/scope-creep-solo-indie-game-development) — "Fun bar" gate rationale
-- [Draw Calls: The Silent Killer (Three.js Roadmap)](https://threejsroadmap.com/blog/draw-calls-the-silent-killer) — Draw call budget guidance
+- Gaffer on Games: Fix Your Timestep — fixed-timestep timeScale theory (canonical; per-system timeScale split is an inference from this pattern)
+- TresJS ScanlinePmndrs guide — density/opacity parameter confirmation (wrapper library, not core pmndrs lib)
+- Three.js forum: InstancedMesh rotation, geometry swap for regular Mesh — community-confirmed patterns consistent with official docs
+- gamepadtester.pro: deadzone radial vs axial guide (2026) — 0.12 deadzone threshold recommendation
+- howler.js npm registry: 700K weekly downloads, March 2024 last release — still dominant browser game audio library
 
 ### Tertiary (LOW confidence)
-- [Rogueliter.com — Best roguelites 2025](https://rogueliker.com/best-new-roguelikes/) — Meta-progression design conventions (community consensus, no academic backing)
-- [Roguelite progression design (ResetEra)](https://www.resetera.com/threads/do-you-like-meta-progression-in-your-roguelikes-roguelites.1341955/) — Player preference for sidegrades over stat stacking
-- [Roguelite progression systems academic paper (Theseus.fi)](https://www.theseus.fi/bitstream/handle/10024/881994/Kammonen_Eino.pdf) — Theoretical framework for meta-progression design
+- ResetEra: Meta progression roguelite community thread — extra lives cap community consensus; needs playtest validation for this specific game's balance
+- Slynyrd: Shmup laser design philosophy — laser feel principles; subjective; requires tuning against playtester feedback
+- Steredenn dev blog: Expandable laser implementation — beam approach from a different engine (2D Unity); useful for philosophy, not direct code patterns
 
 ---
-
-*Research completed: 2026-03-02*
+*Research completed: 2026-03-06*
 *Ready for roadmap: yes*
