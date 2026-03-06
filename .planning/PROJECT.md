@@ -35,13 +35,15 @@ The thrill of arcade shooting elevated — every run feels different because of 
 
 ### Active
 
-- [ ] Audio: synthwave BGM + sound effects (weapon fire, death, pickup, boss hits)
+- [ ] Audio: single synthwave BGM loop + full SFX coverage (combat, UI, ambient)
 - [ ] Gamepad support with button mapping
-- [ ] Ship skin unlocks and neon color theme options
+- [ ] Ship skins: 3-4 distinct ship shapes + color variants, unlockable in meta shop
+- [ ] New power-ups: piercing shot, homing missiles, time slow
+- [ ] New power-ups: continuous beam laser, charged burst laser, sweeping laser (rare, busy screens)
 - [ ] Starting power-up selection from unlocked pool
 - [ ] Extra lives and alternate ships in meta shop
-- [ ] Higher difficulty mode unlocks
-- [ ] CRT/scanline overlay and pixel-art rendering options
+- [ ] Difficulty mode unlocks (Hard/Nightmare) purchasable in meta shop
+- [ ] CRT/scanline presets with intensity slider, unlockable in steps via meta shop
 
 ### Out of Scope
 
@@ -65,6 +67,18 @@ localStorage persistence via Zustand persist (SAVE_VERSION 3, key: ssi-meta-v1).
 - **Audio**: Deferred to v2
 - **Infrastructure**: None — fully client-side, no server/backend
 
+## Current Milestone: v1.1 Polish & Depth
+
+**Goal:** Add audio, gamepad support, ship customization, six new power-ups, expanded meta shop, and unlockable CRT visual filters to deepen the gameplay loop and player expression.
+
+**Target features:**
+- Single synthwave BGM + full SFX coverage
+- Gamepad controller support
+- Ship skins (shapes + color variants) unlockable in shop
+- 6 new power-ups: piercing, homing, time slow, continuous beam, charged burst, sweeping laser
+- Meta shop expansion: extra lives, alt ships, starting power-up slot, difficulty unlocks
+- CRT/scanline presets with intensity, unlockable in steps
+
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
@@ -82,4 +96,4 @@ localStorage persistence via Zustand persist (SAVE_VERSION 3, key: ssi-meta-v1).
 | Campaign as data-driven wave configs | TypeScript objects not hardcoded logic; future chapters easy to add | ✓ Good — Chapter 1 defined in single config file |
 
 ---
-*Last updated: 2026-03-06 after v1.0 milestone*
+*Last updated: 2026-03-06 after v1.1 milestone start*
