@@ -132,6 +132,17 @@ None - no external service configuration required.
 - InstancedMesh architecture committed — cannot be retrofitted. Phase 3 enemy archetype work must extend EnemyType and ENEMY_DEFS, not add individual Mesh per enemy
 - Concern: collision detection performance at 150+ entities unvalidated — run stress test in Plan 04 before committing AABB approach
 
+## Self-Check: PASSED
+
+- FOUND: src/config/enemies.ts
+- FOUND: src/entities/Enemy.ts
+- FOUND: src/systems/AISystem.ts
+- FOUND: src/core/Game.ts
+- FOUND: .planning/phases/01-engine-core-combat/01-03-SUMMARY.md
+- FOUND commit: ae9e90c (Task 1)
+- FOUND commit: b816114 (Task 2)
+- FOUND commit: a97b8ff (docs/metadata)
+
 ---
 *Phase: 01-engine-core-combat*
 *Completed: 2026-03-02*
