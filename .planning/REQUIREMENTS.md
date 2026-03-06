@@ -114,13 +114,50 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated by roadmapper) | | |
+| AUD-01 | Phase 6 | Pending |
+| AUD-02 | Phase 6 | Pending |
+| AUD-03 | Phase 6 | Pending |
+| AUD-04 | Phase 6 | Pending |
+| AUD-05 | Phase 6 | Pending |
+| AUD-06 | Phase 6 | Pending |
+| AUD-07 | Phase 6 | Pending |
+| SHOP-08 | Phase 6 | Pending |
+| PAD-01 | Phase 7 | Pending |
+| PAD-02 | Phase 7 | Pending |
+| PAD-03 | Phase 7 | Pending |
+| PAD-04 | Phase 7 | Pending |
+| PAD-05 | Phase 7 | Pending |
+| SKIN-01 | Phase 8 | Pending |
+| SKIN-02 | Phase 8 | Pending |
+| SKIN-03 | Phase 8 | Pending |
+| SKIN-04 | Phase 8 | Pending |
+| SKIN-05 | Phase 8 | Pending |
+| CRT-01 | Phase 8 | Pending |
+| CRT-02 | Phase 8 | Pending |
+| CRT-03 | Phase 8 | Pending |
+| CRT-04 | Phase 8 | Pending |
+| CRT-05 | Phase 8 | Pending |
+| PWR-01 | Phase 9 | Pending |
+| PWR-02 | Phase 9 | Pending |
+| PWR-03 | Phase 9 | Pending |
+| PWR-04 | Phase 9 | Pending |
+| PWR-05 | Phase 9 | Pending |
+| PWR-06 | Phase 9 | Pending |
+| PWR-07 | Phase 9 | Pending |
+| PWR-08 | Phase 9 | Pending |
+| SHOP-01 | Phase 10 | Pending |
+| SHOP-02 | Phase 10 | Pending |
+| SHOP-03 | Phase 10 | Pending |
+| SHOP-04 | Phase 10 | Pending |
+| SHOP-05 | Phase 10 | Pending |
+| SHOP-06 | Phase 10 | Pending |
+| SHOP-07 | Phase 10 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 38 total
-- Mapped to phases: 0
-- Unmapped: 38 ⚠️
+- Mapped to phases: 38
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-06*
-*Last updated: 2026-03-06 after initial definition*
+*Last updated: 2026-03-06 after roadmap creation*
