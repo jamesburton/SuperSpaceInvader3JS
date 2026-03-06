@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A browser-based Space Invaders remake built with Three.js/WebGL, featuring a Neon Tokyo cyberpunk aesthetic with dense color, multi-colored enemy waves, and glowing effects. Combines the pure arcade shooting of the original with modern roguelite progression, a deep meta-unlock shop, dynamic enemy AI, and both campaign and endless modes. Built as a portfolio piece to showcase polished game development craft.
+A browser-based Space Invaders remake built with Three.js/WebGL, featuring a Neon Tokyo cyberpunk aesthetic with dense neon color, six enemy archetypes with formation-breaking AI, a roguelite meta-progression economy, and both Campaign and Endless game modes. Shipped v1.0 with 7,486 LOC TypeScript as a portfolio piece showcasing polished game development craft.
 
 ## Core Value
 
@@ -12,76 +12,74 @@ The thrill of arcade shooting elevated — every run feels different because of 
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Three.js/WebGL renderer at stable 60fps with object pooling and InstancedMesh — v1.0
+- ✓ Fixed-timestep game loop preventing bullet tunneling — v1.0
+- ✓ Player movement, firing, lives, invincibility frames, pause — v1.0
+- ✓ Score, wave, and lives HUD — v1.0
+- ✓ Neon Tokyo cyberpunk aesthetic with selective bloom post-processing — v1.0
+- ✓ Per-wave color palettes with emissive materials on all entities — v1.0
+- ✓ Particle effects: death bursts, muzzle flash, engine trail, pickup swell — v1.0
+- ✓ Screen shake, wave announcements, weapon-type visual distinction — v1.0
+- ✓ Six enemy archetypes with distinct geometry, AI, and visual identity — v1.0
+- ✓ Formation-breaking behavior (flanking, charging, diving, swooping) — v1.0
+- ✓ Wave escalation with increasing enemy count, speed, and fire rate — v1.0
+- ✓ Spread shot, rapid fire, and shield power-ups with duration expiry — v1.0
+- ✓ In-run Gold currency, between-wave upgrade shop with 3 random choices — v1.0
+- ✓ Persistent SI$ meta currency earned at run end via localStorage — v1.0
+- ✓ Meta shop with weapon loadout unlocks and capped passive stat upgrades — v1.0
+- ✓ Multi-phase boss encounter with telegraphed transitions and segmented health bar — v1.0
+- ✓ Campaign Chapter 1: 4 handcrafted levels + boss with atmospheric briefings — v1.0
+- ✓ Endless mode with infinite wave escalation — v1.0
+- ✓ Mode selection UI (Campaign/Endless/Upgrades) with keyboard navigation — v1.0
+- ✓ Campaign progress saved to localStorage and resumable — v1.0
 
 ### Active
 
-**Rendering & Visuals**
-- [ ] Three.js/WebGL renderer with Neon Tokyo cyberpunk aesthetic
-- [ ] Dense multi-color enemy waves with per-wave visual variety and escalating complexity
-- [ ] Glowing sprites, neon lighting effects, particle systems for explosions and impacts
-- [ ] Cosmetic unlock system: ship skins, color themes, trail effects
-
-**Game Modes**
-- [ ] Campaign mode — expandable foundation (1 full chapter: 3-4 levels + boss fight)
-- [ ] Endless/arcade mode — infinite wave escalation for score-chasing
-- [ ] Difficulty unlock system — higher difficulties and additional game modes unlocked via meta shop
-
-**Enemy Systems**
-- [ ] Enemy types with distinct combat roles (shielders, flankers, snipers, chargers)
-- [ ] Formation-breaking behavior — enemies that charge, split, flank, and adapt mid-wave
-- [ ] Escalating enemy visual variety across waves and levels
-- [ ] Boss encounters with unique, multi-phase attack patterns
-
-**In-Run Progression**
-- [ ] Mid-wave power-up drops (spread shot, shield, rapid fire, etc.)
-- [ ] Between-wave upgrade shop — spend in-run currency on temporary upgrades
-- [ ] Selectable permanent artifacts per run (locked-in at run start from meta shop)
-- [ ] Artifact slot unlocks — start with 1 slot, unlock more via meta shop
-
-**Meta Progression (Between Runs)**
-- [ ] Main menu meta shop — spend persistent currency earned across runs
-- [ ] Unlock starting weapon loadouts — choose default weapon before a run
-- [ ] Unlock passive stat upgrades — permanent % bonuses to speed, fire rate, shield capacity
-- [ ] Unlock starting power-up selection — lock in 1-2 power-ups to start each run with
-- [ ] Unlock extra lives
-- [ ] Unlock alternate ships with different base stats/abilities
-- [ ] Unlock cosmetics (ship skins, color themes, trail effects)
-- [ ] Unlock higher difficulties and additional game modes
-
-**Controls**
-- [ ] Keyboard controls (WASD / arrows + spacebar) — desktop-first, v1 scope
+- [ ] Audio: synthwave BGM + sound effects (weapon fire, death, pickup, boss hits)
+- [ ] Gamepad support with button mapping
+- [ ] Ship skin unlocks and neon color theme options
+- [ ] Starting power-up selection from unlocked pool
+- [ ] Extra lives and alternate ships in meta shop
+- [ ] Higher difficulty mode unlocks
+- [ ] CRT/scanline overlay and pixel-art rendering options
 
 ### Out of Scope
 
-- Audio (BGM + SFX) — deferred to v2, not blocking v1 polish
-- Gamepad support — deferred to v2
-- Mouse aim/control — TBD post-v1
 - Online leaderboards / multiplayer — no backend infrastructure for portfolio scope
-- Mobile / touch controls — desktop-first
+- Mobile / touch controls — desktop-first design
+- Mid-run save / load — breaks roguelite tension by design
+- Permanent stat inflation (uncapped) — creates "solved" meta state
+- Dynamic PointLights per bullet — performance trap; additive-blended sprites sufficient
 
 ## Context
 
-- Existing codebase named `SuperSpaceInvader3JS` suggests this may have early Three.js scaffolding — verify before starting
-- Portfolio-quality polish matters: visual effects, game feel, and the meta shop depth are the differentiators
-- Neon Tokyo direction: think dense layered color, multiple hues per enemy wave, glowing outlines, dynamic lighting from projectiles
+Shipped v1.0 with 7,486 LOC TypeScript across 140 files.
+Tech stack: Three.js 0.183.2 + TypeScript + Vite + pmndrs/postprocessing + Zustand 5.x (no React).
+All rendering uses OrthographicCamera, InstancedMesh, and object pooling for zero-GC gameplay.
+localStorage persistence via Zustand persist (SAVE_VERSION 3, key: ssi-meta-v1).
 
 ## Constraints
 
-- **Tech Stack**: Three.js/WebGL — chosen for WebGL visual capabilities and portfolio impact; committed, not up for debate
+- **Tech Stack**: Three.js/WebGL — committed, not up for debate
 - **Platform**: Browser-first, desktop keyboard in v1
-- **Audio**: Deferred to post-v1 — don't block other progress on this
+- **Audio**: Deferred to v2
 - **Infrastructure**: None — fully client-side, no server/backend
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Three.js over Phaser/Canvas | WebGL effects are the portfolio-worthy visual differentiator | — Pending |
-| Expandable campaign foundation over full campaign | Ship quality over quantity for portfolio | — Pending |
-| Roguelite run structure with meta-progression | Adds replay variety; increases engagement per demo session | — Pending |
-| Keyboard-only controls for v1 | Keeps scope tight; gamepad/mouse are v2 additions | — Pending |
-| No audio in v1 | Removes significant scope (sourcing, mixing, licensing) without hurting the core game loop demo | — Pending |
+| Three.js over Phaser/Canvas | WebGL effects are the portfolio-worthy visual differentiator | ✓ Good — neon bloom aesthetic achieved |
+| OrthographicCamera for 2D plane | Exact hitbox math, consistent visual scale | ✓ Good — AABB collision works perfectly |
+| InstancedMesh + object pooling from Phase 1 | Cannot be retrofitted; zero-GC gameplay critical | ✓ Good — stable 60fps with 50+ entities |
+| pmndrs/postprocessing selective bloom | Three.js UnrealBloomPass too broad; selective control needed | ✓ Good — neon elements glow without washing HUD |
+| Zustand 5.x persist for meta state | Versioned schema enables migration; no React dependency | ✓ Good — 3 schema versions migrated cleanly |
+| RunState as plain TS singleton (volatile) | In-run state must reset completely; no persistence needed | ✓ Good — clean separation from meta |
+| Dual currency (Gold + SI$) | In-run economy separate from meta prevents inflation | ✓ Good — shop/meta feel distinct |
+| DOM overlay HUD (not Three.js TextGeometry) | Simpler, more readable, no font loading | ✓ Good — crisp text at all resolutions |
+| Keyboard-only controls for v1 | Keeps scope tight; gamepad/mouse are v2 | ✓ Good — shipped on time |
+| No audio in v1 | Removes significant scope without hurting core game loop | ✓ Good — v1 focused on visuals and gameplay |
+| Campaign as data-driven wave configs | TypeScript objects not hardcoded logic; future chapters easy to add | ✓ Good — Chapter 1 defined in single config file |
 
 ---
-*Last updated: 2026-03-02 after initialization*
+*Last updated: 2026-03-06 after v1.0 milestone*
