@@ -1,11 +1,16 @@
 import { META_UPGRADES } from '../config/metaUpgrades';
 import type { MetaUpgrade } from '../config/metaUpgrades';
+import type { InputManager } from '../core/InputManager';
 import { useMetaStore } from '../state/MetaState';
+import { audioManager } from '../systems/AudioManager';
 
 export class MetaShopUI {
   private readonly el: HTMLElement;
   private readonly keyHandler: (e: KeyboardEvent) => void;
   private onCloseCallback: (() => void) | null = null;
+  private selectedIndex: number = 0;
+  /** Flat ordered list of purchasable (non-owned, non-locked) upgrade IDs, rebuilt each render. */
+  private purchasableIds: string[] = [];
 
   constructor(hudRoot: HTMLElement) {
     const el = document.createElement('div');
@@ -37,6 +42,7 @@ export class MetaShopUI {
 
   public show(onClose: () => void): void {
     this.onCloseCallback = onClose;
+    this.selectedIndex = 0;
     this.render();
     this.el.style.display = 'flex';
     window.addEventListener('keydown', this.keyHandler);
@@ -52,6 +58,44 @@ export class MetaShopUI {
     return this.el.style.display !== 'none';
   }
 
+  /**
+   * Process gamepad/keyboard navigation for the meta shop.
+   * Must be called BEFORE clearJustPressed() in the metaShopUI-visible guard.
+   */
+  public update(input: InputManager): void {
+    if (!this.isVisible) return;
+
+    if (input.justPressed('Escape')) {
+      this.onCloseCallback?.();
+      return;
+    }
+
+    if (this.purchasableIds.length === 0) return;
+
+    if (input.justPressed('ArrowUp') || input.justPressed('ArrowLeft')) {
+      this.selectedIndex = (this.selectedIndex - 1 + this.purchasableIds.length) % this.purchasableIds.length;
+      this.render();
+      audioManager.playSfx('menuNav');
+    } else if (input.justPressed('ArrowDown') || input.justPressed('ArrowRight')) {
+      this.selectedIndex = (this.selectedIndex + 1) % this.purchasableIds.length;
+      this.render();
+      audioManager.playSfx('menuNav');
+    } else if (input.justPressed('Space')) {
+      // A button = purchase selected item
+      this._buyById(this.purchasableIds[this.selectedIndex]);
+    }
+  }
+
+  /** Purchase an upgrade by ID — extracted from window.__metaShopBuy for gamepad use. */
+  private _buyById(id: string): void {
+    const upg = META_UPGRADES.find(u => u.id === id);
+    if (!upg) return;
+    const success = useMetaStore.getState().purchaseUpgrade(id, upg.cost);
+    if (success) {
+      this.render();
+    }
+  }
+
   private render(): void {
     const state = useMetaStore.getState();
     const balance = state.metaCurrency;
@@ -63,11 +107,24 @@ export class MetaShopUI {
     const green = '#00cc44';
     const glow = `0 0 10px ${cyan}`;
 
+    // Rebuild the purchasable IDs list for cursor navigation
+    const newPurchasableIds: string[] = [];
+
     /** Standard upgrade card. */
     const makeCard = (upg: MetaUpgrade, locked = false): string => {
       const isOwned = owned.has(upg.id);
       const canAfford = balance >= upg.cost;
-      const borderColor = isOwned ? '#444' : locked ? '#333' : cyan;
+      const isPurchasable = !isOwned && !locked;
+
+      if (isPurchasable) {
+        newPurchasableIds.push(upg.id);
+      }
+
+      const isSelected = isPurchasable && this.purchasableIds[this.selectedIndex] === upg.id;
+      const borderColor = isSelected ? '#ffffff' : isOwned ? '#444' : locked ? '#333' : cyan;
+      const boxShadow = isSelected
+        ? `box-shadow:0 0 16px #fff,0 0 8px #fff`
+        : isOwned || locked ? 'box-shadow:none' : `box-shadow:${glow}`;
       const nameColor = isOwned ? '#666' : locked ? '#444' : cyan;
       const categoryLabel =
         upg.category === 'loadout' ? 'Loadout'
@@ -76,7 +133,7 @@ export class MetaShopUI {
         : 'Passive';
 
       return `
-        <div style="border:1px solid ${borderColor};box-shadow:${isOwned || locked ? 'none' : glow};padding:14px 18px;margin:6px;min-width:190px;max-width:210px;text-align:center;opacity:${isOwned ? 0.6 : locked ? 0.35 : 1};">
+        <div style="border:1px solid ${borderColor};${boxShadow};padding:14px 18px;margin:6px;min-width:190px;max-width:210px;text-align:center;opacity:${isOwned ? 0.6 : locked ? 0.35 : 1};">
           <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;">${categoryLabel}</div>
           <div style="font-size:16px;color:${nameColor};margin:6px 0;text-shadow:${isOwned || locked ? 'none' : glow};">${upg.displayName}</div>
           <div style="font-size:11px;color:#999;margin-bottom:10px;">${upg.description}</div>
@@ -150,6 +207,12 @@ export class MetaShopUI {
       return makeSeqCard(upg, prereqId);
     }).join('');
 
+    // Update purchasableIds and clamp cursor
+    this.purchasableIds = newPurchasableIds;
+    if (this.purchasableIds.length > 0) {
+      this.selectedIndex = Math.min(this.selectedIndex, this.purchasableIds.length - 1);
+    }
+
     this.el.innerHTML = `
       <h2 style="font-size:30px;color:${cyan};text-shadow:${glow};letter-spacing:0.12em;margin-bottom:4px;">-- META SHOP --</h2>
       <div style="font-size:15px;color:${gold};text-shadow:0 0 8px ${gold};margin-bottom:20px;">SI$ ${balance}</div>
@@ -191,17 +254,12 @@ export class MetaShopUI {
         ${bunkerExtraCards}
       </div>
 
-      <div style="font-size:13px;color:#555;letter-spacing:2px;">ESC / U to close</div>
+      <div style="font-size:13px;color:#555;letter-spacing:2px;">ESC / U / B to close</div>
     `;
 
     // Attach purchase handler
     (window as unknown as Record<string, unknown>)['__metaShopBuy'] = (id: string) => {
-      const upg = META_UPGRADES.find(u => u.id === id);
-      if (!upg) return;
-      const success = useMetaStore.getState().purchaseUpgrade(id, upg.cost);
-      if (success) {
-        this.render();
-      }
+      this._buyById(id);
     };
 
     // Attach bunker toggle handler

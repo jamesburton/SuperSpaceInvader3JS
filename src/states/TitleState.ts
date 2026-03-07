@@ -93,6 +93,7 @@ export class TitleState implements IGameState {
   update(_dt: number): void {
     // While MetaShopUI is open, only handle close key (ESC handled by MetaShopUI internally)
     if (this.metaShopUI?.isVisible) {
+      this.metaShopUI.update(this.input);  // gamepad/keyboard cursor navigation (07-02)
       this.input.clearJustPressed();
       return;
     }

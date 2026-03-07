@@ -1,4 +1,5 @@
 import type { ShopItem } from '../systems/ShopSystem';
+import type { InputManager } from '../core/InputManager';
 import { audioManager } from '../systems/AudioManager';
 
 /**
@@ -8,6 +9,7 @@ import { audioManager } from '../systems/AudioManager';
  * update after each purchase without reopening the modal.
  *
  * Keys: 1–9 buy the nth visible item, ESC closes.
+ * Arrow keys / D-pad navigate selection, A button (Space) purchases selected item.
  * Click: window.__shopBuy(index) is attached for onclick handlers.
  */
 export class ShopUI {
@@ -17,6 +19,7 @@ export class ShopUI {
   private onPurchaseFn: ((item: ShopItem) => boolean) | null = null;
   private onCloseFn: (() => void) | null = null;
   private readonly keyHandler: (e: KeyboardEvent) => void;
+  private selectedIndex: number = 0;
 
   constructor(hudRoot: HTMLElement) {
     const el = document.createElement('div');
@@ -72,6 +75,7 @@ export class ShopUI {
     this.getBalanceFn = getBalance;
     this.onPurchaseFn = onPurchase;
     this.onCloseFn = onClose;
+    this.selectedIndex = 0;
 
     this._render();
     this.el.style.display = 'flex';
@@ -86,6 +90,32 @@ export class ShopUI {
     };
   }
 
+  /**
+   * Process gamepad/keyboard arrow navigation and A/B button actions.
+   * Must be called BEFORE clearJustPressed() in the shop-open guard.
+   */
+  public update(input: InputManager): void {
+    if (!this.isVisible) return;
+    const items = this.getItemsFn?.() ?? [];
+    if (items.length === 0) return;
+
+    if (input.justPressed('ArrowUp')) {
+      this.selectedIndex = (this.selectedIndex - 1 + items.length) % items.length;
+      this._render();
+      audioManager.playSfx('menuNav');
+    } else if (input.justPressed('ArrowDown')) {
+      this.selectedIndex = (this.selectedIndex + 1) % items.length;
+      this._render();
+      audioManager.playSfx('menuNav');
+    } else if (input.justPressed('Space')) {
+      // A button = confirm/purchase selected item
+      this._buyItem(items[this.selectedIndex]);
+    } else if (input.justPressed('Escape')) {
+      // B button = close shop
+      this.onCloseFn?.();
+    }
+  }
+
   private _buyItem(item: ShopItem): void {
     const success = this.onPurchaseFn?.(item) ?? false;
     if (success) {
@@ -96,6 +126,8 @@ export class ShopUI {
         // Nothing left to buy — auto-close
         this.onCloseFn?.();
       } else {
+        // Clamp cursor to prevent out-of-bounds when item list shrinks
+        this.selectedIndex = Math.min(this.selectedIndex, items.length - 1);
         this._render();
       }
     }
@@ -112,8 +144,11 @@ export class ShopUI {
     const rowsHtml = items.map((item, i) => {
       const keyHint = i < 9 ? `[${i + 1}]` : '';
       const canAfford = balance >= item.price;
+      const isSelected = i === this.selectedIndex;
+      const selectedBorder = isSelected ? `border-left:3px solid ${cyan}` : 'border-left:3px solid transparent';
+      const selectedBg = isSelected ? `background:rgba(0,255,255,0.08)` : '';
       return `
-        <div style="display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid #222;max-width:540px;width:100%;">
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid #222;max-width:540px;width:100%;${selectedBorder};${selectedBg};">
           <div style="font-size:13px;color:#555;width:24px;flex-shrink:0;">${keyHint}</div>
           <div style="flex:1;">
             <div style="font-size:17px;color:${cyan};text-shadow:${glow};">${item.displayName}</div>
@@ -130,7 +165,7 @@ export class ShopUI {
 
     this.el.innerHTML = `
       <h2 style="font-size:26px;color:${cyan};text-shadow:${glow};letter-spacing:0.1em;margin-bottom:4px;">-- UPGRADE SHOP --</h2>
-      <div style="font-size:14px;color:#aaa;margin-bottom:16px;">Balance: <span style="color:${gold};">${balance} Gold</span> &nbsp;|&nbsp; 1–9 to buy &nbsp;|&nbsp; ESC to close</div>
+      <div style="font-size:14px;color:#aaa;margin-bottom:16px;">Balance: <span style="color:${gold};">${balance} Gold</span> &nbsp;|&nbsp; 1-9 / D-PAD to select &nbsp;|&nbsp; A to buy &nbsp;|&nbsp; B / ESC to close</div>
       <div style="display:flex;flex-direction:column;align-items:center;width:100%;max-height:72vh;overflow-y:auto;">
         ${rowsHtml || '<div style="color:#555;margin-top:24px;">No items available</div>'}
       </div>

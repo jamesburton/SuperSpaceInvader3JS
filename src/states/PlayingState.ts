@@ -97,6 +97,7 @@ export class PlayingState implements IGameState {
 
     // Phase 3: while shop is visible, pause all gameplay logic
     if (ctx.shopUI.isVisible) {
+      ctx.shopUI.update(input);  // gamepad/keyboard cursor navigation (07-02)
       input.clearJustPressed();
       return;
     }
