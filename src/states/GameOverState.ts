@@ -16,6 +16,8 @@ export class GameOverState implements IGameState {
   private readonly conversionRate: number;
   /** True if the extra_continue upgrade is owned AND not yet used this run. */
   private readonly continueAvailable: boolean;
+  /** Track last hint device to detect changes in update() */
+  private lastHintDevice: 'keyboard' | 'gamepad' = 'keyboard';
 
   constructor(
     private readonly input: InputManager,
@@ -51,16 +53,27 @@ export class GameOverState implements IGameState {
     const titleGlow = isVictory ? '#ffd700' : '#f44';
     const titleText = isVictory ? 'VICTORY!' : 'GAME OVER';
 
+    // Initialize hint device tracking
+    this.lastHintDevice = this.input.activeInputDevice;
+    const isGamepad = this.lastHintDevice === 'gamepad';
+
     // Continue hint: only for defeats (can't continue after winning)
     let continueHint = '';
     if (!isVictory && this.onContinue !== null) {
       const continueUnlocked = useMetaStore.getState().purchasedUpgrades.includes('extra_continue');
       if (continueUnlocked) {
-        continueHint = this.continueAvailable
-          ? `<p style="font-size:18px;margin-top:16px;letter-spacing:2px;color:#00ff88;">PRESS C TO CONTINUE</p>`
-          : `<p style="font-size:18px;margin-top:16px;letter-spacing:2px;opacity:0.35;">CONTINUE USED</p>`;
+        const continueText = this.continueAvailable
+          ? (isGamepad ? 'Y: CONTINUE' : 'PRESS C TO CONTINUE')
+          : (isGamepad ? 'Y: CONTINUE (USED)' : 'CONTINUE USED');
+        const continueStyle = this.continueAvailable
+          ? 'font-size:18px;margin-top:16px;letter-spacing:2px;color:#00ff88;'
+          : 'font-size:18px;margin-top:16px;letter-spacing:2px;opacity:0.35;';
+        continueHint = `<p id="hint-continue" style="${continueStyle}">${continueText}</p>`;
       }
     }
+
+    const restartText = isGamepad ? `A: ${isVictory ? 'PLAY AGAIN' : 'RESTART'}` : `PRESS R TO ${isVictory ? 'PLAY AGAIN' : 'RESTART'}`;
+    const menuText = isGamepad ? 'B: MENU' : 'PRESS M FOR MENU';
 
     this.hud.showOverlay(`
       <h1 style="font-size:48px;margin-bottom:24px;text-shadow:0 0 20px ${titleGlow};letter-spacing:4px;color:${titleColor};">${titleText}</h1>
@@ -72,21 +85,63 @@ export class GameOverState implements IGameState {
         : ''}
       <p style="font-size:20px;margin:12px 0;color:#ffd700;">SI$ EARNED: ${this.siEarned} | TOTAL: ${this.totalSI}</p>
       ${continueHint}
-      <p style="font-size:18px;margin-top:${continueHint ? '8' : '40'}px;opacity:0.7;letter-spacing:2px;">PRESS R TO ${isVictory ? 'PLAY AGAIN' : 'RESTART'}</p>
-      <p style="font-size:18px;margin-top:8px;opacity:0.7;letter-spacing:2px;">PRESS M FOR MENU</p>
+      <p id="hint-restart" style="font-size:18px;margin-top:${continueHint ? '8' : '40'}px;opacity:0.7;letter-spacing:2px;">${restartText}</p>
+      <p id="hint-menu" style="font-size:18px;margin-top:8px;opacity:0.7;letter-spacing:2px;">${menuText}</p>
     `);
   }
 
   update(_dt: number): void {
+    // Update hint text dynamically when player switches input device
+    if (this.input.activeInputDevice !== this.lastHintDevice) {
+      this.lastHintDevice = this.input.activeInputDevice;
+      const isGamepad = this.lastHintDevice === 'gamepad';
+      const isVictory = this.type === 'victory';
+
+      const restartEl = document.getElementById('hint-restart');
+      if (restartEl) {
+        restartEl.textContent = isGamepad
+          ? `A: ${isVictory ? 'PLAY AGAIN' : 'RESTART'}`
+          : `PRESS R TO ${isVictory ? 'PLAY AGAIN' : 'RESTART'}`;
+      }
+
+      const menuEl = document.getElementById('hint-menu');
+      if (menuEl) {
+        menuEl.textContent = isGamepad ? 'B: MENU' : 'PRESS M FOR MENU';
+      }
+
+      const continueEl = document.getElementById('hint-continue');
+      if (continueEl) {
+        if (this.continueAvailable) {
+          continueEl.textContent = isGamepad ? 'Y: CONTINUE' : 'PRESS C TO CONTINUE';
+        } else {
+          continueEl.textContent = isGamepad ? 'Y: CONTINUE (USED)' : 'CONTINUE USED';
+        }
+      }
+    }
+
     if (this.continueAvailable && this.input.justPressed('KeyC')) {
       this.input.clearJustPressed();
       this.onContinue!();
       return;
     }
 
+    // A button (Space) = restart
+    if (this.input.justPressed('Space')) {
+      this.input.clearJustPressed();
+      this.restartGame();
+      return;
+    }
+
     if (this.input.justPressed('KeyR')) {
       this.input.clearJustPressed();
       this.restartGame();
+      return;
+    }
+
+    // B button (Escape) = return to menu
+    if (this.input.justPressed('Escape')) {
+      this.input.clearJustPressed();
+      this.returnToMenu();
       return;
     }
 

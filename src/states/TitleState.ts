@@ -82,7 +82,9 @@ export class TitleState implements IGameState {
         </div>
 
         <p style="font-size:13px;opacity:0.5;letter-spacing:2px;margin-top:8px;">
-          ARROW KEYS TO NAVIGATE &nbsp;|&nbsp; ENTER TO SELECT
+          ${this.input.activeInputDevice === 'gamepad'
+            ? 'D-PAD TO NAVIGATE &nbsp;|&nbsp; A TO SELECT'
+            : 'ARROW KEYS TO NAVIGATE &nbsp;|&nbsp; ENTER TO SELECT'}
         </p>
       </div>
     `;

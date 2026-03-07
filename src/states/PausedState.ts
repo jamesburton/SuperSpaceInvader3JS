@@ -5,6 +5,9 @@ import { audioManager } from '../systems/AudioManager';
 import { useMetaStore } from '../state/MetaState';
 
 export class PausedState implements IGameState {
+  /** Track last hint device to detect changes in update() */
+  private lastHintDevice: 'keyboard' | 'gamepad' = 'keyboard';
+
   constructor(
     private readonly stateManager: StateManager,
     private readonly input: InputManager,
@@ -15,11 +18,14 @@ export class PausedState implements IGameState {
     // Pause SFX plays immediately on entering pause state
     audioManager.playSfx('pause');
 
+    this.lastHintDevice = this.input.activeInputDevice;
+    const isGamepad = this.lastHintDevice === 'gamepad';
+
     const { volume, muted } = useMetaStore.getState();
 
     this.hud.showOverlay(`
       <h1 style="font-size:48px;margin-bottom:32px;text-shadow:0 0 20px #fff;letter-spacing:4px;">PAUSED</h1>
-      <p style="font-size:18px;opacity:0.7;letter-spacing:2px;">PRESS ESC or P TO RESUME</p>
+      <p id="hint-resume" style="font-size:18px;opacity:0.7;letter-spacing:2px;">${isGamepad ? 'A: RESUME' : 'PRESS ESC or P TO RESUME'}</p>
       <div style="margin-top:32px;display:flex;flex-direction:column;align-items:center;gap:16px;">
         <label style="font-family:'Courier New',monospace;color:#fff;font-size:14px;display:flex;align-items:center;gap:12px;">
           VOLUME
@@ -49,8 +55,23 @@ export class PausedState implements IGameState {
   }
 
   update(_dt: number): void {
+    // Update hint text dynamically when player switches input device
+    if (this.input.activeInputDevice !== this.lastHintDevice) {
+      this.lastHintDevice = this.input.activeInputDevice;
+      const resumeEl = document.getElementById('hint-resume');
+      if (resumeEl) {
+        resumeEl.textContent = this.lastHintDevice === 'gamepad'
+          ? 'A: RESUME'
+          : 'PRESS ESC or P TO RESUME';
+      }
+    }
+
     // Only listen for resume input — ALL other game logic is frozen
-    if (this.input.justPressed('Escape') || this.input.justPressed('KeyP')) {
+    if (
+      this.input.justPressed('Escape') ||
+      this.input.justPressed('KeyP') ||
+      this.input.justPressed('Space')  // A button = resume (07-02)
+    ) {
       this.input.clearJustPressed();
       this.stateManager.pop(); // restores PlayingState via resume()
       return;
