@@ -19,11 +19,11 @@ Requirements for v1.1 Polish & Depth. Each maps to roadmap phases.
 
 ### Gamepad
 
-- [ ] **PAD-01**: Player can move ship with left analog stick with deadzone filtering
-- [ ] **PAD-02**: Player can shoot with A button and pause with Start button
+- [x] **PAD-01**: Player can move ship with left analog stick with deadzone filtering
+- [x] **PAD-02**: Player can shoot with A button and pause with Start button
 - [ ] **PAD-03**: Player can navigate all menus and shop UI with gamepad
-- [ ] **PAD-04**: Game displays notification on gamepad connect/disconnect
-- [ ] **PAD-05**: Game gracefully falls back to keyboard when gamepad disconnects mid-game
+- [x] **PAD-04**: Game displays notification on gamepad connect/disconnect
+- [x] **PAD-05**: Game gracefully falls back to keyboard when gamepad disconnects mid-game
 
 ### Ship Skins
 
@@ -122,11 +122,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUD-06 | Phase 6 | Complete |
 | AUD-07 | Phase 6 | Complete |
 | SHOP-08 | Phase 6 | Complete |
-| PAD-01 | Phase 7 | Pending |
-| PAD-02 | Phase 7 | Pending |
+| PAD-01 | Phase 7 | Complete |
+| PAD-02 | Phase 7 | Complete |
 | PAD-03 | Phase 7 | Pending |
-| PAD-04 | Phase 7 | Pending |
-| PAD-05 | Phase 7 | Pending |
+| PAD-04 | Phase 7 | Complete |
+| PAD-05 | Phase 7 | Complete |
 | SKIN-01 | Phase 8 | Pending |
 | SKIN-02 | Phase 8 | Pending |
 | SKIN-03 | Phase 8 | Pending |

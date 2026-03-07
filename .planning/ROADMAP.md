@@ -61,7 +61,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — InputManager gamepad polling, radial deadzone, button-to-keycode synthesis, connect/disconnect toast, compatibility warning
+- [x] 07-01-PLAN.md — InputManager gamepad polling, radial deadzone, button-to-keycode synthesis, connect/disconnect toast, compatibility warning — completed 2026-03-07
 - [ ] 07-02-PLAN.md — ShopUI/MetaShopUI D-pad cursor navigation + dynamic input hint text in all game state overlays
 
 ### Phase 8: Visual Customization
@@ -127,7 +127,7 @@ Plans:
 | 4. Boss Encounter + Meta Progression | v1.0 | 6/6 | Complete | 2026-03-03 |
 | 5. Campaign Mode + Game Modes | v1.0 | 6/6 | Complete | 2026-03-06 |
 | 6. Foundation | v1.1 | 4/4 | Complete | 2026-03-07 |
-| 7. Gamepad Support | v1.1 | 0/2 | Not started | - |
+| 7. Gamepad Support | v1.1 | 1/2 | In progress | - |
 | 8. Visual Customization | v1.1 | 0/4 | Not started | - |
 | 9. Power-Ups | v1.1 | 0/4 | Not started | - |
 | 10. Meta Shop Expansion | v1.1 | 0/3 | Not started | - |
