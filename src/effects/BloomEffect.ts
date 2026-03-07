@@ -10,7 +10,8 @@ import type { WebGLRenderer, Scene, OrthographicCamera } from 'three';
  * HUD is DOM-based and entirely outside the WebGL pipeline — unaffected by any post-processing.
  */
 export class BloomEffect {
-  private readonly composer: EffectComposer;
+  /** Exposed as public so CRTManager can addPass() to the same EffectComposer after bloom init */
+  public readonly composer: EffectComposer;
 
   /** Exposed so Game.ts can register emissive meshes via selection.add(mesh) */
   public readonly bloomEffect: SelectiveBloomEffect;
