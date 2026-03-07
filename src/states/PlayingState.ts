@@ -23,6 +23,7 @@ import type { BossSystem } from '../systems/BossSystem';
 import type { BunkerManager } from '../entities/BunkerManager';
 import { runState } from '../state/RunState';
 import { useMetaStore } from '../state/MetaState';
+import { PlayerSkinManager } from '../entities/PlayerSkinManager';
 import { audioManager } from '../systems/AudioManager';
 import { FIXED_STEP } from '../utils/constants';
 import { BOSS_DEF } from '../config/boss';
@@ -30,6 +31,9 @@ import { CAMPAIGN_CHAPTER_1, getAlgorithmicWaves } from '../config/campaign';
 import { PausedState } from './PausedState';
 import { GameOverState } from './GameOverState';
 import { LevelBriefingState } from './LevelBriefingState';
+
+/** Singleton skin manager — shared across all PlayingState instances (one per run). */
+const playerSkinManager = new PlayerSkinManager();
 
 /** All dependencies PlayingState needs — passed from Game.ts */
 export interface PlayingStateContext {
@@ -556,7 +560,7 @@ export class PlayingState implements IGameState {
    * Called from enter() each time PlayingState becomes active (new run or restart).
    */
   private applyMetaBonuses(): void {
-    const { purchasedUpgrades } = useMetaStore.getState();
+    const { purchasedUpgrades, selectedSkin } = useMetaStore.getState();
     const { player, powerUpManager } = this.ctx;
 
     // Count tiers for multiplicative passives
@@ -603,6 +607,9 @@ export class PlayingState implements IGameState {
         this.ctx.bunkerManager.autoRepairBetweenWaves(1);
       };
     }
+
+    // Apply skin from MetaStore — swaps geometry + material in-place (SKIN-01, SKIN-02, SKIN-04)
+    playerSkinManager.applySkin(player, selectedSkin.shapeId, selectedSkin.colorId);
   }
 
   render(alpha: number): void {
