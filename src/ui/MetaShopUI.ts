@@ -4,6 +4,7 @@ import type { InputManager } from '../core/InputManager';
 import { useMetaStore } from '../state/MetaState';
 import { audioManager } from '../systems/AudioManager';
 import { SkinShopUI } from './SkinShopUI';
+import type { SceneManager } from '../core/SceneManager';
 
 export class MetaShopUI {
   private readonly el: HTMLElement;
@@ -14,7 +15,7 @@ export class MetaShopUI {
   private purchasableIds: string[] = [];
   private readonly skinShopUI: SkinShopUI;
 
-  constructor(hudRoot: HTMLElement) {
+  constructor(hudRoot: HTMLElement, private readonly sceneManager?: SceneManager) {
     this.skinShopUI = new SkinShopUI(hudRoot);
     const el = document.createElement('div');
     el.id = 'meta-shop-overlay';
@@ -101,6 +102,16 @@ export class MetaShopUI {
     if (!upg) return;
     const success = useMetaStore.getState().purchaseUpgrade(id, upg.cost);
     if (success) {
+      // Handle CRT tier purchase — update active tier and reinit CRT in the renderer
+      if (upg.effectType === 'crt_tier') {
+        const owned = useMetaStore.getState().purchasedUpgrades;
+        const maxTier = [3, 2, 1].find(t => owned.includes(`crt_tier_${t}`)) ?? null;
+        useMetaStore.getState().setCrtTier(maxTier);
+        if (this.sceneManager) {
+          this.sceneManager.initCrt(maxTier, useMetaStore.getState().crtIntensity);
+        }
+      }
+      audioManager.playSfx('purchase');
       this.render();
     }
   }
@@ -216,6 +227,13 @@ export class MetaShopUI {
       return makeSeqCard(upg, prereqId);
     }).join('');
 
+    // CRT tier cards (sequential: tier 2 requires tier 1, tier 3 requires tier 2)
+    const crtUpgrades = META_UPGRADES.filter(u => u.effectType === 'crt_tier');
+    const crtCards = crtUpgrades.map((upg, i) => {
+      const prereqId = i === 0 ? null : crtUpgrades[i - 1].id;
+      return makeSeqCard(upg, prereqId);
+    }).join('');
+
     // Update purchasableIds and clamp cursor
     this.purchasableIds = newPurchasableIds;
     if (this.purchasableIds.length > 0) {
@@ -272,8 +290,36 @@ export class MetaShopUI {
         </button>
       </div>
 
+      <h3 style="font-size:14px;color:#aaa;letter-spacing:2px;margin-bottom:8px;">CRT FILTER</h3>
+      <div style="font-size:11px;color:#666;margin-bottom:8px;letter-spacing:1px;">Retro CRT monitor effects. Higher tiers add more visual distortion.</div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin-bottom:8px;">
+        ${crtCards}
+      </div>
+      ${state.crtTier !== null && state.crtTier >= 1 ? `
+        <div style="margin:12px 0 16px;display:flex;align-items:center;gap:12px;">
+          <label style="font-family:'Courier New',monospace;color:#fff;font-size:13px;letter-spacing:1px;">INTENSITY</label>
+          <input id="crt-intensity-slider" type="range" min="0.01" max="1" step="0.01"
+                 value="${state.crtIntensity}"
+                 style="width:160px;accent-color:#0ff;cursor:pointer;" />
+          <span style="font-size:12px;color:#0ff;min-width:40px;">${Math.round(state.crtIntensity * 100)}%</span>
+        </div>
+      ` : '<div style="margin-bottom:16px;"></div>'}
+
       <div style="font-size:13px;color:#555;letter-spacing:2px;">ESC / U / B to close</div>
     `;
+
+    // Wire CRT intensity slider
+    const crtSlider = document.getElementById('crt-intensity-slider') as HTMLInputElement | null;
+    crtSlider?.addEventListener('input', () => {
+      const val = parseFloat(crtSlider.value);
+      useMetaStore.getState().setCrtIntensity(val);
+      if (this.sceneManager?.crt) {
+        this.sceneManager.crt.setIntensity(val);
+      }
+      // Update the percentage label next to the slider
+      const label = crtSlider.nextElementSibling as HTMLElement | null;
+      if (label) label.textContent = `${Math.round(val * 100)}%`;
+    });
 
     // Attach purchase handler
     (window as unknown as Record<string, unknown>)['__metaShopBuy'] = (id: string) => {

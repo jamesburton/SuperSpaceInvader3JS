@@ -29,7 +29,7 @@ export class TitleState implements IGameState {
     audioManager.stopBgm(); // Phase 6: stop BGM on return to menu (in case a run was in progress)
     if (!this.metaShopUI) {
       const hudRoot = document.getElementById('hud') as HTMLElement;
-      this.metaShopUI = new MetaShopUI(hudRoot);
+      this.metaShopUI = new MetaShopUI(hudRoot, this.ctx.scene);
     }
 
     this._renderMenu();
