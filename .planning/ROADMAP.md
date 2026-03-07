@@ -40,7 +40,7 @@
   3. Every combat event (weapon fire, enemy death, player hit, power-up pickup) produces an SFX
   4. Player can mute audio and adjust master volume from the pause menu, and the setting persists after closing and reopening the browser
   5. Audio begins playing on first keypress in a fresh browser tab without a page refresh
-**Plans:** 4 plans
+**Plans:** 2/4 plans executed
 
 Plans:
 - [x] 06-01-PLAN.md — MetaStore v4 schema migration (SAVE_VERSION bump, migration block, new persistent fields) — completed 2026-03-07
@@ -126,7 +126,7 @@ Plans:
 | 3. Enemy Depth + Wave Systems + Power-Ups | v1.0 | 9/9 | Complete | 2026-03-03 |
 | 4. Boss Encounter + Meta Progression | v1.0 | 6/6 | Complete | 2026-03-03 |
 | 5. Campaign Mode + Game Modes | v1.0 | 6/6 | Complete | 2026-03-06 |
-| 6. Foundation | v1.1 | 1/4 | In progress | - |
+| 6. Foundation | 2/4 | In Progress|  | - |
 | 7. Gamepad Support | v1.1 | 0/2 | Not started | - |
 | 8. Visual Customization | v1.1 | 0/4 | Not started | - |
 | 9. Power-Ups | v1.1 | 0/4 | Not started | - |
