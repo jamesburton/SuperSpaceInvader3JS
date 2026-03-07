@@ -23,7 +23,7 @@
 **Milestone Goal:** Add audio, gamepad support, ship customization, six new power-ups, expanded meta shop, and unlockable CRT visual filters to deepen the gameplay loop and player expression.
 
 - [x] **Phase 6: Foundation** - MetaStore v4 schema migration + full audio system (completed 2026-03-07)
-- [ ] **Phase 7: Gamepad Support** - Controller input synthesized into existing input layer
+- [x] **Phase 7: Gamepad Support** - Controller input synthesized into existing input layer (completed 2026-03-07)
 - [ ] **Phase 8: Visual Customization** - Ship skins + CRT post-processing effects
 - [ ] **Phase 9: Power-Ups** - Piercing shot, homing missiles, and time slow
 - [ ] **Phase 10: Meta Shop Expansion** - Extra lives, difficulty unlocks, starting power-up slot, CRT tiers
@@ -58,7 +58,7 @@ Plans:
   3. A toast notification appears when a gamepad connects or disconnects
   4. If a gamepad disconnects mid-game, the game continues without crashing and keyboard input takes over immediately
   5. A non-standard controller (e.g. PS5 in Firefox) shows a compatibility warning rather than silently producing wrong inputs
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 07-01-PLAN.md — InputManager gamepad polling, radial deadzone, button-to-keycode synthesis, connect/disconnect toast, compatibility warning — completed 2026-03-07
@@ -127,7 +127,7 @@ Plans:
 | 4. Boss Encounter + Meta Progression | v1.0 | 6/6 | Complete | 2026-03-03 |
 | 5. Campaign Mode + Game Modes | v1.0 | 6/6 | Complete | 2026-03-06 |
 | 6. Foundation | v1.1 | 4/4 | Complete | 2026-03-07 |
-| 7. Gamepad Support | v1.1 | 1/2 | In progress | - |
+| 7. Gamepad Support | 2/2 | Complete   | 2026-03-07 | - |
 | 8. Visual Customization | v1.1 | 0/4 | Not started | - |
 | 9. Power-Ups | v1.1 | 0/4 | Not started | - |
 | 10. Meta Shop Expansion | v1.1 | 0/3 | Not started | - |

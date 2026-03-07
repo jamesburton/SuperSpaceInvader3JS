@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish & Depth
 status: executing
-stopped_at: "Completed 07-gamepad-support 07-01-PLAN.md"
-last_updated: "2026-03-07T12:12:45Z"
-last_activity: "2026-03-07 — Plan 07-01 complete; gamepad polling + synthesis + toast notifications"
+stopped_at: Completed 07-gamepad-support 07-02-PLAN.md
+last_updated: "2026-03-07T12:21:23.302Z"
+last_activity: 2026-03-07 — Plan 07-01 complete; gamepad polling + synthesis + toast notifications
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
   percent: 13
 ---
 
@@ -52,6 +52,7 @@ Progress: [█░░░░░░░░░] 13%
 | Phase 06-foundation P03 | 3min | 2 tasks | 7 files |
 | Phase 06-foundation P04 | 4 | 2 tasks | 4 files |
 | Phase 07-gamepad P01 | 2min | 2 tasks | 3 files |
+| Phase 07-gamepad-support P02 | 4min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,10 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table with outcomes.
 - Binary threshold (not proportional) preserves identical movement feel to keyboard
 - _clearSynthesizedKeys() on disconnect only removes GAMEPAD_CODES — keyboard-held keys remain intact
 - menuNav SFX reused for connect/disconnect chime — no new audio asset needed
+- [Phase 07-02]: ShopUI.update() called BEFORE clearJustPressed() in PlayingState shop guard — justPressed must be readable at call time
+- [Phase 07-02]: MetaShopUI purchasableIds rebuilt each render pass — flat list of non-owned, non-locked upgrade IDs enables linear D-pad navigation across card grid
+- [Phase 07-02]: Dynamic hints via DOM id lookups in update() rather than re-rendering full overlay — avoids flickering and event listener re-attachment
+- [Phase 07-02]: A button (Space) = restart/resume in GameOverState/PausedState — Space was unused in both states; safe addition alongside existing keyboard bindings
 
 ### Pending Todos
 
@@ -98,6 +103,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-07T12:12:45Z
-Stopped at: Completed 07-gamepad-support 07-01-PLAN.md
-Resume file: .planning/phases/07-gamepad-support/07-02-PLAN.md
+Last session: 2026-03-07T12:21:23.295Z
+Stopped at: Completed 07-gamepad-support 07-02-PLAN.md
+Resume file: None
