@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish & Depth
 status: executing
-stopped_at: Completed 08-visual-customization 08-03-PLAN.md
-last_updated: "2026-03-07T12:54:22.842Z"
+stopped_at: Completed 08-visual-customization 08-02-PLAN.md
+last_updated: "2026-03-07T13:01:30.422Z"
 last_activity: 2026-03-07 — Plan 08-01 complete; skinConfig data layer + PlayerSkinManager + PlayingState wiring
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
   percent: 15
 ---
 
@@ -55,6 +55,7 @@ Progress: [█░░░░░░░░░] 15%
 | Phase 07-gamepad-support P02 | 4min | 2 tasks | 6 files |
 | Phase 08-visual-customization P01 | 3min | 2 tasks | 3 files |
 | Phase 08-visual-customization P08-03 | 3min | 2 tasks | 4 files |
+| Phase 08-visual-customization P02 | 4min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,9 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table with outcomes.
 - SHAPE_SVG_PATHS uses pre-computed polygon coordinates scaled to 80x48 SVG viewBox — no second WebGL context
 - selectedSkin destructured alongside purchasedUpgrades in applyMetaBonuses() — single getState() call
 - [Phase 08-03]: CRT minimum intensity 0.01 — avoids invisible effect while paying GPU cost; SceneManager.render() routes through EffectComposer covering TitleState/GameOverState in single change
+- [Phase 08-02]: 'purchase' SFX key used (not 'shopPurchase') — AudioManager SfxKey union has 'purchase' as the correct identifier
+- [Phase 08-02]: SkinShopUI auto-equips purchased shape on buy — better UX than requiring a second click to equip
+- [Phase 08-02]: Color selection requires no purchase gate — all 6 colors free to all shapes (SKIN-02)
 
 ### Pending Todos
 
@@ -114,6 +118,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-07T12:54:22.832Z
-Stopped at: Completed 08-visual-customization 08-03-PLAN.md
+Last session: 2026-03-07T13:01:30.413Z
+Stopped at: Completed 08-visual-customization 08-02-PLAN.md
 Resume file: None
