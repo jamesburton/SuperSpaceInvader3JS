@@ -74,13 +74,13 @@ Plans:
   3. Selected skin and color are preserved after closing and reopening the browser
   4. Player unlocks CRT Tier 1 in the meta shop and sees light scanlines applied across the entire game canvas
   5. Player adjusts the CRT intensity slider and the effect updates immediately without restarting
-**Plans**: TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 08-01: Ship geometry assets (3-4 shapes) + PlayerSkinManager (swap geometry/material in-place on Player mesh)
-- [ ] 08-02: Ship selection UI (preview panel, color picker, SI$ purchase flow, SKIN-04 persistence)
-- [ ] 08-03: CRTEffect as pmndrs Effect subclass in separate EffectPass after bloom
-- [ ] 08-04: CRT meta shop unlock flow + intensity slider with real-time preview
+- [ ] 08-01-PLAN.md — Ship geometry data (4 shapes, 6 colors) + PlayerSkinManager class + PlayingState wiring
+- [ ] 08-02-PLAN.md — SkinShopUI with SVG previews, color swatches, SI$ purchase flow, MetaStore persistence
+- [ ] 08-03-PLAN.md — CRTManager (ScanlineEffect + ChromaticAberrationEffect in separate EffectPass) + global render pipeline
+- [ ] 08-04-PLAN.md — CRT meta shop tier unlock flow + intensity slider with real-time preview
 
 ### Phase 9: Power-Ups
 **Goal**: Players discover three new power-ups mid-run that each feel mechanically distinct and are clearly communicated through visual feedback
