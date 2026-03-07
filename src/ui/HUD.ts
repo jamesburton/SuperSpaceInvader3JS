@@ -1,6 +1,7 @@
 import type { RunStateData } from '../state/RunState';
 import type { PowerUpType } from '../config/powerups';
 import { POWER_UP_DEFS } from '../config/powerups';
+import { audioManager } from '../systems/AudioManager';
 
 export class HUD {
   private readonly scoreEl: HTMLElement;
@@ -26,6 +27,7 @@ export class HUD {
       </div>
       <div id="hud-lives" style="position:absolute;top:16px;right:16px;font-size:18px;font-family:'Courier New',monospace;color:#fff;text-shadow:0 0 8px #fff;">LIVES: 3</div>
       <div id="hud-overlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.7);flex-direction:column;align-items:center;justify-content:center;font-family:'Courier New',monospace;color:#fff;"></div>
+      <div id="hud-controls" style="position:absolute;bottom:8px;right:8px;font-size:11px;font-family:'Courier New',monospace;color:#333;letter-spacing:1px;pointer-events:none;">P / ESC — pause</div>
     `;
 
     this.scoreEl = hudRoot.querySelector('#hud-score') as HTMLElement;
@@ -96,6 +98,7 @@ export class HUD {
 
   /** Show "WAVE X" neon-styled with the wave palette color, for 2.5 seconds */
   public showWaveAnnouncement(wave: number, hexColor?: number): void {
+    audioManager.playSfx('waveStart'); // Phase 6: wave start SFX (AUD-03)
     const colorHex = hexColor !== undefined
       ? `#${hexColor.toString(16).padStart(6, '0')}`
       : '#00ffff'; // fallback cyan

@@ -4,6 +4,7 @@ import type { Player } from '../entities/Player';
 import type { Bullet } from '../entities/Bullet';
 import type { ParticleManager } from '../effects/ParticleManager';
 import type { PowerUpManager } from './PowerUpManager';
+import { audioManager } from './AudioManager';
 
 // Rapid fire cooldown override — 0.08s = ~12 shots/second
 const RAPID_FIRE_COOLDOWN = 0.08;
@@ -42,6 +43,10 @@ export class WeaponSystem {
   ): void {
     if (!player.active) return;
 
+    // Enforce max in-flight bullet cap (meta upgrade: passive_maxBullets_N)
+    const inFlight = activeBullets.filter(b => b.active && b.isPlayerBullet).length;
+    if (inFlight >= player.maxBulletsInFlight) return;
+
     const wantsToFire = input.justPressed('Space');
 
     if (wantsToFire && player.canFire()) {
@@ -49,6 +54,7 @@ export class WeaponSystem {
 
       // Record fire (sets standard cooldown via fireCooldownMultiplier)
       player.recordFire();
+      audioManager.playSfx('shoot'); // Phase 6: weapon fire SFX (AUD-02)
 
       // Rapid fire override: shorten cooldown to 0.08s
       if (powerUpManager?.isActive('rapidFire')) {
@@ -84,11 +90,11 @@ export class WeaponSystem {
       // Spawn at barrel tip (top center of player ship)
       bullet.init(player.x, player.y + player.height + 10, true);
 
-      if (isSpread && angleOffset !== 0) {
-        // Decompose bullet speed into angled trajectory (negative vy = upward)
-        const speed = Math.abs(bullet.vy); // BULLET_SPEED from init()
+      if (isSpread) {
+        // Decompose bullet speed into angled trajectory. Positive vy = upward in this world.
+        const speed = bullet.vy; // BULLET_SPEED from init(), already positive (upward)
         bullet.vx = Math.sin(angleOffset) * speed;
-        bullet.vy = -Math.cos(angleOffset) * speed; // negative = upward
+        bullet.vy = Math.cos(angleOffset) * speed;
         bullet.setColor(0x0088ff); // spread bullets: blue (FEEL-07)
       }
 

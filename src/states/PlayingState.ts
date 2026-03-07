@@ -101,6 +101,12 @@ export class PlayingState implements IGameState {
       return;
     }
 
+    // M-key mute toggle (AUD-06 quality-of-life shortcut, does not pause)
+    if (input.justPressed('KeyM')) {
+      audioManager.setMuted(!audioManager.isMuted);
+      // No clearJustPressed() here — fall through to normal input processing
+    }
+
     // Pause on ESC or P
     if (input.justPressed('Escape') || input.justPressed('KeyP')) {
       input.clearJustPressed();
@@ -198,6 +204,7 @@ export class PlayingState implements IGameState {
       // Camera shake on phase change
       if (ctx.bossSystem.phaseJustChanged) {
         ctx.cameraShake.triggerLarge();
+        audioManager.playSfx('bossPhase'); // Phase 6: boss phase transition SFX (AUD-03)
       }
 
       // Bullet movement + culling (still needed for boss bullets)
@@ -209,6 +216,7 @@ export class PlayingState implements IGameState {
       // Camera shake on player hit
       if (ctx.collisionSystem.wasHitThisStep()) {
         ctx.cameraShake.triggerSmall();
+        audioManager.playSfx('playerHit'); // Phase 6: player hit SFX in boss mode (AUD-02)
       }
 
       ctx.particleManager.update(dt);
@@ -271,6 +279,7 @@ export class PlayingState implements IGameState {
     // Phase 2: trigger camera shake if player was hit this step
     if (ctx.collisionSystem.wasHitThisStep()) {
       ctx.cameraShake.triggerSmall();
+      audioManager.playSfx('playerHit'); // Phase 6: player hit SFX (AUD-02)
     }
 
     // Phase 2: update all active particles
@@ -283,6 +292,7 @@ export class PlayingState implements IGameState {
     const pickedUpName = ctx.collisionSystem.consumePickupName();
     if (pickedUpName) {
       ctx.pickupFeedback.showPickup(pickedUpName); // FEEL-04: activates Phase 2 stub
+      audioManager.playSfx('pickup'); // Phase 6: pickup SFX (AUD-02)
     }
 
     // 7. Check lives

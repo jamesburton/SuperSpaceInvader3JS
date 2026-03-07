@@ -4,10 +4,13 @@ import type { EnemyFormation } from '../entities/Enemy';
 import type { ObjectPool } from '../core/ObjectPool';
 import type { ParticleManager } from '../effects/ParticleManager';
 import type { PowerUpManager } from './PowerUpManager';
+import type { BunkerManager } from '../entities/BunkerManager';
 import { runState } from '../state/RunState';
+import { useMetaStore } from '../state/MetaState';
 import { ENEMY_DEFS } from '../config/enemies';
 import { PLAYER_INVINCIBILITY_DURATION } from '../utils/constants';
 import { wavePalette } from '../config/palettes';
+import { audioManager } from './AudioManager';
 
 /** AABB overlap test: true if two axis-aligned boxes overlap */
 function aabbOverlap(
@@ -21,6 +24,7 @@ export class CollisionSystem {
   private playerInvincibility: number = 0; // countdown timer in seconds
   private particleManager: ParticleManager | null = null;
   private powerUpManager: PowerUpManager | null = null;
+  private bunkerManager: BunkerManager | null = null;
   private hitThisStep: boolean = false;    // flag for camera shake trigger
   private collectedPickupName: string | null = null; // set when pickup collected this step
 
@@ -40,6 +44,14 @@ export class CollisionSystem {
    */
   public setPowerUpManager(pm: PowerUpManager): void {
     this.powerUpManager = pm;
+  }
+
+  /**
+   * Inject BunkerManager for bunker segment collision.
+   * Called from Game.ts during init() after BunkerManager is created.
+   */
+  public setBunkerManager(bm: BunkerManager): void {
+    this.bunkerManager = bm;
   }
 
   /**
@@ -90,6 +102,7 @@ export class CollisionSystem {
 
       if (bullet.isPlayerBullet) {
         // Player bullet vs each active enemy
+        let bulletConsumed = false;
         for (const enemy of formation.enemies) {
           if (!enemy.active) continue;
           const aabb = formation.getEnemyAABB(enemy);
@@ -98,6 +111,7 @@ export class CollisionSystem {
                           aabb.x, aabb.y, aabb.w, aabb.h)) {
             // Hit registered — consume bullet regardless of shield state
             bulletsToRelease.push({ bullet, pool: playerBulletPool });
+            bulletConsumed = true;
 
             // Shielder shield phasing: reduce shieldHp before body damage
             if (enemy.type === 'shielder' && enemy.shieldActive) {
@@ -122,6 +136,7 @@ export class CollisionSystem {
               formation.killEnemy(enemy.instanceIndex);
               runState.addScore(ENEMY_DEFS[enemy.type].scoreValue);
               runState.recordKill();
+              audioManager.playSfx('enemyDeath'); // Phase 6: enemy death SFX (AUD-02)
 
               // INRUN-01: drop Gold on kill
               const def = ENEMY_DEFS[enemy.type];
@@ -141,7 +156,38 @@ export class CollisionSystem {
             break; // bullet consumed by first hit — stop checking this bullet
           }
         }
+
+        // Player bullet vs bunker segments (if not consumed by enemy hit)
+        // Skip if bunker_forceshield upgrade is owned (player bullets pass through)
+        if (!bulletConsumed && this.bunkerManager) {
+          const forceShield = useMetaStore.getState().purchasedUpgrades.includes('bunker_forceshield');
+          if (!forceShield) {
+            for (const seg of this.bunkerManager.getSegments()) {
+              if (aabbOverlap(bullet.x, bullet.y, bullet.width, bullet.height,
+                              seg.x, seg.y, seg.hw, seg.hh)) {
+                this.bunkerManager.destroySegment(seg);
+                bulletsToRelease.push({ bullet, pool: playerBulletPool });
+                break;
+              }
+            }
+          }
+        }
       } else {
+        // Enemy bullet vs bunker segments (always consume bullet + destroy segment)
+        if (this.bunkerManager) {
+          let hitBunker = false;
+          for (const seg of this.bunkerManager.getSegments()) {
+            if (aabbOverlap(bullet.x, bullet.y, bullet.width, bullet.height,
+                            seg.x, seg.y, seg.hw, seg.hh)) {
+              this.bunkerManager.destroySegment(seg);
+              bulletsToRelease.push({ bullet, pool: enemyBulletPool });
+              hitBunker = true;
+              break;
+            }
+          }
+          if (hitBunker) continue; // bullet consumed by bunker — skip player hit check
+        }
+
         // Enemy bullet vs player
         if (this.playerInvincibility <= 0 && player.active) {
           if (aabbOverlap(bullet.x, bullet.y, bullet.width, bullet.height,
@@ -170,8 +216,8 @@ export class CollisionSystem {
       if (idx !== -1) activeBullets.splice(idx, 1);
     }
 
-    // Pickup token collision — detect player-vs-token AABB overlap
-    if (this.powerUpManager && this.playerInvincibility <= 0) {
+    // Pickup token collision — always active, even during invincibility frames
+    if (this.powerUpManager) {
       for (const token of this.powerUpManager.getActiveTokens()) {
         if (!token.active) continue;
         if (aabbOverlap(player.x, player.y, player.width, player.height,
