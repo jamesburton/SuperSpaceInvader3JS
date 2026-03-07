@@ -40,13 +40,13 @@
   3. Every combat event (weapon fire, enemy death, player hit, power-up pickup) produces an SFX
   4. Player can mute audio and adjust master volume from the pause menu, and the setting persists after closing and reopening the browser
   5. Audio begins playing on first keypress in a fresh browser tab without a page refresh
-**Plans**: TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 06-01: MetaStore v4 schema migration (SAVE_VERSION bump, migration block, new persistent fields)
-- [ ] 06-02: AudioManager singleton (Howler.js setup, BGM loop, AudioContext unlock on first gesture)
-- [ ] 06-03: SFX integration (combat SFX wired into WeaponSystem, CollisionSystem, PowerUpManager)
-- [ ] 06-04: UI and game flow SFX + volume control in pause menu + AUD-07 persistence
+- [ ] 06-01-PLAN.md — MetaStore v4 schema migration (SAVE_VERSION bump, migration block, new persistent fields)
+- [ ] 06-02-PLAN.md — AudioManager singleton (Howler.js setup, BGM loop, AudioContext unlock on first gesture)
+- [ ] 06-03-PLAN.md — SFX integration (combat SFX wired into WeaponSystem, CollisionSystem, HUD, game states)
+- [ ] 06-04-PLAN.md — UI SFX + volume control in pause menu + M-key mute + AUD-07 persistence
 
 ### Phase 7: Gamepad Support
 **Goal**: Players with a gamepad plugged in can play the complete game without touching the keyboard
@@ -126,7 +126,7 @@ Plans:
 | 3. Enemy Depth + Wave Systems + Power-Ups | v1.0 | 9/9 | Complete | 2026-03-03 |
 | 4. Boss Encounter + Meta Progression | v1.0 | 6/6 | Complete | 2026-03-03 |
 | 5. Campaign Mode + Game Modes | v1.0 | 6/6 | Complete | 2026-03-06 |
-| 6. Foundation | v1.1 | 0/4 | Not started | - |
+| 6. Foundation | v1.1 | 0/4 | Planning complete | - |
 | 7. Gamepad Support | v1.1 | 0/2 | Not started | - |
 | 8. Visual Customization | v1.1 | 0/4 | Not started | - |
 | 9. Power-Ups | v1.1 | 0/4 | Not started | - |
