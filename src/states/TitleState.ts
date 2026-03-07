@@ -7,6 +7,7 @@ import { MetaShopUI } from '../ui/MetaShopUI';
 import { runState } from '../state/RunState';
 import { CAMPAIGN_CHAPTER_1 } from '../config/campaign';
 import { useMetaStore } from '../state/MetaState';
+import { audioManager } from '../systems/AudioManager';
 
 type MenuOption = 'campaign' | 'endless' | 'upgrades';
 
@@ -25,6 +26,7 @@ export class TitleState implements IGameState {
   ) {}
 
   enter(): void {
+    audioManager.stopBgm(); // Phase 6: stop BGM on return to menu (in case a run was in progress)
     if (!this.metaShopUI) {
       const hudRoot = document.getElementById('hud') as HTMLElement;
       this.metaShopUI = new MetaShopUI(hudRoot);

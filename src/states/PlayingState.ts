@@ -23,6 +23,7 @@ import type { BossSystem } from '../systems/BossSystem';
 import type { BunkerManager } from '../entities/BunkerManager';
 import { runState } from '../state/RunState';
 import { useMetaStore } from '../state/MetaState';
+import { audioManager } from '../systems/AudioManager';
 import { FIXED_STEP } from '../utils/constants';
 import { BOSS_DEF } from '../config/boss';
 import { CAMPAIGN_CHAPTER_1, getAlgorithmicWaves } from '../config/campaign';
@@ -80,6 +81,7 @@ export class PlayingState implements IGameState {
     this.ctx.cameraShake.reset(); // Phase 2: clear any residual shake
     this.applyMetaBonuses();      // Phase 4: apply persistent meta upgrades at run start
     this._spawnBunkers();         // Spawn bunkers if enabled and slots purchased
+    audioManager.playBgm();       // Phase 6: start BGM on gameplay enter (AUD-01)
 
     // Phase 5: Campaign mode — feed the current level's waves to SpawnSystem
     if (runState.mode === 'campaign') {

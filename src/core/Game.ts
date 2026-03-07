@@ -18,11 +18,13 @@ import { BossHealthBar } from '../ui/BossHealthBar';
 import { PickupFeedback } from '../ui/PickupFeedback';
 import { BossEnemy } from '../entities/Boss';
 import { BossSystem } from '../systems/BossSystem';
+import { BunkerManager } from '../entities/BunkerManager';
 import { ShopUI } from '../ui/ShopUI';
 import { HUD } from '../ui/HUD';
 import { TitleState } from '../states/TitleState';
 import type { PlayingStateContext } from '../states/PlayingState';
 import { FIXED_STEP, MAX_DELTA } from '../utils/constants';
+import { audioManager } from '../systems/AudioManager';
 
 export class Game {
   public readonly scene: SceneManager;
@@ -79,6 +81,9 @@ export class Game {
     const boss = new BossEnemy(this.scene.scene);
     const bossSystem = new BossSystem();
 
+    // Bunkers — managed separately, spawned per-run in PlayingState
+    const bunkerManager = new BunkerManager(this.scene.scene);
+
     // PlayingStateContext — shared across all states
     const ctx: PlayingStateContext = {
       scene: this.scene,
@@ -101,6 +106,7 @@ export class Game {
       shopUI,            // Phase 3
       boss,              // Phase 4
       bossSystem,        // Phase 4
+      bunkerManager,     // Phase 5
     };
 
     // Apply Wave 1 palette so initial enemy formation spawns cyan (not gray default)
@@ -128,6 +134,9 @@ export class Game {
     // Phase 3: register pickup token meshes with bloom so tokens glow
     powerUpManager.registerBloom((mesh) => bloom.bloomEffect.selection.add(mesh));
 
+    // Register bunker segment bloom callback so segments glow when spawned
+    bunkerManager.registerBloom((mesh) => bloom.bloomEffect.selection.add(mesh));
+
     // Phase 4: register boss mesh with bloom so it glows during encounter
     bloom.bloomEffect.selection.add(boss.mesh);
 
@@ -136,6 +145,17 @@ export class Game {
 
     // Phase 3: wire power-up manager into collision system for pickup/shield/SID drops
     collisionSystem.setPowerUpManager(powerUpManager);
+
+    // Wire bunker manager into collision system for segment hit detection
+    collisionSystem.setBunkerManager(bunkerManager);
+
+    // Wire bunker repair callback — avoids circular import ShopSystem<->BunkerManager
+    shopSystem._onBunkerRepairPurchased = () => {
+      bunkerManager.repairMostDamaged();
+    };
+
+    // Phase 6: initialize audio engine (BGM + SFX + AudioContext unlock)
+    audioManager.init();
 
     // Start at TitleState
     this.stateManager.replace(new TitleState(this.stateManager, this.input, hud, ctx));

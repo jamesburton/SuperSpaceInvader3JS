@@ -4,6 +4,7 @@ import type { HUD } from '../ui/HUD';
 import type { PlayingStateContext } from './PlayingState';
 import { runState } from '../state/RunState';
 import { useMetaStore } from '../state/MetaState';
+import { audioManager } from '../systems/AudioManager';
 
 export class GameOverState implements IGameState {
   private readonly finalScore: number;
@@ -43,6 +44,8 @@ export class GameOverState implements IGameState {
   }
 
   enter(): void {
+    audioManager.stopBgm();           // Phase 6: stop BGM when game ends (AUD-01)
+    audioManager.playSfx('gameOver'); // Phase 6: game over SFX (AUD-03)
     const isVictory = this.type === 'victory';
     const titleColor = isVictory ? '#ffd700' : '#f44';
     const titleGlow = isVictory ? '#ffd700' : '#f44';
