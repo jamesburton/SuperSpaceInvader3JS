@@ -62,6 +62,9 @@ export class Game {
     const hudRoot = document.getElementById('hud') as HTMLElement;
     const hud = new HUD(hudRoot);
 
+    // Phase 7: wire gamepad support now that hudRoot exists for the toast element
+    this.input.initGamepad(hudRoot);
+
     // Phase 2: construct particle, shake, and stub UI components
     const particleManager = new ParticleManager(this.scene.scene);
     const cameraShake = new CameraShake();
