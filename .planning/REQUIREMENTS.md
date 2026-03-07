@@ -53,7 +53,7 @@ Requirements for v1.1 Polish & Depth. Each maps to roadmap phases.
 - [ ] **SHOP-05**: Hard mode increases enemy speed, adds +1 enemy per wave, enables earlier Sniper spawns
 - [ ] **SHOP-06**: Player can unlock Nightmare difficulty mode after completing Hard
 - [ ] **SHOP-07**: Nightmare mode has aggressive formation breaks and an additional boss attack phase
-- [ ] **SHOP-08**: Existing v1.0 save data migrates to v1.1 schema without loss (MetaStore v3→v4)
+- [x] **SHOP-08**: Existing v1.0 save data migrates to v1.1 schema without loss (MetaStore v3→v4)
 
 ### CRT / Visual
 
@@ -121,7 +121,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUD-05 | Phase 6 | Pending |
 | AUD-06 | Phase 6 | Pending |
 | AUD-07 | Phase 6 | Pending |
-| SHOP-08 | Phase 6 | Pending |
+| SHOP-08 | Phase 6 | Complete |
 | PAD-01 | Phase 7 | Pending |
 | PAD-02 | Phase 7 | Pending |
 | PAD-03 | Phase 7 | Pending |

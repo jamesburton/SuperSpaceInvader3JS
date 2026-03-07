@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish & Depth
-status: planning
-stopped_at: Phase 6 context gathered
-last_updated: "2026-03-06T20:47:38.639Z"
-last_activity: 2026-03-06 — Roadmap created, 38 requirements mapped to Phases 6-10
+status: in-progress
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-07T10:07:30Z"
+last_activity: 2026-03-07 — Plan 06-01 complete; MetaStore v4 migration with all v1.1 fields
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 17
+  completed_plans: 1
+  percent: 6
 ---
 
 # Project State
@@ -26,26 +26,26 @@ See: .planning/PROJECT.md (updated 2026-03-06)
 ## Current Position
 
 Phase: 6 of 10 (Foundation)
-Plan: —
-Status: Ready to plan
-Last activity: 2026-03-06 — Roadmap created, 38 requirements mapped to Phases 6-10
+Plan: 1 of 4 complete
+Status: In progress
+Last activity: 2026-03-07 — Plan 06-01 complete; MetaStore v4 migration with all v1.1 fields
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 6%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0 (v1.1)
-- Average duration: —
-- Total execution time: —
+- Total plans completed: 1 (v1.1)
+- Average duration: ~2 min
+- Total execution time: ~2 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 06-foundation | 1/4 | ~2 min | ~2 min |
 
-**Recent Trend:** Not started
+**Recent Trend:** 1 plan completed
 
 *Updated after each plan completion*
 
@@ -63,6 +63,11 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table with outcomes.
 - Time slow applied per-system (enemies receive dt * timeScale, player receives raw dt)
 - Audio asset source (BGM synthwave loop, SFX sprite) is an external dependency — flag as Phase 6 blocker
 
+**06-01 decisions:**
+- All 8 v1.1 fields added in ONE migration step to SAVE_VERSION 4 — no future schema bumps needed for this milestone
+- _migrate exported as named export for testability — allows pure unit tests without DOM or localStorage
+- setVolume clamps to [0,1] via Math.max/Math.min — audio system receives valid values only
+
 ### Pending Todos
 
 None.
@@ -74,6 +79,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T20:47:38.633Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-foundation/06-CONTEXT.md
+Last session: 2026-03-07T10:07:30Z
+Stopped at: Completed 06-01-PLAN.md
+Resume file: .planning/phases/06-foundation/06-02-PLAN.md

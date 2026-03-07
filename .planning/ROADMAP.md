@@ -43,7 +43,7 @@
 **Plans:** 4 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — MetaStore v4 schema migration (SAVE_VERSION bump, migration block, new persistent fields)
+- [x] 06-01-PLAN.md — MetaStore v4 schema migration (SAVE_VERSION bump, migration block, new persistent fields) — completed 2026-03-07
 - [ ] 06-02-PLAN.md — AudioManager singleton (Howler.js setup, BGM loop, AudioContext unlock on first gesture)
 - [ ] 06-03-PLAN.md — SFX integration (combat SFX wired into WeaponSystem, CollisionSystem, HUD, game states)
 - [ ] 06-04-PLAN.md — UI SFX + volume control in pause menu + M-key mute + AUD-07 persistence
@@ -126,7 +126,7 @@ Plans:
 | 3. Enemy Depth + Wave Systems + Power-Ups | v1.0 | 9/9 | Complete | 2026-03-03 |
 | 4. Boss Encounter + Meta Progression | v1.0 | 6/6 | Complete | 2026-03-03 |
 | 5. Campaign Mode + Game Modes | v1.0 | 6/6 | Complete | 2026-03-06 |
-| 6. Foundation | v1.1 | 0/4 | Planning complete | - |
+| 6. Foundation | v1.1 | 1/4 | In progress | - |
 | 7. Gamepad Support | v1.1 | 0/2 | Not started | - |
 | 8. Visual Customization | v1.1 | 0/4 | Not started | - |
 | 9. Power-Ups | v1.1 | 0/4 | Not started | - |
