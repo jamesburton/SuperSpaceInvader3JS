@@ -3,6 +3,7 @@ import type { MetaUpgrade } from '../config/metaUpgrades';
 import type { InputManager } from '../core/InputManager';
 import { useMetaStore } from '../state/MetaState';
 import { audioManager } from '../systems/AudioManager';
+import { SkinShopUI } from './SkinShopUI';
 
 export class MetaShopUI {
   private readonly el: HTMLElement;
@@ -11,8 +12,10 @@ export class MetaShopUI {
   private selectedIndex: number = 0;
   /** Flat ordered list of purchasable (non-owned, non-locked) upgrade IDs, rebuilt each render. */
   private purchasableIds: string[] = [];
+  private readonly skinShopUI: SkinShopUI;
 
   constructor(hudRoot: HTMLElement) {
+    this.skinShopUI = new SkinShopUI(hudRoot);
     const el = document.createElement('div');
     el.id = 'meta-shop-overlay';
     el.style.cssText = [
@@ -64,6 +67,12 @@ export class MetaShopUI {
    */
   public update(input: InputManager): void {
     if (!this.isVisible) return;
+
+    // Delegate to SkinShopUI when it is open — prevents MetaShopUI from processing input
+    if (this.skinShopUI.isVisible) {
+      this.skinShopUI.update(input);
+      return;
+    }
 
     if (input.justPressed('Escape')) {
       this.onCloseCallback?.();
@@ -254,6 +263,15 @@ export class MetaShopUI {
         ${bunkerExtraCards}
       </div>
 
+      <h3 style="font-size:14px;color:#aaa;letter-spacing:2px;margin-bottom:8px;">SHIP SKINS</h3>
+      <div style="margin-bottom:24px;">
+        <button
+          onclick="window.__openSkinShop()"
+          style="background:transparent;border:1px solid ${cyan};color:${cyan};font-family:'Courier New',monospace;font-size:14px;padding:8px 24px;cursor:pointer;letter-spacing:2px;text-shadow:${glow};">
+          CUSTOMIZE SHIP
+        </button>
+      </div>
+
       <div style="font-size:13px;color:#555;letter-spacing:2px;">ESC / U / B to close</div>
     `;
 
@@ -266,6 +284,14 @@ export class MetaShopUI {
     (window as unknown as Record<string, unknown>)['__metaToggleBunkers'] = () => {
       useMetaStore.getState().toggleBunkers();
       this.render();
+    };
+
+    // Attach skin shop open handler
+    (window as unknown as Record<string, unknown>)['__openSkinShop'] = () => {
+      this.skinShopUI.show(() => {
+        this.skinShopUI.hide();
+        this.render();
+      });
     };
   }
 }
