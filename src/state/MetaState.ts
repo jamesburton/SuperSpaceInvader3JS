@@ -49,6 +49,8 @@ export interface MetaStore {
   setVolume: (v: number) => void;
   /** Set muted flag. */
   setMuted: (m: boolean) => void;
+  /** Set the selected ship skin (shapeId + colorId). Persisted via Zustand middleware. */
+  setSkin: (shapeId: string, colorId: string) => void;
 }
 
 /**
@@ -158,6 +160,10 @@ export const useMetaStore = createStore<MetaStore>()(
 
       setMuted: (m: boolean) => {
         set({ muted: m });
+      },
+
+      setSkin: (shapeId: string, colorId: string) => {
+        set({ selectedSkin: { shapeId, colorId } });
       },
     }),
     {

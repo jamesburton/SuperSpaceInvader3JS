@@ -7,7 +7,7 @@ export interface MetaUpgrade {
   /** Cost in SI$ */
   cost: number;
   /** Category for grouping in the shop UI */
-  category: 'loadout' | 'passive' | 'bunker';
+  category: 'loadout' | 'passive' | 'bunker' | 'skin';
   /**
    * Effect type for PlayingState to read on run start.
    * 'loadout_spread': start with 30s spread shot active
@@ -27,7 +27,8 @@ export interface MetaUpgrade {
     | 'passive_fireRate' | 'passive_moveSpeed' | 'passive_startingLife' | 'passive_continue'
     | 'passive_maxBullets'
     | 'passive_siConversion' | 'passive_siTaxReduction'
-    | 'bunker_slot' | 'bunker_autorepair' | 'bunker_forceshield';
+    | 'bunker_slot' | 'bunker_autorepair' | 'bunker_forceshield'
+    | 'skin_shape';
   /** Tier within its effect group (1, 2, or 3) — 0 for loadouts/once-only upgrades */
   tier: number;
 }
@@ -292,6 +293,35 @@ export const META_UPGRADES: MetaUpgrade[] = [
     category: 'bunker',
     effectType: 'bunker_slot',
     tier: 4,
+  },
+
+  // --- Ship Skin Shapes (SKIN-03: purchasable with SI$) ---
+  {
+    id: 'skin_shape_delta',
+    displayName: 'DELTA FRAME',
+    description: 'Unlock the Delta ship shape',
+    cost: 25,
+    category: 'skin',
+    effectType: 'skin_shape',
+    tier: 0,
+  },
+  {
+    id: 'skin_shape_dart',
+    displayName: 'DART FRAME',
+    description: 'Unlock the Dart ship shape',
+    cost: 35,
+    category: 'skin',
+    effectType: 'skin_shape',
+    tier: 0,
+  },
+  {
+    id: 'skin_shape_cruiser',
+    displayName: 'CRUISER FRAME',
+    description: 'Unlock the Cruiser ship shape',
+    cost: 50,
+    category: 'skin',
+    effectType: 'skin_shape',
+    tier: 0,
   },
 
   // --- Bunker Upgrades ---
