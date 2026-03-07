@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish & Depth
 status: executing
-stopped_at: Completed 08-visual-customization 08-02-PLAN.md
-last_updated: "2026-03-07T13:01:30.422Z"
+stopped_at: Completed 08-visual-customization 08-04-PLAN.md
+last_updated: "2026-03-07T13:07:35.158Z"
 last_activity: 2026-03-07 — Plan 08-01 complete; skinConfig data layer + PlayerSkinManager + PlayingState wiring
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
   percent: 15
 ---
 
@@ -56,6 +56,7 @@ Progress: [█░░░░░░░░░] 15%
 | Phase 08-visual-customization P01 | 3min | 2 tasks | 3 files |
 | Phase 08-visual-customization P08-03 | 3min | 2 tasks | 4 files |
 | Phase 08-visual-customization P02 | 4min | 2 tasks | 4 files |
+| Phase 08-visual-customization P04 | 3min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,8 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table with outcomes.
 - [Phase 08-02]: 'purchase' SFX key used (not 'shopPurchase') — AudioManager SfxKey union has 'purchase' as the correct identifier
 - [Phase 08-02]: SkinShopUI auto-equips purchased shape on buy — better UX than requiring a second click to equip
 - [Phase 08-02]: Color selection requires no purchase gate — all 6 colors free to all shapes (SKIN-02)
+- [Phase 08-visual-customization]: CRTManager stores composer ref; dispose() calls removePass() before dispose() for clean EffectComposer reinit
+- [Phase 08-visual-customization]: SceneManager.initCrt() is now idempotent — disposes old CRT pass before creating new one for tier upgrade purchases
 
 ### Pending Todos
 
@@ -118,6 +121,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-07T13:01:30.413Z
-Stopped at: Completed 08-visual-customization 08-02-PLAN.md
+Last session: 2026-03-07T13:07:35.147Z
+Stopped at: Completed 08-visual-customization 08-04-PLAN.md
 Resume file: None
