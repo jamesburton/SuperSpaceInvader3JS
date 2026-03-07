@@ -12,10 +12,10 @@ Requirements for v1.1 Polish & Depth. Each maps to roadmap phases.
 - [x] **AUD-01**: Player hears a looping synthwave BGM track during gameplay without audible gaps
 - [x] **AUD-02**: Player hears SFX for all combat events (weapon fire, enemy death, player hit, power-up pickup)
 - [x] **AUD-03**: Player hears SFX for game flow events (wave start, boss phase transition, game over)
-- [ ] **AUD-04**: Player hears SFX for UI interactions (menu navigation, shop purchase, pause)
+- [x] **AUD-04**: Player hears SFX for UI interactions (menu navigation, shop purchase, pause)
 - [x] **AUD-05**: Audio plays on first user interaction without requiring page refresh (AudioContext unlock)
-- [ ] **AUD-06**: Player can mute/unmute and adjust master volume from pause menu
-- [ ] **AUD-07**: Volume preference persists across sessions
+- [x] **AUD-06**: Player can mute/unmute and adjust master volume from pause menu
+- [x] **AUD-07**: Volume preference persists across sessions
 
 ### Gamepad
 
@@ -117,10 +117,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUD-01 | Phase 6 | Complete |
 | AUD-02 | Phase 6 | Complete |
 | AUD-03 | Phase 6 | Complete |
-| AUD-04 | Phase 6 | Pending |
+| AUD-04 | Phase 6 | Complete |
 | AUD-05 | Phase 6 | Complete |
-| AUD-06 | Phase 6 | Pending |
-| AUD-07 | Phase 6 | Pending |
+| AUD-06 | Phase 6 | Complete |
+| AUD-07 | Phase 6 | Complete |
 | SHOP-08 | Phase 6 | Complete |
 | PAD-01 | Phase 7 | Pending |
 | PAD-02 | Phase 7 | Pending |

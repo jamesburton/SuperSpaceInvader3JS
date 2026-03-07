@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish & Depth
 status: executing
-stopped_at: Completed 06-03-PLAN.md (AudioManager wiring)
-last_updated: "2026-03-07T10:15:39.031Z"
+stopped_at: Completed 06-04-PLAN.md (Audio UI Controls)
+last_updated: "2026-03-07T10:17:03.374Z"
 last_activity: 2026-03-07 — Plan 06-01 complete; MetaStore v4 migration with all v1.1 fields
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 6
 ---
 
@@ -50,6 +50,7 @@ Progress: [█░░░░░░░░░] 6%
 *Updated after each plan completion*
 | Phase 06-foundation P02 | 4 | 2 tasks | 15 files |
 | Phase 06-foundation P03 | 3min | 2 tasks | 7 files |
+| Phase 06-foundation P04 | 4 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,8 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table with outcomes.
 - [Phase 06-foundation]: AudioManager MetaStoreV4 local interface with optional chaining allows safe execution before or after 06-01 migration
 - [Phase 06-foundation]: gameOver SFX placed in GameOverState.enter() — handles both defeat and victory paths without duplicate calls
 - [Phase 06-foundation]: TitleState.enter() calls stopBgm() defensively — Howler handles no-op gracefully, ensures BGM cleanup on menu return
+- [Phase 06-foundation]: Volume slider uses DOM addEventListener for responsive real-time control without per-frame polling
+- [Phase 06-foundation]: M-key mute shortcut placed after shop-open guard in PlayingState to avoid conflicts with GameOverState
 
 ### Pending Todos
 
@@ -86,6 +89,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-07T10:15:39.026Z
-Stopped at: Completed 06-03-PLAN.md (AudioManager wiring)
+Last session: 2026-03-07T10:17:03.359Z
+Stopped at: Completed 06-04-PLAN.md (Audio UI Controls)
 Resume file: None

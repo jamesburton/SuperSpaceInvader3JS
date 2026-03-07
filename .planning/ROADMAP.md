@@ -22,7 +22,7 @@
 
 **Milestone Goal:** Add audio, gamepad support, ship customization, six new power-ups, expanded meta shop, and unlockable CRT visual filters to deepen the gameplay loop and player expression.
 
-- [ ] **Phase 6: Foundation** - MetaStore v4 schema migration + full audio system
+- [x] **Phase 6: Foundation** - MetaStore v4 schema migration + full audio system (completed 2026-03-07)
 - [ ] **Phase 7: Gamepad Support** - Controller input synthesized into existing input layer
 - [ ] **Phase 8: Visual Customization** - Ship skins + CRT post-processing effects
 - [ ] **Phase 9: Power-Ups** - Piercing shot, homing missiles, and time slow
@@ -40,7 +40,7 @@
   3. Every combat event (weapon fire, enemy death, player hit, power-up pickup) produces an SFX
   4. Player can mute audio and adjust master volume from the pause menu, and the setting persists after closing and reopening the browser
   5. Audio begins playing on first keypress in a fresh browser tab without a page refresh
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 06-01-PLAN.md — MetaStore v4 schema migration (SAVE_VERSION bump, migration block, new persistent fields) — completed 2026-03-07
@@ -126,7 +126,7 @@ Plans:
 | 3. Enemy Depth + Wave Systems + Power-Ups | v1.0 | 9/9 | Complete | 2026-03-03 |
 | 4. Boss Encounter + Meta Progression | v1.0 | 6/6 | Complete | 2026-03-03 |
 | 5. Campaign Mode + Game Modes | v1.0 | 6/6 | Complete | 2026-03-06 |
-| 6. Foundation | 3/4 | In Progress|  | - |
+| 6. Foundation | 4/4 | Complete   | 2026-03-07 | - |
 | 7. Gamepad Support | v1.1 | 0/2 | Not started | - |
 | 8. Visual Customization | v1.1 | 0/4 | Not started | - |
 | 9. Power-Ups | v1.1 | 0/4 | Not started | - |
