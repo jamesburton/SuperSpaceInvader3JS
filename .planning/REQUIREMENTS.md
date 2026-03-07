@@ -57,11 +57,11 @@ Requirements for v1.1 Polish & Depth. Each maps to roadmap phases.
 
 ### CRT / Visual
 
-- [ ] **CRT-01**: Player can unlock CRT Tier 1 "HIGH-DEF 2003" (light scanlines) in meta shop
-- [ ] **CRT-02**: Player can unlock CRT Tier 2 "CONSUMER 1991" (moderate scanlines + chromatic aberration)
-- [ ] **CRT-03**: Player can unlock CRT Tier 3 "ARCADE 1983" (heavy scanlines + strong chromatic aberration)
+- [x] **CRT-01**: Player can unlock CRT Tier 1 "HIGH-DEF 2003" (light scanlines) in meta shop
+- [x] **CRT-02**: Player can unlock CRT Tier 2 "CONSUMER 1991" (moderate scanlines + chromatic aberration)
+- [x] **CRT-03**: Player can unlock CRT Tier 3 "ARCADE 1983" (heavy scanlines + strong chromatic aberration)
 - [ ] **CRT-04**: Player can adjust CRT effect intensity with a slider
-- [ ] **CRT-05**: CRT effect updates in real-time as settings change (no restart required)
+- [x] **CRT-05**: CRT effect updates in real-time as settings change (no restart required)
 
 ## v1.2+ Requirements
 
@@ -132,11 +132,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SKIN-03 | Phase 8 | Pending |
 | SKIN-04 | Phase 8 | Complete |
 | SKIN-05 | Phase 8 | Pending |
-| CRT-01 | Phase 8 | Pending |
-| CRT-02 | Phase 8 | Pending |
-| CRT-03 | Phase 8 | Pending |
+| CRT-01 | Phase 8 | Complete |
+| CRT-02 | Phase 8 | Complete |
+| CRT-03 | Phase 8 | Complete |
 | CRT-04 | Phase 8 | Pending |
-| CRT-05 | Phase 8 | Pending |
+| CRT-05 | Phase 8 | Complete |
 | PWR-01 | Phase 9 | Pending |
 | PWR-02 | Phase 9 | Pending |
 | PWR-03 | Phase 9 | Pending |

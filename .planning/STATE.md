@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish & Depth
 status: executing
-stopped_at: Completed 07-gamepad-support 07-02-PLAN.md
-last_updated: "2026-03-07T12:54:11.710Z"
+stopped_at: Completed 08-visual-customization 08-03-PLAN.md
+last_updated: "2026-03-07T12:54:22.842Z"
 last_activity: 2026-03-07 — Plan 08-01 complete; skinConfig data layer + PlayerSkinManager + PlayingState wiring
 progress:
   total_phases: 5
@@ -54,6 +54,7 @@ Progress: [█░░░░░░░░░] 15%
 | Phase 07-gamepad P01 | 2min | 2 tasks | 3 files |
 | Phase 07-gamepad-support P02 | 4min | 2 tasks | 6 files |
 | Phase 08-visual-customization P01 | 3min | 2 tasks | 3 files |
+| Phase 08-visual-customization P08-03 | 3min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,7 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table with outcomes.
 - SKIN_UPGRADE_DEFS excludes 'default' chevron (always free) — only 3 purchasable shapes listed
 - SHAPE_SVG_PATHS uses pre-computed polygon coordinates scaled to 80x48 SVG viewBox — no second WebGL context
 - selectedSkin destructured alongside purchasedUpgrades in applyMetaBonuses() — single getState() call
+- [Phase 08-03]: CRT minimum intensity 0.01 — avoids invisible effect while paying GPU cost; SceneManager.render() routes through EffectComposer covering TitleState/GameOverState in single change
 
 ### Pending Todos
 
@@ -112,6 +114,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-07T12:21:23.295Z
-Stopped at: Completed 07-gamepad-support 07-02-PLAN.md
+Last session: 2026-03-07T12:54:22.832Z
+Stopped at: Completed 08-visual-customization 08-03-PLAN.md
 Resume file: None

@@ -74,7 +74,7 @@ Plans:
   3. Selected skin and color are preserved after closing and reopening the browser
   4. Player unlocks CRT Tier 1 in the meta shop and sees light scanlines applied across the entire game canvas
   5. Player adjusts the CRT intensity slider and the effect updates immediately without restarting
-**Plans:** 1/4 plans executed
+**Plans:** 2/4 plans executed
 
 Plans:
 - [ ] 08-01-PLAN.md — Ship geometry data (4 shapes, 6 colors) + PlayerSkinManager class + PlayingState wiring
@@ -128,6 +128,6 @@ Plans:
 | 5. Campaign Mode + Game Modes | v1.0 | 6/6 | Complete | 2026-03-06 |
 | 6. Foundation | v1.1 | 4/4 | Complete | 2026-03-07 |
 | 7. Gamepad Support | 2/2 | Complete   | 2026-03-07 | - |
-| 8. Visual Customization | 1/4 | In Progress|  | - |
+| 8. Visual Customization | 2/4 | In Progress|  | - |
 | 9. Power-Ups | v1.1 | 0/4 | Not started | - |
 | 10. Meta Shop Expansion | v1.1 | 0/3 | Not started | - |
