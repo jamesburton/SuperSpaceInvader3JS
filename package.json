@@ -11,12 +11,14 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "howler": "^2.2.4",
     "postprocessing": "6.38.3",
     "three": "0.183.2",
     "three.quarks": "0.17.0",
     "zustand": "5.0.11"
   },
   "devDependencies": {
+    "@types/howler": "^2.2.12",
     "@types/three": "0.183.1",
     "@vitest/coverage-v8": "^4.0.18",
     "jsdom": "^28.1.0",
