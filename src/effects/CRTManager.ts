@@ -33,6 +33,7 @@ export class CRTManager {
   private scanline: ScanlineEffect | null = null;
   private chromatic: ChromaticAberrationEffect | null = null;
   private activeTier: ValidTier = 1;
+  private composer: EffectComposer | null = null;
 
   /**
    * Initialize CRT effects and attach them to the existing EffectComposer.
@@ -82,6 +83,7 @@ export class CRTManager {
     // Create a new EffectPass with all CRT effects and add it to the composer.
     // Because bloom was added first, this pass executes after bloom — critical for
     // maintaining bloom output integrity.
+    this.composer = composer;
     this.pass = new EffectPass(camera, ...effects);
     composer.addPass(this.pass);
   }
@@ -107,8 +109,13 @@ export class CRTManager {
   }
 
   public dispose(): void {
+    // Remove pass from composer BEFORE disposing it — prevents dangling reference in composer's pass list
+    if (this.pass && this.composer) {
+      this.composer.removePass(this.pass);
+    }
     this.pass?.dispose();
     this.pass = null;
+    this.composer = null;
     this.scanline = null;
     this.chromatic = null;
   }

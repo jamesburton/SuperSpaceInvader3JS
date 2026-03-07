@@ -100,6 +100,11 @@ export class SceneManager {
    * @param intensity - Effect intensity in [0.0, 1.0]
    */
   public initCrt(tier: number | null, intensity: number): CRTManager | null {
+    // Dispose old CRT pass before creating a new one — enables clean reinit after tier change
+    if (this.crtManager) {
+      this.crtManager.dispose();
+      this.crtManager = null;
+    }
     if (!this.bloomEffect || tier === null || tier < 1) return null;
     this.crtManager = new CRTManager();
     this.crtManager.init(this.bloomEffect.composer, this.camera, tier, intensity);

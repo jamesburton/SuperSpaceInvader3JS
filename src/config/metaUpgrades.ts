@@ -7,7 +7,7 @@ export interface MetaUpgrade {
   /** Cost in SI$ */
   cost: number;
   /** Category for grouping in the shop UI */
-  category: 'loadout' | 'passive' | 'bunker' | 'skin';
+  category: 'loadout' | 'passive' | 'bunker' | 'skin' | 'crt';
   /**
    * Effect type for PlayingState to read on run start.
    * 'loadout_spread': start with 30s spread shot active
@@ -28,7 +28,8 @@ export interface MetaUpgrade {
     | 'passive_maxBullets'
     | 'passive_siConversion' | 'passive_siTaxReduction'
     | 'bunker_slot' | 'bunker_autorepair' | 'bunker_forceshield'
-    | 'skin_shape';
+    | 'skin_shape'
+    | 'crt_tier';
   /** Tier within its effect group (1, 2, or 3) — 0 for loadouts/once-only upgrades */
   tier: number;
 }
@@ -342,5 +343,34 @@ export const META_UPGRADES: MetaUpgrade[] = [
     category: 'bunker',
     effectType: 'bunker_forceshield',
     tier: 0,
+  },
+
+  // --- CRT Filter Tiers (SKIN-CRT: sequential unlock) ---
+  {
+    id: 'crt_tier_1',
+    displayName: 'HIGH-DEF 2003',
+    description: 'Light scanlines — the new retro',
+    cost: 30,
+    category: 'crt',
+    effectType: 'crt_tier',
+    tier: 1,
+  },
+  {
+    id: 'crt_tier_2',
+    displayName: 'CONSUMER 1991',
+    description: 'Moderate scanlines + chromatic aberration',
+    cost: 45,
+    category: 'crt',
+    effectType: 'crt_tier',
+    tier: 2,
+  },
+  {
+    id: 'crt_tier_3',
+    displayName: 'ARCADE 1983',
+    description: 'Heavy scanlines + strong chromatic aberration',
+    cost: 60,
+    category: 'crt',
+    effectType: 'crt_tier',
+    tier: 3,
   },
 ];

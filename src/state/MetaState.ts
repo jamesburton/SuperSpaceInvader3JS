@@ -51,6 +51,10 @@ export interface MetaStore {
   setMuted: (m: boolean) => void;
   /** Set the selected ship skin (shapeId + colorId). Persisted via Zustand middleware. */
   setSkin: (shapeId: string, colorId: string) => void;
+  /** Set the active CRT tier (null = off, 1/2/3 = tier). Persisted via Zustand middleware. */
+  setCrtTier: (tier: number | null) => void;
+  /** Set CRT intensity, clamped to [0, 1]. Persisted via Zustand middleware. */
+  setCrtIntensity: (intensity: number) => void;
 }
 
 /**
@@ -164,6 +168,14 @@ export const useMetaStore = createStore<MetaStore>()(
 
       setSkin: (shapeId: string, colorId: string) => {
         set({ selectedSkin: { shapeId, colorId } });
+      },
+
+      setCrtTier: (tier: number | null) => {
+        set({ crtTier: tier });
+      },
+
+      setCrtIntensity: (intensity: number) => {
+        set({ crtIntensity: Math.max(0, Math.min(1, intensity)) });
       },
     }),
     {
