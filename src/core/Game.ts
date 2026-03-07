@@ -25,6 +25,7 @@ import { TitleState } from '../states/TitleState';
 import type { PlayingStateContext } from '../states/PlayingState';
 import { FIXED_STEP, MAX_DELTA } from '../utils/constants';
 import { audioManager } from '../systems/AudioManager';
+import { useMetaStore } from '../state/MetaState';
 
 export class Game {
   public readonly scene: SceneManager;
@@ -156,6 +157,11 @@ export class Game {
     shopSystem._onBunkerRepairPurchased = () => {
       bunkerManager.repairMostDamaged();
     };
+
+    // Phase 8: initialize CRT post-processing (conditional on meta unlock)
+    // initCrt() adds a separate EffectPass after the bloom pass — keeps bloom intact
+    const { crtTier, crtIntensity } = useMetaStore.getState();
+    this.scene.initCrt(crtTier, crtIntensity);
 
     // Phase 6: initialize audio engine (BGM + SFX + AudioContext unlock)
     audioManager.init();

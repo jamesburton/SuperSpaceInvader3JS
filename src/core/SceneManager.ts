@@ -10,6 +10,7 @@ import {
 } from 'three';
 import { WORLD_WIDTH, WORLD_HEIGHT } from '../utils/constants';
 import { BloomEffect } from '../effects/BloomEffect';
+import { CRTManager } from '../effects/CRTManager';
 
 export class SceneManager {
   public readonly scene: Scene;
@@ -17,6 +18,7 @@ export class SceneManager {
   public readonly renderer: WebGLRenderer;
 
   private bloomEffect: BloomEffect | null = null;
+  private crtManager: CRTManager | null = null;
 
   constructor(container: HTMLElement) {
     this.scene = new Scene();
@@ -90,6 +92,26 @@ export class SceneManager {
   }
 
   /**
+   * Initialise the CRT post-processing pass (added after bloom).
+   * Must be called after initBloom() so the CRT EffectPass is ordered after the bloom pass.
+   * Returns null if bloom is not initialised or tier is null/invalid (CRT not unlocked).
+   *
+   * @param tier      - CRT tier (1/2/3) or null if not unlocked
+   * @param intensity - Effect intensity in [0.0, 1.0]
+   */
+  public initCrt(tier: number | null, intensity: number): CRTManager | null {
+    if (!this.bloomEffect || tier === null || tier < 1) return null;
+    this.crtManager = new CRTManager();
+    this.crtManager.init(this.bloomEffect.composer, this.camera, tier, intensity);
+    return this.crtManager;
+  }
+
+  /** Access the CRTManager after initCrt() has been called. */
+  public get crt(): CRTManager | null {
+    return this.crtManager;
+  }
+
+  /**
    * Render via EffectComposer (bloom active).
    * Used by PlayingState.render() only — other states call render() directly.
    */
@@ -102,11 +124,22 @@ export class SceneManager {
     void alpha;
   }
 
+  /**
+   * Render the scene. Routes through EffectComposer when bloom (and optionally CRT)
+   * is active so all game states receive post-processing effects.
+   * TitleState, GameOverState, and any other non-playing states call this method;
+   * by routing through the composer here, CRT applies globally across all states.
+   */
   public render(): void {
-    this.renderer.render(this.scene, this.camera);
+    if (this.bloomEffect) {
+      this.bloomEffect.render(1 / 60);
+    } else {
+      this.renderer.render(this.scene, this.camera);
+    }
   }
 
   public dispose(): void {
+    this.crtManager?.dispose();
     this.bloomEffect?.dispose();
     this.scene.traverse((obj) => {
       if ('geometry' in obj && obj.geometry) {
