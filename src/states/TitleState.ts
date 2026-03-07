@@ -115,6 +115,7 @@ export class TitleState implements IGameState {
     if (this.input.justPressed('ArrowDown')) {
       this.selectedOption = OPTIONS[(currentIndex + 1) % OPTIONS.length];
       this._renderMenu();
+      audioManager.playSfx('menuNav');
       this.input.clearJustPressed();
       return;
     }
@@ -122,6 +123,7 @@ export class TitleState implements IGameState {
     if (this.input.justPressed('ArrowUp')) {
       this.selectedOption = OPTIONS[(currentIndex - 1 + OPTIONS.length) % OPTIONS.length];
       this._renderMenu();
+      audioManager.playSfx('menuNav');
       this.input.clearJustPressed();
       return;
     }
@@ -153,6 +155,7 @@ export class TitleState implements IGameState {
   }
 
   private _launchSelected(): void {
+    audioManager.playSfx('menuNav');
     if (this.selectedOption === 'upgrades') {
       this.metaShopUI?.show(() => { this.metaShopUI!.hide(); });
       this.input.clearJustPressed();
