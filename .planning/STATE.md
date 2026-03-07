@@ -4,14 +4,14 @@ milestone: v1.1
 milestone_name: Polish & Depth
 status: executing
 stopped_at: Completed 07-gamepad-support 07-02-PLAN.md
-last_updated: "2026-03-07T12:25:33.343Z"
-last_activity: 2026-03-07 — Plan 07-01 complete; gamepad polling + synthesis + toast notifications
+last_updated: "2026-03-07T12:54:11.710Z"
+last_activity: 2026-03-07 — Plan 08-01 complete; skinConfig data layer + PlayerSkinManager + PlayingState wiring
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
-  percent: 13
+  total_plans: 10
+  completed_plans: 8
+  percent: 15
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** The thrill of arcade shooting elevated — every run feels different because of layered in-run progression, meta-unlocks that evolve your build over time, and enemies smart enough to keep you on your toes.
-**Current focus:** Phase 7 — Gamepad Support
+**Current focus:** Phase 8 — Visual Customization
 
 ## Current Position
 
-Phase: 7 of 10 (Gamepad Support)
-Plan: 1 of 2 complete
+Phase: 8 of 10 (Visual Customization)
+Plan: 1 of 4 complete
 Status: In progress
-Last activity: 2026-03-07 — Plan 07-01 complete; gamepad polling + synthesis + toast notifications
+Last activity: 2026-03-07 — Plan 08-01 complete; skinConfig data layer + PlayerSkinManager + PlayingState wiring
 
-Progress: [█░░░░░░░░░] 13%
+Progress: [█░░░░░░░░░] 15%
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Progress: [█░░░░░░░░░] 13%
 | Phase 06-foundation P04 | 4 | 2 tasks | 4 files |
 | Phase 07-gamepad P01 | 2min | 2 tasks | 3 files |
 | Phase 07-gamepad-support P02 | 4min | 2 tasks | 6 files |
+| Phase 08-visual-customization P01 | 3min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,14 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table with outcomes.
 - [Phase 07-02]: MetaShopUI purchasableIds rebuilt each render pass — flat list of non-owned, non-locked upgrade IDs enables linear D-pad navigation across card grid
 - [Phase 07-02]: Dynamic hints via DOM id lookups in update() rather than re-rendering full overlay — avoids flickering and event listener re-attachment
 - [Phase 07-02]: A button (Space) = restart/resume in GameOverState/PausedState — Space was unused in both states; safe addition alongside existing keyboard bindings
+
+**08-01 decisions:**
+- PlayerSkinManager is a module-level singleton in PlayingState — one instance reused across all runs
+- applySkin() disposes old geometry/material before assigning new ones to free GPU memory
+- Bloom re-registration not needed after skin swap — Selection set holds Mesh Object3D reference, not geometry/material
+- SKIN_UPGRADE_DEFS excludes 'default' chevron (always free) — only 3 purchasable shapes listed
+- SHAPE_SVG_PATHS uses pre-computed polygon coordinates scaled to 80x48 SVG viewBox — no second WebGL context
+- selectedSkin destructured alongside purchasedUpgrades in applyMetaBonuses() — single getState() call
 
 ### Pending Todos
 

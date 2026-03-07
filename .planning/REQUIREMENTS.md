@@ -27,10 +27,10 @@ Requirements for v1.1 Polish & Depth. Each maps to roadmap phases.
 
 ### Ship Skins
 
-- [ ] **SKIN-01**: Player can view and select from 3-4 distinct ship geometry shapes in a selection UI
-- [ ] **SKIN-02**: Player can choose from 6 color variants per ship shape
+- [x] **SKIN-01**: Player can view and select from 3-4 distinct ship geometry shapes in a selection UI
+- [x] **SKIN-02**: Player can choose from 6 color variants per ship shape
 - [ ] **SKIN-03**: Ship skins are purchasable with SI$ in the meta shop
-- [ ] **SKIN-04**: Selected skin and color persist across sessions
+- [x] **SKIN-04**: Selected skin and color persist across sessions
 - [ ] **SKIN-05**: Ship selection shows visual preview of each option
 
 ### Power-Ups
@@ -127,10 +127,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PAD-03 | Phase 7 | Complete |
 | PAD-04 | Phase 7 | Complete |
 | PAD-05 | Phase 7 | Complete |
-| SKIN-01 | Phase 8 | Pending |
-| SKIN-02 | Phase 8 | Pending |
+| SKIN-01 | Phase 8 | Complete |
+| SKIN-02 | Phase 8 | Complete |
 | SKIN-03 | Phase 8 | Pending |
-| SKIN-04 | Phase 8 | Pending |
+| SKIN-04 | Phase 8 | Complete |
 | SKIN-05 | Phase 8 | Pending |
 | CRT-01 | Phase 8 | Pending |
 | CRT-02 | Phase 8 | Pending |
