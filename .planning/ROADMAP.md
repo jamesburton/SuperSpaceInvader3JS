@@ -58,11 +58,11 @@ Plans:
   3. A toast notification appears when a gamepad connects or disconnects
   4. If a gamepad disconnects mid-game, the game continues without crashing and keyboard input takes over immediately
   5. A non-standard controller (e.g. PS5 in Firefox) shows a compatibility warning rather than silently producing wrong inputs
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 07-01: InputManager gamepad integration (polling, radial deadzone, synthesize into existing heldKeys/justPressedKeys)
-- [ ] 07-02: Menu and shop UI gamepad navigation + connect/disconnect notification toast
+- [ ] 07-01-PLAN.md — InputManager gamepad polling, radial deadzone, button-to-keycode synthesis, connect/disconnect toast, compatibility warning
+- [ ] 07-02-PLAN.md — ShopUI/MetaShopUI D-pad cursor navigation + dynamic input hint text in all game state overlays
 
 ### Phase 8: Visual Customization
 **Goal**: Players can express their identity through a ship skin they chose and see an optional CRT filter applied across the whole game
@@ -126,7 +126,7 @@ Plans:
 | 3. Enemy Depth + Wave Systems + Power-Ups | v1.0 | 9/9 | Complete | 2026-03-03 |
 | 4. Boss Encounter + Meta Progression | v1.0 | 6/6 | Complete | 2026-03-03 |
 | 5. Campaign Mode + Game Modes | v1.0 | 6/6 | Complete | 2026-03-06 |
-| 6. Foundation | 4/4 | Complete   | 2026-03-07 | - |
+| 6. Foundation | v1.1 | 4/4 | Complete | 2026-03-07 |
 | 7. Gamepad Support | v1.1 | 0/2 | Not started | - |
 | 8. Visual Customization | v1.1 | 0/4 | Not started | - |
 | 9. Power-Ups | v1.1 | 0/4 | Not started | - |
