@@ -113,6 +113,7 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table with outcomes.
 ### Pending Todos
 
 - Remove junk enemies alongside boss — `.planning/todos/pending/2026-03-10-remove-junk-enemies-shown-alongside-boss.md`
+- Add switchable weapons with toggle loadout — `.planning/todos/pending/2026-03-10-add-switchable-weapons-with-toggle-loadout.md`
 
 ### Blockers/Concerns
 
