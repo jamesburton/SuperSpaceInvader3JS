@@ -35,14 +35,14 @@ Requirements for v1.1 Polish & Depth. Each maps to roadmap phases.
 
 ### Power-Ups
 
-- [ ] **PWR-01**: Piercing shot passes through enemies, damaging multiple targets in a line
-- [ ] **PWR-02**: Piercing shot has a distinct visual trail indicating penetration
-- [ ] **PWR-03**: Homing missiles track nearest enemy with limited turn rate and lifetime cap
-- [ ] **PWR-04**: Homing missiles display a lock-on reticle on the targeted enemy
-- [ ] **PWR-05**: Time slow reduces all enemy and bullet speed for a limited duration
-- [ ] **PWR-06**: Time slow applies a visual treatment (desaturation/tint) to communicate the state
-- [ ] **PWR-07**: All three new power-ups appear as purchasable options in the between-wave shop
-- [ ] **PWR-08**: Each new power-up has a visually distinct pickup appearance
+- [x] **PWR-01**: Piercing shot passes through enemies, damaging multiple targets in a line
+- [x] **PWR-02**: Piercing shot has a distinct visual trail indicating penetration
+- [x] **PWR-03**: Homing missiles track nearest enemy with limited turn rate and lifetime cap
+- [x] **PWR-04**: Homing missiles display a lock-on reticle on the targeted enemy
+- [x] **PWR-05**: Time slow reduces all enemy and bullet speed for a limited duration
+- [x] **PWR-06**: Time slow applies a visual treatment (desaturation/tint) to communicate the state
+- [x] **PWR-07**: All three new power-ups appear as purchasable options in the between-wave shop
+- [x] **PWR-08**: Each new power-up has a visually distinct pickup appearance
 
 ### Meta Shop
 
@@ -137,14 +137,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CRT-03 | Phase 8 | Complete |
 | CRT-04 | Phase 8 | Complete |
 | CRT-05 | Phase 8 | Complete |
-| PWR-01 | Phase 9 | Pending |
-| PWR-02 | Phase 9 | Pending |
-| PWR-03 | Phase 9 | Pending |
-| PWR-04 | Phase 9 | Pending |
-| PWR-05 | Phase 9 | Pending |
-| PWR-06 | Phase 9 | Pending |
-| PWR-07 | Phase 9 | Pending |
-| PWR-08 | Phase 9 | Pending |
+| PWR-01 | Phase 9 | Complete |
+| PWR-02 | Phase 9 | Complete |
+| PWR-03 | Phase 9 | Complete |
+| PWR-04 | Phase 9 | Complete |
+| PWR-05 | Phase 9 | Complete |
+| PWR-06 | Phase 9 | Complete |
+| PWR-07 | Phase 9 | Complete |
+| PWR-08 | Phase 9 | Complete |
 | SHOP-01 | Phase 10 | Pending |
 | SHOP-02 | Phase 10 | Pending |
 | SHOP-03 | Phase 10 | Pending |

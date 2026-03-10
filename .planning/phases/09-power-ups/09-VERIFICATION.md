@@ -1,28 +1,16 @@
 ---
 phase: 09-power-ups
-verified: 2026-03-10T16:20:00Z
-status: human_needed
+verified: 2026-03-10T17:20:00Z
+status: passed
 score: 8/8 requirements implemented
-human_verification:
-  - test: "Activate piercing shot and fire through two vertically aligned enemies"
-    expected: "One elongated rail-style projectile damages the first enemy fully, damages the second enemy at reduced strength, then expires"
-    why_human: "Projectile readability and in-motion penetration feel require a running game"
-  - test: "Activate homing missile near a mixed formation"
-    expected: "A single missile locks the nearest enemy, curves toward it with limited steering, shows a lock reticle, and can still expire before impact"
-    why_human: "Targeting feel and reticle readability require a running game"
-  - test: "Activate time slow during active enemy fire"
-    expected: "Enemies and hostile bullets slow visibly while the player ship and player shots remain crisp at full speed; cool tint fades in and out smoothly"
-    why_human: "Selective time-scale feel and renderer/HUD treatment require a running game"
-  - test: "Open the between-wave shop after clearing a wave"
-    expected: "Piercing shot, homing missile, and time slow appear in the shop, purchasing one activates it immediately, and pickup drops are visually distinguishable in gameplay"
-    why_human: "Shop flow and pickup readability require browser gameplay"
+approved_by_user: true
 ---
 
 # Phase 9: Power-Ups Verification Report
 
 **Phase Goal:** Players discover three new power-ups mid-run that each feel mechanically distinct and are clearly communicated through visual feedback
-**Verified:** 2026-03-10T16:20:00Z
-**Status:** human_needed
+**Verified:** 2026-03-10T17:20:00Z
+**Status:** passed
 
 ## Requirements Coverage
 
@@ -42,15 +30,10 @@ human_verification:
 - `npx vitest run src/entities/Bullet.test.ts src/systems/CollisionSystem.test.ts src/systems/HomingMissileManager.test.ts src/state/RunState.test.ts src/ui/HUD.test.ts src/states/PlayingState.test.ts src/systems/ShopSystem.test.ts src/systems/PowerUpManager.test.ts src/entities/PickupToken.test.ts`
 - `npx tsc --noEmit`
 
-## Human Verification Required
+## Human Verification
 
-The code implementation is complete, but the phase still needs browser playtesting for tuning and visual confirmation:
-
-1. Piercing shot readability and two-enemy line behavior
-2. Homing missile steering feel, lock readability, and expiry tuning
-3. Time slow readability under bloom/CRT with real combat pacing
-4. Shop activation flow and pickup recognition in a live run
+Approved by the user on 2026-03-10 after reviewing the required live-play checks.
 
 ## Gaps Summary
 
-No code gaps found against the Phase 9 requirements. Remaining work is human verification only.
+No code gaps found against the Phase 9 requirements.

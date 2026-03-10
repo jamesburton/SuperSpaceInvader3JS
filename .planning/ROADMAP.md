@@ -25,7 +25,7 @@
 - [x] **Phase 6: Foundation** - MetaStore v4 schema migration + full audio system (completed 2026-03-07)
 - [x] **Phase 7: Gamepad Support** - Controller input synthesized into existing input layer (completed 2026-03-07)
 - [x] **Phase 8: Visual Customization** - Ship skins + CRT post-processing effects (completed 2026-03-07)
-- [ ] **Phase 9: Power-Ups** - Piercing shot, homing missiles, and time slow
+- [x] **Phase 9: Power-Ups** - Piercing shot, homing missiles, and time slow (completed 2026-03-10)
 - [ ] **Phase 10: Meta Shop Expansion** - Extra lives, difficulty unlocks, starting power-up slot, CRT tiers
 
 ## Phase Details
@@ -92,7 +92,7 @@ Plans:
   3. Time slow reduces all enemy and projectile speeds while the player ship moves at full speed, and a visual desaturation/tint effect communicates the active state
   4. All three new power-ups appear as purchasable options in the between-wave shop alongside existing power-ups
   5. Each new power-up has a visually distinct pickup appearance distinguishable from existing pickups at a glance
-**Plans**: 4/4 implemented, awaiting human verification
+**Plans**: 4/4 complete
 
 Plans:
 - [x] 09-01: Piercing shot (CollisionSystem bullet-skip logic, elongated trail visual, PWR-02) — implemented 2026-03-10
@@ -129,5 +129,5 @@ Plans:
 | 6. Foundation | v1.1 | 4/4 | Complete | 2026-03-07 |
 | 7. Gamepad Support | 2/2 | Complete   | 2026-03-07 | - |
 | 8. Visual Customization | 4/4 | Complete   | 2026-03-07 | - |
-| 9. Power-Ups | v1.1 | 4/4 | Awaiting human verification | - |
+| 9. Power-Ups | v1.1 | 4/4 | Complete | 2026-03-10 |
 | 10. Meta Shop Expansion | v1.1 | 0/3 | Not started | - |
