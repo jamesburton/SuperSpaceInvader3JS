@@ -105,17 +105,17 @@ export class CollisionSystem {
         let bulletConsumed = false;
         for (const enemy of formation.enemies) {
           if (!enemy.active) continue;
+          if (!bullet.canHitEnemy(enemy.instanceIndex)) continue;
           const aabb = formation.getEnemyAABB(enemy);
 
           if (aabbOverlap(bullet.x, bullet.y, bullet.width, bullet.height,
                           aabb.x, aabb.y, aabb.w, aabb.h)) {
-            // Hit registered — consume bullet regardless of shield state
-            bulletsToRelease.push({ bullet, pool: playerBulletPool });
-            bulletConsumed = true;
+            bullet.markEnemyHit(enemy.instanceIndex);
+            const damageScale = bullet.consumeHit();
 
             // Shielder shield phasing: reduce shieldHp before body damage
             if (enemy.type === 'shielder' && enemy.shieldActive) {
-              enemy.shieldHp -= 1;
+              enemy.shieldHp -= damageScale;
               if (enemy.shieldHp <= 0) {
                 // Shield destroyed — show visual burst but DO NOT kill body yet
                 enemy.shieldActive = false;
@@ -124,36 +124,44 @@ export class CollisionSystem {
                   this.particleManager.spawnDeathBurst(worldPos.x, worldPos.y + enemy.height, 0xff00ff);
                 }
               }
-              break; // bullet consumed
+            } else {
+              // Normal body damage (shield inactive or non-Shielder)
+              enemy.health -= damageScale;
+
+              if (enemy.health <= 0) {
+                // Capture world position BEFORE killEnemy() scales matrix to zero
+                const worldPos = formation.getEnemyWorldPos(enemy);
+                formation.killEnemy(enemy.instanceIndex);
+                runState.addScore(ENEMY_DEFS[enemy.type].scoreValue);
+                runState.recordKill();
+                audioManager.playSfx('enemyDeath'); // Phase 6: enemy death SFX (AUD-02)
+
+                // INRUN-01: drop Gold on kill
+                const def = ENEMY_DEFS[enemy.type];
+                runState.addGold(def.sidDropAmount);
+
+                // Try to spawn a power-up drop at kill position
+                if (this.powerUpManager) {
+                  this.powerUpManager.trySpawnDrop(worldPos.x, worldPos.y, def.dropChance);
+                }
+
+                // Spawn death particle burst at kill position with current wave palette color
+                if (this.particleManager) {
+                  const paletteColor = wavePalette.getColor(runState.wave);
+                  this.particleManager.spawnDeathBurst(worldPos.x, worldPos.y, paletteColor);
+                }
+              }
             }
 
-            // Normal body damage (shield inactive or non-Shielder)
-            enemy.health -= 1;
-
-            if (enemy.health <= 0) {
-              // Capture world position BEFORE killEnemy() scales matrix to zero
-              const worldPos = formation.getEnemyWorldPos(enemy);
-              formation.killEnemy(enemy.instanceIndex);
-              runState.addScore(ENEMY_DEFS[enemy.type].scoreValue);
-              runState.recordKill();
-              audioManager.playSfx('enemyDeath'); // Phase 6: enemy death SFX (AUD-02)
-
-              // INRUN-01: drop Gold on kill
-              const def = ENEMY_DEFS[enemy.type];
-              runState.addGold(def.sidDropAmount);
-
-              // Try to spawn a power-up drop at kill position
-              if (this.powerUpManager) {
-                this.powerUpManager.trySpawnDrop(worldPos.x, worldPos.y, def.dropChance);
-              }
-
-              // Spawn death particle burst at kill position with current wave palette color
-              if (this.particleManager) {
-                const paletteColor = wavePalette.getColor(runState.wave);
-                this.particleManager.spawnDeathBurst(worldPos.x, worldPos.y, paletteColor);
-              }
+            if (this.particleManager && bullet.shotKind === 'piercing') {
+              this.particleManager.spawnPiercingImpact(bullet.x, bullet.y, bullet.vx, bullet.vy);
             }
-            break; // bullet consumed by first hit — stop checking this bullet
+
+            if (bullet.remainingHits <= 0) {
+              bulletsToRelease.push({ bullet, pool: playerBulletPool });
+              bulletConsumed = true;
+              break;
+            }
           }
         }
 

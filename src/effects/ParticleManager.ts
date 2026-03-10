@@ -130,6 +130,30 @@ export class ParticleManager {
     this.activeParticles.push(p);
   }
 
+  public spawnPiercingImpact(x: number, y: number, vx: number, vy: number): void {
+    const speed = Math.hypot(vx, vy) || 1;
+    const dirX = vx / speed;
+    const dirY = vy / speed;
+    for (let i = 0; i < 3; i++) {
+      const p = this.trailPool.acquire();
+      if (!p) break;
+
+      const offset = (i - 1) * 10;
+      const jitter = (Math.random() - 0.5) * 12;
+      p.init(
+        x - dirX * offset,
+        y - dirY * offset,
+        dirX * (40 + jitter),
+        dirY * (40 + jitter),
+        (Math.random() - 0.5) * 4,
+        0.12 + Math.random() * 0.06,
+        0x44f5ff,
+      );
+      this.sourcePool.set(p, this.trailPool);
+      this.activeParticles.push(p);
+    }
+  }
+
   /**
    * Update all active particles. Call each fixed step before rendering.
    * Dead particles are released back to their source pool automatically.
