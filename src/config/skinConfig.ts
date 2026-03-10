@@ -44,7 +44,8 @@ function makeDeltaGeometry(): BufferGeometry {
      0,  -4, 0, // 2 center base notch
    -20, -12, 0, // 3 left base
   ]);
-  const indices = new Uint16Array([0, 1, 2, 0, 2, 3]);
+  // CCW winding from +Z camera (same convention as default chevron)
+  const indices = new Uint16Array([0, 2, 1, 0, 3, 2]);
   const geo = new BufferGeometry();
   geo.setAttribute('position', new Float32BufferAttribute(positions, 3));
   geo.setIndex(new Uint16BufferAttribute(indices, 1));
@@ -65,7 +66,8 @@ function makeDartGeometry(): BufferGeometry {
     -4, -12, 0, // 4 left wing tip
     -8,  -8, 0, // 5 left shoulder
   ]);
-  const indices = new Uint16Array([0, 1, 5, 1, 2, 3, 1, 3, 5, 3, 4, 5]);
+  // CCW winding from +Z camera (same convention as default chevron)
+  const indices = new Uint16Array([0, 5, 1, 1, 3, 2, 1, 5, 3, 3, 5, 4]);
   const geo = new BufferGeometry();
   geo.setAttribute('position', new Float32BufferAttribute(positions, 3));
   geo.setIndex(new Uint16BufferAttribute(indices, 1));
@@ -88,13 +90,14 @@ function makeCruiserGeometry(): BufferGeometry {
    -20, -12, 0, // 6 left wing tip
    -20,   2, 0, // 7 left wing front
   ]);
+  // CCW winding from +Z camera (same convention as default chevron)
   const indices = new Uint16Array([
-    0, 1, 7,   // nose to wings
-    1, 3, 4,   // right fill
-    1, 2, 3,   // right wing
-    4, 5, 7,   // left fill
-    5, 6, 7,   // left wing
-    1, 4, 7,   // center fill
+    0, 7, 1,   // nose to wings
+    1, 4, 3,   // right fill
+    1, 3, 2,   // right wing
+    4, 7, 5,   // left fill
+    5, 7, 6,   // left wing
+    1, 7, 4,   // center fill
   ]);
   const geo = new BufferGeometry();
   geo.setAttribute('position', new Float32BufferAttribute(positions, 3));

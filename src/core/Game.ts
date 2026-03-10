@@ -22,10 +22,12 @@ import { BunkerManager } from '../entities/BunkerManager';
 import { ShopUI } from '../ui/ShopUI';
 import { HUD } from '../ui/HUD';
 import { TitleState } from '../states/TitleState';
+import { NameEntryState } from '../states/NameEntryState';
 import type { PlayingStateContext } from '../states/PlayingState';
 import { FIXED_STEP, MAX_DELTA } from '../utils/constants';
 import { audioManager } from '../systems/AudioManager';
 import { useMetaStore } from '../state/MetaState';
+import { profileManager } from '../state/ProfileManager';
 
 export class Game {
   public readonly scene: SceneManager;
@@ -158,16 +160,23 @@ export class Game {
       bunkerManager.repairMostDamaged();
     };
 
-    // Phase 8: initialize CRT post-processing (conditional on meta unlock)
-    // initCrt() adds a separate EffectPass after the bloom pass — keeps bloom intact
+    // Phase 8: initialize CRT overlay (CSS-based, covers entire viewport including HUD)
     const { crtTier, crtIntensity } = useMetaStore.getState();
     this.scene.initCrt(crtTier, crtIntensity);
 
     // Phase 6: initialize audio engine (BGM + SFX + AudioContext unlock)
     audioManager.init();
 
-    // Start at TitleState
-    this.stateManager.replace(new TitleState(this.stateManager, this.input, hud, ctx));
+    // Start at NameEntryState if no profile, otherwise TitleState
+    if (!profileManager.hasActiveProfile()) {
+      this.stateManager.replace(new NameEntryState(
+        this.stateManager, hud,
+        () => this.stateManager.replace(new TitleState(this.stateManager, this.input, hud, ctx)),
+        'new',
+      ));
+    } else {
+      this.stateManager.replace(new TitleState(this.stateManager, this.input, hud, ctx));
+    }
 
     console.log('[Game] All systems initialized. Starting at TitleState.');
   }

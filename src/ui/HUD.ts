@@ -90,10 +90,12 @@ export class HUD {
   public showOverlay(html: string): void {
     this.overlayEl.innerHTML = html;
     this.overlayEl.style.display = 'flex';
+    this.overlayEl.style.pointerEvents = 'auto';
   }
 
   public hideOverlay(): void {
     this.overlayEl.style.display = 'none';
+    this.overlayEl.style.pointerEvents = 'none';
   }
 
   /** Show "WAVE X" neon-styled with the wave palette color, for 2.5 seconds */

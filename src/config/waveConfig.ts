@@ -32,13 +32,36 @@ export interface FormationLayout {
 const ALL_TYPES: EnemyType[] = ['grunt', 'shielder', 'flanker', 'sniper', 'charger', 'swooper'];
 
 /**
- * Wave definitions for waves 1-10.
- * Beyond wave 10, getWaveConfig() derives from the wave-10 template with escalating multipliers.
+ * Wave definitions for waves 1-12.
+ * Waves 1-2 are easy starter waves. Waves 3-12 are the original 1-10 content.
+ * Beyond wave 12, getWaveConfig() derives from the wave-12 template with escalating multipliers.
  */
 export const WAVE_CONFIGS: readonly WaveConfig[] = [
-  // Wave 1 — intro wave: grunt only, small formation
+  // Wave 1 — tutorial: single row of 4 grunts, very slow
   {
     waveNumber: 1,
+    rows: 1,
+    cols: 4,
+    speedMultiplier: 0.5,
+    fireRateMultiplier: 0.4,
+    hpMultiplier: 1.0,
+    allowedTypes: ['grunt'],
+    shopAfterThisWave: false,
+  },
+  // Wave 2 — two rows, introduce Shielder at low difficulty
+  {
+    waveNumber: 2,
+    rows: 2,
+    cols: 5,
+    speedMultiplier: 0.65,
+    fireRateMultiplier: 0.55,
+    hpMultiplier: 1.0,
+    allowedTypes: ['grunt', 'shielder'],
+    shopAfterThisWave: false,
+  },
+  // Wave 3 — grunt only, standard starting formation
+  {
+    waveNumber: 3,
     rows: 3,
     cols: 8,
     speedMultiplier: 1.0,
@@ -47,9 +70,9 @@ export const WAVE_CONFIGS: readonly WaveConfig[] = [
     allowedTypes: ['grunt'],
     shopAfterThisWave: false,
   },
-  // Wave 2 — slight escalation
+  // Wave 4 — slight escalation
   {
-    waveNumber: 2,
+    waveNumber: 4,
     rows: 3,
     cols: 9,
     speedMultiplier: 1.1,
@@ -58,20 +81,20 @@ export const WAVE_CONFIGS: readonly WaveConfig[] = [
     allowedTypes: ['grunt'],
     shopAfterThisWave: false,
   },
-  // Wave 3 — introduce Shielder
+  // Wave 5 — introduce Shielder, first shop
   {
-    waveNumber: 3,
+    waveNumber: 5,
     rows: 4,
     cols: 9,
     speedMultiplier: 1.2,
     fireRateMultiplier: 1.2,
     hpMultiplier: 1.0,
     allowedTypes: ['grunt', 'shielder'],
-    shopAfterThisWave: false,
+    shopAfterThisWave: true,
   },
-  // Wave 4 — more Shielders
+  // Wave 6 — more Shielders
   {
-    waveNumber: 4,
+    waveNumber: 6,
     rows: 4,
     cols: 9,
     speedMultiplier: 1.3,
@@ -80,20 +103,20 @@ export const WAVE_CONFIGS: readonly WaveConfig[] = [
     allowedTypes: ['grunt', 'shielder'],
     shopAfterThisWave: false,
   },
-  // Wave 5 — introduce Flanker, first shop
+  // Wave 7 — introduce Flanker
   {
-    waveNumber: 5,
+    waveNumber: 7,
     rows: 4,
     cols: 10,
     speedMultiplier: 1.4,
     fireRateMultiplier: 1.3,
     hpMultiplier: 1.2,
     allowedTypes: ['grunt', 'shielder', 'flanker'],
-    shopAfterThisWave: true,
+    shopAfterThisWave: false,
   },
-  // Wave 6 — introduce Sniper
+  // Wave 8 — introduce Sniper
   {
-    waveNumber: 6,
+    waveNumber: 8,
     rows: 4,
     cols: 10,
     speedMultiplier: 1.5,
@@ -102,9 +125,9 @@ export const WAVE_CONFIGS: readonly WaveConfig[] = [
     allowedTypes: ['grunt', 'shielder', 'flanker', 'sniper'],
     shopAfterThisWave: false,
   },
-  // Wave 7 — introduce Charger
+  // Wave 9 — introduce Charger
   {
-    waveNumber: 7,
+    waveNumber: 9,
     rows: 4,
     cols: 10,
     speedMultiplier: 1.6,
@@ -113,20 +136,20 @@ export const WAVE_CONFIGS: readonly WaveConfig[] = [
     allowedTypes: ['grunt', 'shielder', 'flanker', 'sniper', 'charger'],
     shopAfterThisWave: false,
   },
-  // Wave 8 — larger formation
+  // Wave 10 — larger formation, second shop
   {
-    waveNumber: 8,
+    waveNumber: 10,
     rows: 5,
     cols: 10,
     speedMultiplier: 1.7,
     fireRateMultiplier: 1.5,
     hpMultiplier: 1.4,
     allowedTypes: ['grunt', 'shielder', 'flanker', 'sniper', 'charger'],
-    shopAfterThisWave: false,
+    shopAfterThisWave: true,
   },
-  // Wave 9 — introduce Swooper
+  // Wave 11 — introduce Swooper
   {
-    waveNumber: 9,
+    waveNumber: 11,
     rows: 5,
     cols: 10,
     speedMultiplier: 1.8,
@@ -135,26 +158,26 @@ export const WAVE_CONFIGS: readonly WaveConfig[] = [
     allowedTypes: ['grunt', 'shielder', 'flanker', 'sniper', 'charger', 'swooper'],
     shopAfterThisWave: false,
   },
-  // Wave 10 — all types, second shop, max formation
+  // Wave 12 — all types, max formation
   {
-    waveNumber: 10,
+    waveNumber: 12,
     rows: 5,
     cols: 10,
     speedMultiplier: 2.0,
     fireRateMultiplier: 1.8,
     hpMultiplier: 1.6,
     allowedTypes: ALL_TYPES,
-    shopAfterThisWave: true,
+    shopAfterThisWave: false,
   },
 ];
 
 /**
  * Returns the wave configuration for the given wave number.
- * Waves 1-10 return pre-defined entries.
- * Waves beyond 10 are derived from the wave-10 template with escalating multipliers:
- *   - speedMultiplier scales by +5% per wave beyond 10
- *   - fireRateMultiplier scales by +4% per wave beyond 10
- *   - hpMultiplier scales by +3% per wave beyond 10
+ * Waves 1-12 return pre-defined entries.
+ * Waves beyond 12 are derived from the wave-12 template with escalating multipliers:
+ *   - speedMultiplier scales by +5% per wave beyond 12
+ *   - fireRateMultiplier scales by +4% per wave beyond 12
+ *   - hpMultiplier scales by +3% per wave beyond 12
  *   - shopAfterThisWave is true every 5th wave
  *   - rows/cols are capped at 5/10
  */

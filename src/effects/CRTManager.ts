@@ -1,122 +1,110 @@
-import { ScanlineEffect, ChromaticAberrationEffect, EffectPass, BlendFunction } from 'postprocessing';
-import { Vector2 } from 'three';
-import type { EffectComposer } from 'postprocessing';
-import type { OrthographicCamera } from 'three';
-
 /**
- * Tier parameters for each CRT unlock level.
- * Tier 1: scanlines only (no chromatic aberration).
- * Tier 2: moderate scanlines + mild chromatic aberration.
- * Tier 3: heavy scanlines + strong chromatic aberration.
+ * CRTManager — CSS-based CRT overlay that covers the entire game viewport.
+ *
+ * Uses a repeating linear gradient for scanlines, applied via a full-viewport
+ * overlay div with pointer-events:none. This ensures the CRT effect covers
+ * both the WebGL canvas AND the DOM-based HUD/overlays.
+ *
+ * Tier parameters control scanline density and opacity:
+ * - Tier 1: light scanlines (subtle retro feel)
+ * - Tier 2: moderate scanlines + slight color fringe
+ * - Tier 3: heavy scanlines + strong color fringe + vignette
  */
+
 const CRT_TIER_PARAMS = {
-  1: { baseDensity: 1.5, baseCA: 0.0 },
-  2: { baseDensity: 2.5, baseCA: 0.003 },
-  3: { baseDensity: 4.0, baseCA: 0.006 },
+  1: { lineHeight: 4, baseOpacity: 0.12, colorFringe: 0, vignette: false },
+  2: { lineHeight: 3, baseOpacity: 0.18, colorFringe: 0.4, vignette: false },
+  3: { lineHeight: 2, baseOpacity: 0.25, colorFringe: 0.8, vignette: true },
 } as const;
 
 type ValidTier = 1 | 2 | 3;
 
-/**
- * CRTManager wraps ScanlineEffect + ChromaticAberrationEffect in a separate EffectPass
- * added AFTER the bloom EffectPass. This separation is critical — merging CRT effects
- * into the bloom pass causes bloom to disappear (confirmed in Phase 8 research, Pitfall 1).
- *
- * Usage:
- *   const crtManager = new CRTManager();
- *   crtManager.init(bloom.composer, camera, crtTier, crtIntensity);
- *   // Later, when user adjusts intensity slider:
- *   crtManager.setIntensity(newIntensity);
- */
 export class CRTManager {
-  private pass: EffectPass | null = null;
-  private scanline: ScanlineEffect | null = null;
-  private chromatic: ChromaticAberrationEffect | null = null;
+  private overlayEl: HTMLElement | null = null;
   private activeTier: ValidTier = 1;
-  private composer: EffectComposer | null = null;
+  // Container ref kept for potential future use (resize handling)
 
   /**
-   * Initialize CRT effects and attach them to the existing EffectComposer.
-   * Must be called after bloom pass has already been added so CRT pass is ordered after bloom.
+   * Initialize the CRT CSS overlay inside the given container.
+   * The overlay covers the entire container and sits above all content.
    *
-   * @param composer - The shared EffectComposer (from BloomEffect.composer)
-   * @param camera   - The orthographic camera
-   * @param tier     - CRT tier (1/2/3) or null if not unlocked
+   * @param container - The game viewport element (#game-viewport)
+   * @param _camera   - Unused (kept for API compat, was needed for EffectComposer)
+   * @param tier      - CRT tier (1/2/3) or null if not active
    * @param intensity - Effect intensity in [0.0, 1.0]
    */
   public init(
-    composer: EffectComposer,
-    camera: OrthographicCamera,
+    container: HTMLElement,
+    _camera: unknown,
     tier: number | null,
     intensity: number,
   ): void {
-    if (tier === null || tier < 1 || tier > 3) {
-      // CRT not unlocked — do not add any pass
-      return;
-    }
+    if (tier === null || tier < 1 || tier > 3) return;
 
     this.activeTier = tier as ValidTier;
-    const params = CRT_TIER_PARAMS[this.activeTier];
 
-    // Clamp intensity — minimum 0.01 so scanlines are always slightly visible once unlocked.
-    // A zero intensity would make the CRT entirely invisible while still paying the GPU cost.
-    const clamped = Math.max(0.01, Math.min(1, intensity));
+    // Create overlay element
+    this.overlayEl = document.createElement('div');
+    this.overlayEl.id = 'crt-overlay';
+    this.overlayEl.style.cssText = [
+      'position:absolute',
+      'inset:0',
+      'pointer-events:none',
+      'z-index:9999',
+      'mix-blend-mode:multiply',
+    ].join(';');
+    container.appendChild(this.overlayEl);
 
-    // Create scanline effect — uses OVERLAY blend so it darkens between pixel rows
-    this.scanline = new ScanlineEffect({
-      blendFunction: BlendFunction.OVERLAY,
-      density: params.baseDensity * clamped,
-    });
-
-    const effects: (ScanlineEffect | ChromaticAberrationEffect)[] = [this.scanline];
-
-    // Chromatic aberration only at tiers 2 and 3
-    if (params.baseCA > 0) {
-      this.chromatic = new ChromaticAberrationEffect({
-        offset: new Vector2(params.baseCA * clamped, params.baseCA * clamped),
-        radialModulation: true,
-        modulationOffset: 0.15,
-      });
-      effects.push(this.chromatic);
-    }
-
-    // Create a new EffectPass with all CRT effects and add it to the composer.
-    // Because bloom was added first, this pass executes after bloom — critical for
-    // maintaining bloom output integrity.
-    this.composer = composer;
-    this.pass = new EffectPass(camera, ...effects);
-    composer.addPass(this.pass);
+    this.applyEffect(intensity);
   }
 
   /**
-   * Update CRT effect intensity at runtime (no restart required).
-   * Called by the settings UI when the player adjusts the CRT intensity slider.
-   *
-   * @param intensity - New intensity in [0.0, 1.0]
+   * Update CRT effect intensity at runtime.
    */
   public setIntensity(intensity: number): void {
-    if (!this.scanline) return;
+    if (!this.overlayEl) return;
+    this.applyEffect(intensity);
+  }
+
+  /**
+   * Change active tier at runtime without full reinit.
+   */
+  public setTier(tier: number): void {
+    if (tier < 1 || tier > 3) return;
+    this.activeTier = tier as ValidTier;
+  }
+
+  private applyEffect(intensity: number): void {
+    if (!this.overlayEl) return;
 
     const clamped = Math.max(0.01, Math.min(1, intensity));
     const params = CRT_TIER_PARAMS[this.activeTier];
 
-    this.scanline.density = params.baseDensity * clamped;
+    const lineH = params.lineHeight;
+    const opacity = params.baseOpacity * clamped;
 
-    if (this.chromatic) {
-      const offset = params.baseCA * clamped;
-      this.chromatic.offset = new Vector2(offset, offset);
-    }
+    // Scanline gradient: alternating transparent and dark bands
+    const scanlines = `repeating-linear-gradient(0deg, transparent 0px, transparent ${lineH}px, rgba(0,0,0,${opacity}) ${lineH}px, rgba(0,0,0,${opacity}) ${lineH * 2}px)`;
+
+    // Color fringe: subtle red/blue edge glow via box-shadow
+    const fringe = params.colorFringe * clamped;
+    const fringeVal = fringe > 0
+      ? `inset ${fringe}px 0 ${fringe * 2}px rgba(255,0,0,${0.06 * clamped}), inset -${fringe}px 0 ${fringe * 2}px rgba(0,100,255,${0.06 * clamped})`
+      : 'none';
+
+    // Vignette: darken edges
+    const vignette = params.vignette
+      ? `, radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,${0.4 * clamped}) 100%)`
+      : '';
+
+    this.overlayEl.style.background = scanlines + vignette;
+    this.overlayEl.style.boxShadow = fringeVal;
   }
 
   public dispose(): void {
-    // Remove pass from composer BEFORE disposing it — prevents dangling reference in composer's pass list
-    if (this.pass && this.composer) {
-      this.composer.removePass(this.pass);
+    if (this.overlayEl && this.overlayEl.parentElement) {
+      this.overlayEl.parentElement.removeChild(this.overlayEl);
     }
-    this.pass?.dispose();
-    this.pass = null;
-    this.composer = null;
-    this.scanline = null;
-    this.chromatic = null;
+    this.overlayEl = null;
   }
 }

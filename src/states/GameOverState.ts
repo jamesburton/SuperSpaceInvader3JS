@@ -5,6 +5,7 @@ import type { PlayingStateContext } from './PlayingState';
 import { runState } from '../state/RunState';
 import { useMetaStore } from '../state/MetaState';
 import { audioManager } from '../systems/AudioManager';
+import { profileManager } from '../state/ProfileManager';
 
 export class GameOverState implements IGameState {
   private readonly finalScore: number;
@@ -48,6 +49,13 @@ export class GameOverState implements IGameState {
   enter(): void {
     audioManager.stopBgm();           // Phase 6: stop BGM when game ends (AUD-01)
     audioManager.playSfx('gameOver'); // Phase 6: game over SFX (AUD-03)
+
+    // Record high score for current player profile
+    const playerName = profileManager.getActiveProfileName();
+    if (playerName) {
+      profileManager.recordScore(playerName, this.finalScore, this.finalWave, runState.mode);
+    }
+    profileManager.saveCurrentState();
     const isVictory = this.type === 'victory';
     const titleColor = isVictory ? '#ffd700' : '#f44';
     const titleGlow = isVictory ? '#ffd700' : '#f44';

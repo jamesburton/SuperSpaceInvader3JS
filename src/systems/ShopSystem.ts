@@ -74,6 +74,15 @@ export const SHOP_ITEMS: ShopItem[] = [
     tier: 1,
     maxPurchases: 6,
   },
+  {
+    id: 'repairBunker',
+    displayName: 'REPAIR BUNKER',
+    description: 'Fully repair most damaged bunker',
+    price: 30,
+    category: 'defense',
+    tier: 1,
+    maxPurchases: 99,
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -96,17 +105,26 @@ export class ShopSystem {
    */
   public _onShieldChargePurchased: (() => void) | null = null;
 
+  /** Optional callback for bunker repair purchase — injected by Game.ts. */
+  public _onBunkerRepairPurchased: (() => void) | null = null;
+
   /**
-   * Generate 3 random non-maxed shop items.
+   * Returns all non-maxed shop items for multi-buy shop display.
    * Filters out items that have reached maxPurchases for this run.
-   * Shuffles and slices to 3 (or fewer if the pool is smaller).
    */
-  public generateChoices(): ShopItem[] {
-    const available = SHOP_ITEMS.filter(item => {
+  public getAvailableItems(): ShopItem[] {
+    return SHOP_ITEMS.filter(item => {
       const purchased = this.purchaseCounts.get(item.id) ?? 0;
       return purchased < item.maxPurchases;
     });
-    // Fisher-Yates shuffle via sort — adequate for small arrays
+  }
+
+  /**
+   * @deprecated Use getAvailableItems() instead.
+   * Generate 3 random non-maxed shop items.
+   */
+  public generateChoices(): ShopItem[] {
+    const available = this.getAvailableItems();
     const shuffled = [...available].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, Math.min(3, shuffled.length));
   }
@@ -152,6 +170,10 @@ export class ShopSystem {
       case 'extraLife':
         runState.addLife();
         break;
+
+      case 'repairBunker':
+        this._onBunkerRepairPurchased?.();
+        break;
     }
 
     return true;
@@ -167,6 +189,6 @@ export class ShopSystem {
     this.spreadCount = 1;
     this.bulletSpeedMultiplier = 1.0;
     this.moveSpeedMultiplier = 1.0;
-    this._onShieldChargePurchased = null;
+    // NOTE: do NOT null callbacks — they are wired once in Game.init() and must persist across runs
   }
 }

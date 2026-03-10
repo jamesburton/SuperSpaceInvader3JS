@@ -3,18 +3,22 @@ import type { InputManager } from '../core/InputManager';
 import type { HUD } from '../ui/HUD';
 import { PlayingState } from './PlayingState';
 import type { PlayingStateContext } from './PlayingState';
+import { NameEntryState } from './NameEntryState';
 import { MetaShopUI } from '../ui/MetaShopUI';
+import { HighScoreUI } from '../ui/HighScoreUI';
 import { runState } from '../state/RunState';
 import { CAMPAIGN_CHAPTER_1 } from '../config/campaign';
 import { useMetaStore } from '../state/MetaState';
 import { audioManager } from '../systems/AudioManager';
+import { profileManager } from '../state/ProfileManager';
 
-type MenuOption = 'campaign' | 'endless' | 'upgrades';
+type MenuOption = 'campaign' | 'endless' | 'upgrades' | 'scores';
 
-const OPTIONS: MenuOption[] = ['campaign', 'endless', 'upgrades'];
+const OPTIONS: MenuOption[] = ['campaign', 'endless', 'upgrades', 'scores'];
 
 export class TitleState implements IGameState {
   private metaShopUI: MetaShopUI | null = null;
+  private highScoreUI: HighScoreUI | null = null;
   private selectedOption: MenuOption = 'campaign'; // default: Campaign
   private _levelSelectVisible: boolean = false;
 
@@ -27,15 +31,22 @@ export class TitleState implements IGameState {
 
   enter(): void {
     audioManager.stopBgm(); // Phase 6: stop BGM on return to menu (in case a run was in progress)
+    const hudRoot = document.getElementById('hud') as HTMLElement;
     if (!this.metaShopUI) {
-      const hudRoot = document.getElementById('hud') as HTMLElement;
       this.metaShopUI = new MetaShopUI(hudRoot, this.ctx.scene);
     }
+    if (!this.highScoreUI) {
+      this.highScoreUI = new HighScoreUI(hudRoot);
+    }
+
+    // Save profile state on return to menu
+    profileManager.saveCurrentState();
 
     this._renderMenu();
   }
 
   private _renderMenu(): void {
+    const playerName = profileManager.getActiveProfileName();
     const optionStyle = (opt: MenuOption): string => {
       const isSelected = this.selectedOption === opt;
       return isSelected
@@ -46,12 +57,20 @@ export class TitleState implements IGameState {
     const campaignSelected = this.selectedOption === 'campaign';
     const endlessSelected = this.selectedOption === 'endless';
     const upgradesSelected = this.selectedOption === 'upgrades';
+    const scoresSelected = this.selectedOption === 'scores';
 
     const html = `
       <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
-        <h1 style="font-size:48px;margin-bottom:32px;text-shadow:0 0 20px #fff;letter-spacing:4px;color:#fff;">
+        <h1 style="font-size:48px;margin-bottom:8px;text-shadow:0 0 20px #fff;letter-spacing:4px;color:#fff;">
           SUPER SPACE INVADERS X
         </h1>
+
+        ${playerName ? `
+          <div style="font-size:13px;color:#0ff;letter-spacing:3px;margin-bottom:24px;text-shadow:0 0 8px #0ff;">
+            PLAYER: ${playerName}
+            <span onclick="window.__changePlayer()" style="color:#555;cursor:pointer;margin-left:12px;font-size:11px;">[CHANGE]</span>
+          </div>
+        ` : '<div style="margin-bottom:24px;"></div>'}
 
         <div style="display:flex;flex-direction:column;align-items:center;gap:28px;margin-bottom:40px;">
 
@@ -79,6 +98,12 @@ export class TitleState implements IGameState {
             </div>
           </div>
 
+          <div style="text-align:center;min-height:64px;${optionStyle('scores')}">
+            <div style="font-size:26px;letter-spacing:3px;line-height:1.2;">
+              ${scoresSelected ? '&#9654; ' : '  '}HIGH SCORES [H]
+            </div>
+          </div>
+
         </div>
 
         <p style="font-size:13px;opacity:0.5;letter-spacing:2px;margin-top:8px;">
@@ -90,12 +115,29 @@ export class TitleState implements IGameState {
     `;
 
     this.hud.showOverlay(html);
+
+    // Wire change player handler
+    (window as unknown as Record<string, unknown>)['__changePlayer'] = () => {
+      this.hud.hideOverlay();
+      this.stateManager.replace(new NameEntryState(
+        this.stateManager, this.hud,
+        () => this.stateManager.replace(new TitleState(this.stateManager, this.input, this.hud, this.ctx)),
+        'switch',
+      ));
+    };
   }
 
   update(_dt: number): void {
     // While MetaShopUI is open, only handle close key (ESC handled by MetaShopUI internally)
     if (this.metaShopUI?.isVisible) {
       this.metaShopUI.update(this.input);  // gamepad/keyboard cursor navigation (07-02)
+      this.input.clearJustPressed();
+      return;
+    }
+
+    // While HighScoreUI is open, delegate input
+    if (this.highScoreUI?.isVisible) {
+      this.highScoreUI.update(this.input);
       this.input.clearJustPressed();
       return;
     }
@@ -149,6 +191,12 @@ export class TitleState implements IGameState {
       return;
     }
 
+    if (this.input.justPressed('KeyH')) {
+      this.selectedOption = 'scores';
+      this._launchSelected();
+      return;
+    }
+
     if (this.input.justPressed('Space') || this.input.justPressed('Enter')) {
       this._launchSelected();
       return;
@@ -165,23 +213,25 @@ export class TitleState implements IGameState {
       return;
     }
 
+    if (this.selectedOption === 'scores') {
+      this.highScoreUI?.show(() => { this.highScoreUI!.hide(); });
+      this.input.clearJustPressed();
+      return;
+    }
+
     if (this.selectedOption === 'campaign') {
       const progress = useMetaStore.getState().campaignProgress[CAMPAIGN_CHAPTER_1.chapterNumber] ?? -1;
-      // furthestCompleted is the highest levelIndex completed (0-based)
-      // The highest unlocked START point is furthestCompleted + 1
-      const highestUnlockedStart = progress + 1; // e.g. completed index 1 → can start at index 2
+      const highestUnlockedStart = progress + 1;
 
       if (highestUnlockedStart > 0 && highestUnlockedStart < CAMPAIGN_CHAPTER_1.levels.length) {
-        // Show level select — player has unlocked at least one start beyond Level 1
         this._showLevelSelect(highestUnlockedStart);
         return;
       }
-      // Fall through to start from level 0 (no unlocked starts beyond first)
     }
 
     this._resetAllSystems();
-    runState.setMode(this.selectedOption);  // 'campaign' or 'endless'
-    runState.setCampaignLevel(0);           // start at level index 0
+    runState.setMode(this.selectedOption as 'campaign' | 'endless');
+    runState.setCampaignLevel(0);
     this.input.clearJustPressed();
     this.stateManager.replace(
       new PlayingState(
@@ -197,8 +247,6 @@ export class TitleState implements IGameState {
     const chapter = CAMPAIGN_CHAPTER_1;
     const levels = chapter.levels;
 
-    // Build level cards HTML. Levels 0..highestUnlockedStart are available; rest are locked.
-    // window.__campaignLevelSelect is set as global onclick handler (MetaShopUI pattern).
     (window as unknown as Record<string, unknown>).__campaignLevelSelect = (levelIndex: number) => {
       this.hud.hideOverlay();
       this._resetAllSystems();
@@ -241,7 +289,6 @@ export class TitleState implements IGameState {
       <p style="font-size:14px;opacity:0.5;letter-spacing:2px;">ESC TO CANCEL</p>
     `);
 
-    // ESC to cancel level select and return to mode menu handled in update()
     this._levelSelectVisible = true;
   }
 
@@ -268,14 +315,15 @@ export class TitleState implements IGameState {
   }
 
   render(_alpha: number): void {
-    // Scene still renders (black canvas visible behind overlay)
     this.ctx.scene.render();
   }
 
   exit(): void {
     this.hud.hideOverlay();
     this.metaShopUI?.hide();
+    this.highScoreUI?.hide();
     (window as unknown as Record<string, unknown>).__campaignLevelSelect = undefined;
+    (window as unknown as Record<string, unknown>)['__changePlayer'] = undefined;
     this._levelSelectVisible = false;
   }
 }

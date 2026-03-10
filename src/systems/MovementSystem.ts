@@ -49,6 +49,7 @@ export class MovementSystem {
       const bullet = activeBullets[i];
       if (!bullet.active) continue;
 
+      bullet.x += bullet.vx * dt;
       bullet.y += bullet.vy * dt;
       bullet.syncMesh();
 

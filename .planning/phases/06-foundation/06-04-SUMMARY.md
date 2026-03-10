@@ -108,6 +108,16 @@ None - no external service configuration required.
 - Phase 6 Foundation is complete (all 4 plans done)
 - Phase 7 (Gamepad Support) can begin — no audio dependencies
 
+## Self-Check: PASSED
+
+- FOUND: src/states/PausedState.ts
+- FOUND: src/states/PlayingState.ts
+- FOUND: src/states/TitleState.ts
+- FOUND: src/ui/ShopUI.ts
+- FOUND: .planning/phases/06-foundation/06-04-SUMMARY.md
+- FOUND: 83d6fa3 (feat: volume slider + mute button in pause overlay)
+- FOUND: 1dcbbce (feat: UI SFX + M-key mute shortcut)
+
 ---
 *Phase: 06-foundation*
 *Completed: 2026-03-07*

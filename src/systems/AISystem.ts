@@ -143,7 +143,13 @@ export class AISystem {
     if (!this.flankersTriggered && this.flankerTimer >= this.flankerChargeDelay) {
       this.flankersTriggered = true;
       this.flankerChargeTimer = 0;
-      for (const flanker of flankers) {
+      // Spread flankers symmetrically around playerX so they fan out rather than pile up.
+      // Each gets a unique target X; chain targeting caused all to converge to the same spot.
+      const count = flankers.length;
+      const SPREAD = 90; // horizontal gap between adjacent flankers
+      const center = (count - 1) / 2;
+      for (let i = 0; i < count; i++) {
+        const flanker = flankers[i];
         if (!flanker.flankerCharging) {
           const pos = formation.getEnemyWorldPos(flanker);
           flanker.x = pos.x;
@@ -151,6 +157,9 @@ export class AISystem {
           flanker.flankerCharging = true;
           flanker.flankerReturning = false;
           flanker.chargerDiveTimer = 1.0; // fire interval timer
+          // Assign a unique target X, clamped to world bounds
+          const rawTarget = playerX + (i - center) * SPREAD;
+          flanker.chargerTargetX = Math.max(-WORLD_WIDTH / 2 + 30, Math.min(WORLD_WIDTH / 2 - 30, rawTarget));
         }
       }
     }
@@ -167,24 +176,17 @@ export class AISystem {
       }
     }
 
-    // --- Charging pass (chain targeting) ---
-    // Each flanker chases the previous one's live X, creating a snake effect.
-    let prevX = playerX;
+    // --- Charging pass (spread targeting) ---
+    // Each flanker moves independently to its pre-assigned chargerTargetX.
     for (const flanker of flankers) {
-      if (!flanker.flankerCharging || flanker.flankerReturning) {
-        // Update prevX even for returning flankers so chain stays coherent
-        prevX = flanker.x;
-        continue;
-      }
+      if (!flanker.flankerCharging || flanker.flankerReturning) continue;
 
-      // Move toward previous flanker's X at 200 units/s
-      const dx = prevX - flanker.x;
+      const dx = flanker.chargerTargetX - flanker.x;
       const moveX = Math.sign(dx) * Math.min(Math.abs(dx), 200 * dt);
       flanker.x += moveX;
       flanker.y -= 30 * dt; // gentle downward drift
 
       formation.setEnemyWorldPos(flanker, flanker.x, flanker.y);
-      prevX = flanker.x; // next flanker in chain targets this one
 
       // Fire every second during charge
       flanker.chargerDiveTimer -= dt;

@@ -102,18 +102,43 @@ export class MetaShopUI {
     if (!upg) return;
     const success = useMetaStore.getState().purchaseUpgrade(id, upg.cost);
     if (success) {
-      // Handle CRT tier purchase — update active tier and reinit CRT in the renderer
+      // Handle CRT tier purchase — auto-select the newly purchased tier
       if (upg.effectType === 'crt_tier') {
-        const owned = useMetaStore.getState().purchasedUpgrades;
-        const maxTier = [3, 2, 1].find(t => owned.includes(`crt_tier_${t}`)) ?? null;
-        useMetaStore.getState().setCrtTier(maxTier);
-        if (this.sceneManager) {
-          this.sceneManager.initCrt(maxTier, useMetaStore.getState().crtIntensity);
+        const tierNum = parseInt(upg.id.replace('crt_tier_', ''), 10);
+        if (!isNaN(tierNum)) {
+          useMetaStore.getState().setCrtTier(tierNum);
+          if (this.sceneManager) {
+            this.sceneManager.initCrt(tierNum, useMetaStore.getState().crtIntensity);
+          }
         }
       }
       audioManager.playSfx('purchase');
       this.render();
     }
+  }
+
+  /** Render CRT tier selector buttons (OFF + owned tiers). Only shows if at least one tier is owned. */
+  private _renderCrtSelector(state: { crtTier: number | null }, owned: Set<string>): string {
+    const ownedTiers: number[] = [];
+    for (let t = 1; t <= 3; t++) {
+      if (owned.has(`crt_tier_${t}`)) ownedTiers.push(t);
+    }
+    if (ownedTiers.length === 0) return '';
+
+    const cyan = '#00ffff';
+    const btnStyle = (active: boolean) =>
+      `background:${active ? 'rgba(0,255,255,0.15)' : 'transparent'};border:1px solid ${active ? cyan : '#555'};color:${active ? cyan : '#888'};font-family:'Courier New',monospace;font-size:13px;padding:6px 16px;cursor:pointer;letter-spacing:1px;${active ? `text-shadow:0 0 8px ${cyan};` : ''}`;
+
+    const offActive = state.crtTier === null;
+    let html = `<div style="display:flex;gap:8px;justify-content:center;margin-bottom:4px;">`;
+    html += `<button onclick="window.__crtSelectTier(0)" style="${btnStyle(offActive)}">OFF</button>`;
+    const tierNames = ['', 'TIER 1', 'TIER 2', 'TIER 3'];
+    for (const t of ownedTiers) {
+      const active = state.crtTier === t;
+      html += `<button onclick="window.__crtSelectTier(${t})" style="${btnStyle(active)}">${tierNames[t]}</button>`;
+    }
+    html += `</div>`;
+    return html;
   }
 
   private render(): void {
@@ -295,6 +320,7 @@ export class MetaShopUI {
       <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:4px;margin-bottom:8px;">
         ${crtCards}
       </div>
+      ${this._renderCrtSelector(state, owned)}
       ${state.crtTier !== null && state.crtTier >= 1 ? `
         <div style="margin:12px 0 16px;display:flex;align-items:center;gap:12px;">
           <label style="font-family:'Courier New',monospace;color:#fff;font-size:13px;letter-spacing:1px;">INTENSITY</label>
@@ -329,6 +355,16 @@ export class MetaShopUI {
     // Attach bunker toggle handler
     (window as unknown as Record<string, unknown>)['__metaToggleBunkers'] = () => {
       useMetaStore.getState().toggleBunkers();
+      this.render();
+    };
+
+    // Attach CRT tier selector handler
+    (window as unknown as Record<string, unknown>)['__crtSelectTier'] = (tier: number) => {
+      const newTier = tier === 0 ? null : tier;
+      useMetaStore.getState().setCrtTier(newTier);
+      if (this.sceneManager) {
+        this.sceneManager.initCrt(newTier, useMetaStore.getState().crtIntensity);
+      }
       this.render();
     };
 

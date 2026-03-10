@@ -4,6 +4,7 @@ import type { Player } from '../entities/Player';
 import type { Bullet } from '../entities/Bullet';
 import type { ParticleManager } from '../effects/ParticleManager';
 import type { PowerUpManager } from './PowerUpManager';
+import type { ShopSystem } from './ShopSystem';
 import { audioManager } from './AudioManager';
 
 // Rapid fire cooldown override — 0.08s = ~12 shots/second
@@ -40,6 +41,7 @@ export class WeaponSystem {
     activeBullets: Bullet[],
     particleManager?: ParticleManager,
     powerUpManager?: PowerUpManager,
+    shopSystem?: ShopSystem,
   ): void {
     if (!player.active) return;
 
@@ -50,7 +52,7 @@ export class WeaponSystem {
     const wantsToFire = input.justPressed('Space');
 
     if (wantsToFire && player.canFire()) {
-      this.fireShot(player, playerBulletPool, activeBullets, powerUpManager);
+      this.fireShot(player, playerBulletPool, activeBullets, powerUpManager, shopSystem);
 
       // Record fire (sets standard cooldown via fireCooldownMultiplier)
       player.recordFire();
@@ -78,10 +80,26 @@ export class WeaponSystem {
     playerBulletPool: ObjectPool<Bullet>,
     activeBullets: Bullet[],
     powerUpManager?: PowerUpManager,
+    shopSystem?: ShopSystem,
   ): void {
-    const isSpread = powerUpManager?.isActive('spreadShot') ?? false;
-    // Angle offsets in radians from vertical (0 = straight up, positive = right)
-    const angles = isSpread ? [-0.4, 0, 0.4] : [0];
+    const isSpreadPowerUp = powerUpManager?.isActive('spreadShot') ?? false;
+    const shopSpread = shopSystem?.spreadCount ?? 1;
+    // Additive: shop spread is the base, power-up pickup adds +2 on top
+    const bulletCount = isSpreadPowerUp ? shopSpread + 2 : shopSpread;
+
+    // Build angle offsets: evenly spaced across a 0.8 radian arc
+    let angles: number[];
+    if (bulletCount <= 1) {
+      angles = [0];
+    } else {
+      const totalArc = 0.8; // total spread arc in radians
+      angles = [];
+      for (let i = 0; i < bulletCount; i++) {
+        angles.push(-totalArc / 2 + (totalArc / (bulletCount - 1)) * i);
+      }
+    }
+
+    const speedMul = shopSystem?.bulletSpeedMultiplier ?? 1;
 
     for (const angleOffset of angles) {
       const bullet = playerBulletPool.acquire();
@@ -90,9 +108,12 @@ export class WeaponSystem {
       // Spawn at barrel tip (top center of player ship)
       bullet.init(player.x, player.y + player.height + 10, true);
 
-      if (isSpread) {
+      // Apply bullet speed multiplier from shop
+      bullet.vy *= speedMul;
+
+      if (bulletCount > 1) {
         // Decompose bullet speed into angled trajectory. Positive vy = upward in this world.
-        const speed = bullet.vy; // BULLET_SPEED from init(), already positive (upward)
+        const speed = bullet.vy; // already scaled by speedMul
         bullet.vx = Math.sin(angleOffset) * speed;
         bullet.vy = Math.cos(angleOffset) * speed;
         bullet.setColor(0x0088ff); // spread bullets: blue (FEEL-07)

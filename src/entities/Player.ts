@@ -57,6 +57,9 @@ export class Player {
   public lives: number = PLAYER_LIVES;
   public active: boolean = true;
 
+  /** Maximum player bullets allowed in flight simultaneously. Default 1; raised by meta upgrades. */
+  public maxBulletsInFlight: number = 1;
+
   private fireCooldown: number = 0;
   private fireCooldownMultiplier: number = 1.0;
   private speedMultiplier: number = 1.0;
@@ -122,6 +125,11 @@ export class Player {
    */
   public setSpeedMultiplier(m: number): void {
     this.speedMultiplier = m;
+  }
+
+  /** Set the maximum in-flight bullet cap. Floored at 1. */
+  public setMaxBulletsInFlight(cap: number): void {
+    this.maxBulletsInFlight = Math.max(1, cap);
   }
 
   /**

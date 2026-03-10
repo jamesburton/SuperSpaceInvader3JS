@@ -92,22 +92,23 @@ export class SceneManager {
   }
 
   /**
-   * Initialise the CRT post-processing pass (added after bloom).
-   * Must be called after initBloom() so the CRT EffectPass is ordered after the bloom pass.
-   * Returns null if bloom is not initialised or tier is null/invalid (CRT not unlocked).
+   * Initialise the CRT overlay (CSS-based, covers entire viewport including HUD).
+   * Returns null if tier is null/invalid (CRT not active).
    *
-   * @param tier      - CRT tier (1/2/3) or null if not unlocked
+   * @param tier      - CRT tier (1/2/3) or null if not active
    * @param intensity - Effect intensity in [0.0, 1.0]
    */
   public initCrt(tier: number | null, intensity: number): CRTManager | null {
-    // Dispose old CRT pass before creating a new one — enables clean reinit after tier change
+    // Dispose old CRT overlay before creating a new one
     if (this.crtManager) {
       this.crtManager.dispose();
       this.crtManager = null;
     }
-    if (!this.bloomEffect || tier === null || tier < 1) return null;
+    if (tier === null || tier < 1) return null;
+    const viewport = this.renderer.domElement.parentElement;
+    if (!viewport) return null;
     this.crtManager = new CRTManager();
-    this.crtManager.init(this.bloomEffect.composer, this.camera, tier, intensity);
+    this.crtManager.init(viewport, this.camera, tier, intensity);
     return this.crtManager;
   }
 

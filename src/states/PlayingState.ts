@@ -128,6 +128,7 @@ export class PlayingState implements IGameState {
       ctx.activeBullets,
       ctx.particleManager,
       ctx.powerUpManager,
+      ctx.shopSystem,
     );
 
     // 2. Player movement
