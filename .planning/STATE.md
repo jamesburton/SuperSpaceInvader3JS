@@ -112,7 +112,7 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table with outcomes.
 
 ### Pending Todos
 
-None.
+- Remove junk enemies alongside boss — `.planning/todos/pending/2026-03-10-remove-junk-enemies-shown-alongside-boss.md`
 
 ### Blockers/Concerns
 
@@ -121,6 +121,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-07T13:07:35.147Z
-Stopped at: Completed 08-visual-customization 08-04-PLAN.md
-Resume file: None
+Last session: 2026-03-10T13:31:28.3752559+00:00
+Stopped at: Session resumed, proceeding to Phase 8 checkpoint verification and state refresh
+Resume file: .planning/phases/08-visual-customization/.continue-here.md
