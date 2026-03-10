@@ -5,6 +5,7 @@ import type { PowerUpType } from '../config/powerups';
 import { POWER_UP_DEFS, POWER_UP_TYPES } from '../config/powerups';
 
 const PICKUP_POOL_SIZE = 16;
+const TIME_SLOW_FACTOR = 0.45;
 
 /**
  * PowerUpManager owns the PickupToken pool, active power-up state, drop spawning,
@@ -130,6 +131,10 @@ export class PowerUpManager {
   /** Number of shield charges remaining (0 or 1). */
   public get activeShieldCharges(): number {
     return this.shieldCharges;
+  }
+
+  public get combatTimeScale(): number {
+    return this.isActive('timeSlow') ? TIME_SLOW_FACTOR : 1;
   }
 
   /**

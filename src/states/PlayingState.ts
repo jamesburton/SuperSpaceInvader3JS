@@ -21,6 +21,7 @@ import type { ShopUI } from '../ui/ShopUI';
 import type { BossEnemy } from '../entities/Boss';
 import type { BossSystem } from '../systems/BossSystem';
 import type { BunkerManager } from '../entities/BunkerManager';
+import type { HomingMissileManager } from '../systems/HomingMissileManager';
 import { runState } from '../state/RunState';
 import { useMetaStore } from '../state/MetaState';
 import { PlayerSkinManager } from '../entities/PlayerSkinManager';
@@ -62,11 +63,13 @@ export interface PlayingStateContext {
   bossSystem: BossSystem;
   // Phase 5: bunkers
   bunkerManager: BunkerManager;
+  homingMissileManager: HomingMissileManager;
 }
 
 export class PlayingState implements IGameState {
   /** Tracks previous isTransitioning state to detect wave-end moment for releaseAll() */
   private lastWasTransitioning: boolean = false;
+  private timeSlowVisualStrength: number = 0;
 
   constructor(
     private readonly stateManager: StateManager,
@@ -78,10 +81,14 @@ export class PlayingState implements IGameState {
 
   enter(): void {
     this.lastWasTransitioning = false;
+    this.timeSlowVisualStrength = 0;
     runState.setPhase('playing');
+    runState.setTimeScale(1);
     // Apply start-run SI$ tax (skip if this is a continue — currency already taxed)
     if (!runState.continueUsed) this._applyStartTax();
     this.hud.hideOverlay();
+    this.hud.setTimeSlowEffect(0);
+    this.ctx.scene.setTimeSlowEffect(0);
     this.ctx.cameraShake.reset(); // Phase 2: clear any residual shake
     this.applyMetaBonuses();      // Phase 4: apply persistent meta upgrades at run start
     this._spawnBunkers();         // Spawn bunkers if enabled and slots purchased
@@ -119,6 +126,15 @@ export class PlayingState implements IGameState {
       return;
     }
 
+    const hostileTimeScale = ctx.powerUpManager.combatTimeScale;
+    const hostileDt = dt * hostileTimeScale;
+    runState.setTimeScale(hostileTimeScale);
+    const visualTarget = hostileTimeScale < 1 ? 1 : 0;
+    const visualSpeed = 6;
+    this.timeSlowVisualStrength += (visualTarget - this.timeSlowVisualStrength) * Math.min(1, dt * visualSpeed);
+    hud.setTimeSlowEffect(this.timeSlowVisualStrength);
+    ctx.scene.setTimeSlowEffect(this.timeSlowVisualStrength);
+
     // 1. Player fire input — WeaponSystem is canonical fire path (Phase 3 refactor)
     ctx.weaponSystem.update(
       dt,
@@ -129,6 +145,8 @@ export class PlayingState implements IGameState {
       ctx.particleManager,
       ctx.powerUpManager,
       ctx.shopSystem,
+      ctx.homingMissileManager,
+      ctx.formation,
     );
 
     // 2. Player movement
@@ -202,7 +220,7 @@ export class PlayingState implements IGameState {
     // Phase 4: boss mode — route to BossSystem instead of normal enemy update
     if (ctx.boss.active) {
       // Update boss movement and attacks
-      ctx.bossSystem.update(dt, ctx.boss, ctx.player.x, ctx.enemyBulletPool, ctx.activeBullets);
+      ctx.bossSystem.update(hostileDt, ctx.boss, ctx.player.x, ctx.enemyBulletPool, ctx.activeBullets);
 
       // Update boss health bar fill and phase label
       ctx.bossHealthBar.update(ctx.boss.healthFraction(), ctx.boss.currentPhase);
@@ -214,7 +232,8 @@ export class PlayingState implements IGameState {
       }
 
       // Bullet movement + culling (still needed for boss bullets)
-      ctx.movementSystem.updateBullets(dt, ctx.activeBullets, ctx.playerBulletPool, ctx.enemyBulletPool);
+      ctx.movementSystem.updateBullets(dt, ctx.activeBullets, ctx.playerBulletPool, ctx.enemyBulletPool, hostileDt);
+      ctx.homingMissileManager.update(dt, ctx.formation, ctx.powerUpManager, ctx.particleManager);
 
       // Collision: player bullets vs boss AABB
       this.updateBossCollision();
@@ -252,7 +271,7 @@ export class PlayingState implements IGameState {
     if (!isTransitioning) {
       // 4. Enemy AI
       const reachedBottom = ctx.aiSystem.update(
-        dt,
+        hostileDt,
         ctx.formation,
         ctx.enemyBulletPool,
         ctx.activeBullets,
@@ -270,7 +289,9 @@ export class PlayingState implements IGameState {
       ctx.activeBullets,
       ctx.playerBulletPool,
       ctx.enemyBulletPool,
+      hostileDt,
     );
+    ctx.homingMissileManager.update(dt, ctx.formation, ctx.powerUpManager, ctx.particleManager);
 
     // 6. Collision
     ctx.collisionSystem.update(
@@ -423,6 +444,10 @@ export class PlayingState implements IGameState {
       this.ctx.aiSystem.reset();
       this.ctx.shopSystem.reset();
       this.ctx.powerUpManager.releaseAll();
+      this.ctx.homingMissileManager.releaseAll();
+      this.ctx.scene.setTimeSlowEffect(0);
+      this.hud.setTimeSlowEffect(0);
+      runState.setTimeScale(1);
       this.ctx.boss.deactivate();
       this.ctx.bossSystem.reset();
       this.ctx.bossHealthBar.hide();

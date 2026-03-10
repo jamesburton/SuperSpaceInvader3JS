@@ -5,6 +5,8 @@ import type { Bullet } from '../entities/Bullet';
 import type { ParticleManager } from '../effects/ParticleManager';
 import type { PowerUpManager } from './PowerUpManager';
 import type { ShopSystem } from './ShopSystem';
+import type { HomingMissileManager } from './HomingMissileManager';
+import type { EnemyFormation } from '../entities/Enemy';
 import { audioManager } from './AudioManager';
 
 // Rapid fire cooldown override — 0.08s = ~12 shots/second
@@ -42,6 +44,8 @@ export class WeaponSystem {
     particleManager?: ParticleManager,
     powerUpManager?: PowerUpManager,
     shopSystem?: ShopSystem,
+    homingMissileManager?: HomingMissileManager,
+    formation?: EnemyFormation,
   ): void {
     if (!player.active) return;
 
@@ -52,7 +56,7 @@ export class WeaponSystem {
     const wantsToFire = input.justPressed('Space');
 
     if (wantsToFire && player.canFire()) {
-      this.fireShot(player, playerBulletPool, activeBullets, powerUpManager, shopSystem);
+      this.fireShot(player, playerBulletPool, activeBullets, powerUpManager, shopSystem, homingMissileManager, formation);
 
       // Record fire (sets standard cooldown via fireCooldownMultiplier)
       player.recordFire();
@@ -81,10 +85,17 @@ export class WeaponSystem {
     activeBullets: Bullet[],
     powerUpManager?: PowerUpManager,
     shopSystem?: ShopSystem,
+    homingMissileManager?: HomingMissileManager,
+    formation?: EnemyFormation,
   ): void {
+    const isHomingPowerUp = powerUpManager?.isActive('homingMissile') ?? false;
     const isPiercingPowerUp = powerUpManager?.isActive('piercingShot') ?? false;
     const isSpreadPowerUp = powerUpManager?.isActive('spreadShot') ?? false;
     const shopSpread = shopSystem?.spreadCount ?? 1;
+    if (isHomingPowerUp && homingMissileManager && formation) {
+      homingMissileManager.spawnMissile(player.x, player.y + player.height + 10, formation);
+      return;
+    }
     if (isPiercingPowerUp) {
       const bullet = playerBulletPool.acquire();
       if (!bullet) return;

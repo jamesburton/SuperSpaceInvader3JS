@@ -19,6 +19,7 @@ import { PickupFeedback } from '../ui/PickupFeedback';
 import { BossEnemy } from '../entities/Boss';
 import { BossSystem } from '../systems/BossSystem';
 import { BunkerManager } from '../entities/BunkerManager';
+import { HomingMissileManager } from '../systems/HomingMissileManager';
 import { ShopUI } from '../ui/ShopUI';
 import { HUD } from '../ui/HUD';
 import { TitleState } from '../states/TitleState';
@@ -28,6 +29,7 @@ import { FIXED_STEP, MAX_DELTA } from '../utils/constants';
 import { audioManager } from '../systems/AudioManager';
 import { useMetaStore } from '../state/MetaState';
 import { profileManager } from '../state/ProfileManager';
+import { POWER_UP_DEFS } from '../config/powerups';
 
 export class Game {
   public readonly scene: SceneManager;
@@ -82,10 +84,14 @@ export class Game {
     shopSystem._onShieldChargePurchased = () => {
       powerUpManager.grantShieldCharge();
     };
+    shopSystem._onTimedPowerUpPurchased = (type) => {
+      powerUpManager.activate(type, POWER_UP_DEFS[type].duration);
+    };
 
     // Phase 4: construct boss entity and system
     const boss = new BossEnemy(this.scene.scene);
     const bossSystem = new BossSystem();
+    const homingMissileManager = new HomingMissileManager(this.scene.scene);
 
     // Bunkers — managed separately, spawned per-run in PlayingState
     const bunkerManager = new BunkerManager(this.scene.scene);
@@ -113,6 +119,7 @@ export class Game {
       boss,              // Phase 4
       bossSystem,        // Phase 4
       bunkerManager,     // Phase 5
+      homingMissileManager,
     };
 
     // Apply Wave 1 palette so initial enemy formation spawns cyan (not gray default)
@@ -145,6 +152,7 @@ export class Game {
 
     // Phase 4: register boss mesh with bloom so it glows during encounter
     bloom.bloomEffect.selection.add(boss.mesh);
+    homingMissileManager.registerBloom((mesh) => bloom.bloomEffect.selection.add(mesh));
 
     // Phase 2: wire particle manager into collision system for death burst effects
     collisionSystem.setParticleManager(particleManager);

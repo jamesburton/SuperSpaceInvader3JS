@@ -180,6 +180,7 @@ export class GameOverState implements IGameState {
     this.ctx.aiSystem.reset();
     this.ctx.shopSystem.reset();
     this.ctx.powerUpManager.releaseAll();
+    this.ctx.homingMissileManager.releaseAll();
     this.ctx.boss.deactivate();
     this.ctx.bossSystem.reset();
     this.ctx.bossHealthBar.hide();
@@ -200,6 +201,7 @@ export class GameOverState implements IGameState {
     this.ctx.aiSystem.reset();
     this.ctx.shopSystem.reset();
     this.ctx.powerUpManager.releaseAll();
+    this.ctx.homingMissileManager.releaseAll();
     this.ctx.boss.deactivate();
     this.ctx.bossSystem.reset();
     this.ctx.bossHealthBar.hide();

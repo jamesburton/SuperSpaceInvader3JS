@@ -50,8 +50,26 @@ export class PickupToken {
     const def = POWER_UP_DEFS[type];
     mat.color.setHex(def.color);
     mat.emissive.setHex(def.color);
-    // Rotate 45 degrees for a diamond appearance
+    mat.emissiveIntensity = 1.5;
+
+    this.mesh.scale.set(1, 1, 1);
     this.mesh.rotation.z = Math.PI / 4;
+
+    switch (type) {
+      case 'piercingShot':
+        this.mesh.scale.set(0.45, 1.7, 1);
+        this.mesh.rotation.z = Math.PI / 10;
+        break;
+      case 'homingMissile':
+        this.mesh.scale.set(0.75, 1.5, 1);
+        this.mesh.rotation.z = 0;
+        break;
+      case 'timeSlow':
+        this.mesh.scale.set(1.25, 1.25, 1);
+        this.mesh.rotation.z = Math.PI / 8;
+        mat.emissiveIntensity = 1.8;
+        break;
+    }
   }
 
   /**

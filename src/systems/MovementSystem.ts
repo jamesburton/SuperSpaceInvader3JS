@@ -40,15 +40,17 @@ export class MovementSystem {
    * @param enemyPool Enemy bullet pool (for release)
    */
   public updateBullets(
-    dt: number,
+    playerDt: number,
     activeBullets: Bullet[],
     playerPool: ObjectPool<Bullet>,
     enemyPool: ObjectPool<Bullet>,
+    enemyDt: number = playerDt,
   ): void {
     for (let i = activeBullets.length - 1; i >= 0; i--) {
       const bullet = activeBullets[i];
       if (!bullet.active) continue;
 
+      const dt = bullet.isPlayerBullet ? playerDt : enemyDt;
       bullet.x += bullet.vx * dt;
       bullet.y += bullet.vy * dt;
       bullet.syncMesh();

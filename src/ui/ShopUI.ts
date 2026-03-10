@@ -152,6 +152,7 @@ export class ShopUI {
           <div style="font-size:13px;color:#555;width:24px;flex-shrink:0;">${keyHint}</div>
           <div style="flex:1;">
             <div style="font-size:17px;color:${cyan};text-shadow:${glow};">${item.displayName}</div>
+            <div style="font-size:10px;color:#4f7f8d;margin-top:2px;letter-spacing:1px;">${item.category.toUpperCase()} T${item.tier}</div>
             <div style="font-size:11px;color:#888;margin-top:2px;">${item.description}</div>
           </div>
           <button

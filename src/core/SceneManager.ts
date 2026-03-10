@@ -117,6 +117,16 @@ export class SceneManager {
     return this.crtManager;
   }
 
+  public setTimeSlowEffect(strength: number): void {
+    const clamped = Math.max(0, Math.min(1, strength));
+    const saturation = 1 - clamped * 0.55;
+    const brightness = 1 - clamped * 0.08;
+    const contrast = 1 - clamped * 0.04;
+    this.renderer.domElement.style.filter = clamped > 0.01
+      ? `saturate(${saturation}) brightness(${brightness}) contrast(${contrast})`
+      : '';
+  }
+
   /**
    * Render via EffectComposer (bloom active).
    * Used by PlayingState.render() only — other states call render() directly.

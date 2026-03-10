@@ -12,6 +12,7 @@ export class HUD {
   private readonly powerupEl: HTMLElement;
   private readonly powerupNameEl: HTMLElement;
   private readonly powerupBarEl: HTMLElement;
+  private readonly timeSlowOverlayEl: HTMLElement;
 
   constructor(hudRoot: HTMLElement) {
     // Create HUD elements inside the #hud container
@@ -25,6 +26,7 @@ export class HUD {
           <div id="hud-powerup-bar" style="height:6px;background:#00ff88;width:100%;transition:width 0.1s linear;"></div>
         </div>
       </div>
+      <div id="hud-timeslow-overlay" style="display:none;position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg, rgba(120,210,255,0.16), rgba(120,210,255,0.04));mix-blend-mode:screen;opacity:0;"></div>
       <div id="hud-lives" style="position:absolute;top:16px;right:16px;font-size:18px;font-family:'Courier New',monospace;color:#fff;text-shadow:0 0 8px #fff;">LIVES: 3</div>
       <div id="hud-overlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.7);flex-direction:column;align-items:center;justify-content:center;font-family:'Courier New',monospace;color:#fff;"></div>
       <div id="hud-controls" style="position:absolute;bottom:8px;right:8px;font-size:11px;font-family:'Courier New',monospace;color:#333;letter-spacing:1px;pointer-events:none;">P / ESC — pause</div>
@@ -38,6 +40,7 @@ export class HUD {
     this.powerupEl = hudRoot.querySelector('#hud-powerup') as HTMLElement;
     this.powerupNameEl = hudRoot.querySelector('#hud-powerup-name') as HTMLElement;
     this.powerupBarEl = hudRoot.querySelector('#hud-powerup-bar') as HTMLElement;
+    this.timeSlowOverlayEl = hudRoot.querySelector('#hud-timeslow-overlay') as HTMLElement;
   }
 
   /** Sync HUD text from RunState. Called after each fixed update step. */
@@ -84,6 +87,12 @@ export class HUD {
       this.powerupBarEl.style.width = `${pct}%`;
       this.powerupBarEl.style.background = `#${def.color.toString(16).padStart(6, '0')}`;
     }
+  }
+
+  public setTimeSlowEffect(strength: number): void {
+    const clamped = Math.max(0, Math.min(1, strength));
+    this.timeSlowOverlayEl.style.display = clamped > 0.01 ? 'block' : 'none';
+    this.timeSlowOverlayEl.style.opacity = `${clamped * 0.85}`;
   }
 
   /** Show full-screen overlay (pause, game over, title) */

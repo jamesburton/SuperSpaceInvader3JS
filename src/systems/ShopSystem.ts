@@ -1,5 +1,6 @@
 import { runState } from '../state/RunState';
 import type { Player } from '../entities/Player';
+import type { PowerUpType } from '../config/powerups';
 
 // ---------------------------------------------------------------------------
 // Shop item definition
@@ -83,6 +84,33 @@ export const SHOP_ITEMS: ShopItem[] = [
     tier: 1,
     maxPurchases: 99,
   },
+  {
+    id: 'piercingShot',
+    displayName: 'PIERCING SHOT',
+    description: 'One rail shot that damages two enemies in line',
+    price: 55,
+    category: 'weapon',
+    tier: 2,
+    maxPurchases: 99,
+  },
+  {
+    id: 'homingMissile',
+    displayName: 'HOMING MISSILE',
+    description: 'Swap your shot for a single imperfect seeker',
+    price: 60,
+    category: 'weapon',
+    tier: 2,
+    maxPurchases: 99,
+  },
+  {
+    id: 'timeSlow',
+    displayName: 'TIME SLOW',
+    description: 'Slow enemies and hostile fire while you stay sharp',
+    price: 50,
+    category: 'defense',
+    tier: 2,
+    maxPurchases: 99,
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -107,6 +135,8 @@ export class ShopSystem {
 
   /** Optional callback for bunker repair purchase — injected by Game.ts. */
   public _onBunkerRepairPurchased: (() => void) | null = null;
+  /** Optional callback for timed power-up purchases — injected by Game.ts. */
+  public _onTimedPowerUpPurchased: ((type: PowerUpType) => void) | null = null;
 
   /**
    * Returns all non-maxed shop items for multi-buy shop display.
@@ -173,6 +203,12 @@ export class ShopSystem {
 
       case 'repairBunker':
         this._onBunkerRepairPurchased?.();
+        break;
+
+      case 'piercingShot':
+      case 'homingMissile':
+      case 'timeSlow':
+        this._onTimedPowerUpPurchased?.(item.id);
         break;
     }
 

@@ -307,6 +307,7 @@ export class TitleState implements IGameState {
     ctx.aiSystem.reset();
     ctx.shopSystem.reset();
     ctx.powerUpManager.releaseAll();
+    ctx.homingMissileManager.releaseAll();
     ctx.boss.deactivate();
     ctx.bossSystem.reset();
     ctx.bossHealthBar.hide();

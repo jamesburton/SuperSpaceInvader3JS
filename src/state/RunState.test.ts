@@ -80,3 +80,15 @@ describe('RunState — snapshot includes gold', () => {
     expect(snap.gold).toBe(42);
   });
 });
+
+describe('RunState — timeScale', () => {
+  it('starts at 1 after reset', () => {
+    expect(runState.timeScale).toBe(1);
+  });
+
+  it('stores combat time scaling for the current run', () => {
+    runState.setTimeScale(0.45);
+    expect(runState.timeScale).toBe(0.45);
+    expect(runState.snapshot().timeScale).toBe(0.45);
+  });
+});

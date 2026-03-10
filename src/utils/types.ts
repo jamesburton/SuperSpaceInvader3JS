@@ -49,6 +49,7 @@ export interface RunStateData {
   gamePhase: GamePhase;
   gold: number;  // Gold accumulated during this run (in-run only, resets on run end)
   siEarnedThisRun: number; // SI$ earned this run via wave clears (for run-end display)
+  timeScale: number;
 }
 
 // InstancedMesh wrapper for enemy rendering

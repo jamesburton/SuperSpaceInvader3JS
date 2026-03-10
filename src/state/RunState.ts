@@ -11,6 +11,7 @@ const _state: RunStateData = {
   gamePhase: 'playing' as GamePhase,
   gold: 0,
   siEarnedThisRun: 0,
+  timeScale: 1,
 };
 
 // Mode fields are separate from RunStateData (not HUD data, not snapshotted)
@@ -35,6 +36,7 @@ export const runState = {
   get gold() { return _state.gold; },
   get goldEarnedThisRun() { return _goldEarnedThisRun; },
   get siEarnedThisRun() { return _state.siEarnedThisRun; },
+  get timeScale() { return _state.timeScale; },
   get continueUsed() { return _continueUsed; },
   get goldConvertedThisRun() { return _goldConvertedThisRun; },
   get siConversionRateUsed() { return _siConversionRateUsed; },
@@ -43,6 +45,7 @@ export const runState = {
 
   setMode(mode: GameMode): void { _mode = mode; },
   setCampaignLevel(index: number): void { _campaignLevelIndex = index; },
+  setTimeScale(scale: number): void { _state.timeScale = Math.max(0, scale); },
 
   addScore(amount: number): void {
     _state.score += amount;
@@ -123,6 +126,7 @@ export const runState = {
     _state.gold = 0;
     _goldEarnedThisRun = 0;
     _state.siEarnedThisRun = 0;
+    _state.timeScale = 1;
     _continueUsed = false;
     _goldConvertedThisRun = 0;
     _siConversionRateUsed = 0;
