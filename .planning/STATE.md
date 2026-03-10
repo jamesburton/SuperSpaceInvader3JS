@@ -116,6 +116,7 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table with outcomes.
 - Add switchable weapons with toggle loadout — `.planning/todos/pending/2026-03-10-add-switchable-weapons-with-toggle-loadout.md`
 - Include enemies with slight homing missile — `.planning/todos/pending/2026-03-10-include-enemies-with-slight-homing-missile.md`
 - Move to damage and shields instead of shields and lives — `.planning/todos/pending/2026-03-10-move-to-damage-and-shields-instead-of-shields-and-lives.md`
+- Add random continue choices with contrast pair traits — `.planning/todos/pending/2026-03-10-add-random-continue-choices-with-contrast-pair-traits.md`
 - Finish level when only barrier enemies remain — `.planning/todos/pending/2026-03-10-finish-level-when-only-barrier-enemies-remain.md`
 
 ### Blockers/Concerns
