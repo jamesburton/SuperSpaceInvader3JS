@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Polish & Depth
-status: executing
-stopped_at: Completed 08-visual-customization 08-04-PLAN.md
-last_updated: "2026-03-07T13:07:35.158Z"
-last_activity: 2026-03-07 — Plan 08-01 complete; skinConfig data layer + PlayerSkinManager + PlayingState wiring
+status: ready_to_plan
+stopped_at: Completed Phase 8 validation; ready to start Phase 9 planning
+last_updated: "2026-03-10T14:18:00+00:00"
+last_activity: 2026-03-10 — Phase 8 validation approved; targeted Phase 8 tests and tsc passed against shipped implementation
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 10
+  total_plans: 17
   completed_plans: 10
-  percent: 15
+  percent: 59
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** The thrill of arcade shooting elevated — every run feels different because of layered in-run progression, meta-unlocks that evolve your build over time, and enemies smart enough to keep you on your toes.
-**Current focus:** Phase 8 — Visual Customization
+**Current focus:** Phase 9 — Power-Ups
 
 ## Current Position
 
-Phase: 8 of 10 (Visual Customization)
-Plan: 1 of 4 complete
-Status: In progress
-Last activity: 2026-03-07 — Plan 08-01 complete; skinConfig data layer + PlayerSkinManager + PlayingState wiring
+Phase: 9 of 10 (Power-Ups)
+Plan: 0 of 4 complete
+Status: Ready to plan
+Last activity: 2026-03-10 — Phase 8 validation approved; Phase 9 is the next roadmap item
 
-Progress: [█░░░░░░░░░] 15%
+Progress: [██████░░░░] 59%
 
 ## Performance Metrics
 
@@ -109,6 +109,7 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table with outcomes.
 - [Phase 08-02]: Color selection requires no purchase gate — all 6 colors free to all shapes (SKIN-02)
 - [Phase 08-visual-customization]: CRTManager stores composer ref; dispose() calls removePass() before dispose() for clean EffectComposer reinit
 - [Phase 08-visual-customization]: SceneManager.initCrt() is now idempotent — disposes old CRT pass before creating new one for tier upgrade purchases
+- [Phase 08-visual-customization]: Validation updated on 2026-03-10 against shipped CSS CRT overlay path; prior 08-VERIFICATION.md is superseded for final behavior coverage
 
 ### Pending Todos
 
@@ -119,6 +120,7 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table with outcomes.
 - Add random continue choices with contrast pair traits — `.planning/todos/pending/2026-03-10-add-random-continue-choices-with-contrast-pair-traits.md`
 - Finish level when only barrier enemies remain — `.planning/todos/pending/2026-03-10-finish-level-when-only-barrier-enemies-remain.md`
 - Revamp gold collection and pricing progression — `.planning/todos/pending/2026-03-10-revamp-gold-collection-and-pricing-progression.md`
+- Gate some unlocks behind power-up discovery — `.planning/todos/pending/2026-03-10-gate-some-unlocks-behind-power-up-discovery.md`
 
 ### Blockers/Concerns
 
@@ -127,6 +129,6 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table with outcomes.
 
 ## Session Continuity
 
-Last session: 2026-03-10T13:31:28.3752559+00:00
-Stopped at: Session resumed, proceeding to Phase 8 checkpoint verification and state refresh
+Last session: 2026-03-10T14:18:00+00:00
+Stopped at: Session resumed, Phase 8 validation confirmed complete, awaiting Phase 9 discussion/planning
 Resume file: .planning/phases/08-visual-customization/.continue-here.md
