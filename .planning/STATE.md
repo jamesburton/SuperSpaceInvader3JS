@@ -121,6 +121,7 @@ All v1.0 decisions logged in PROJECT.md Key Decisions table with outcomes.
 - Finish level when only barrier enemies remain — `.planning/todos/pending/2026-03-10-finish-level-when-only-barrier-enemies-remain.md`
 - Revamp gold collection and pricing progression — `.planning/todos/pending/2026-03-10-revamp-gold-collection-and-pricing-progression.md`
 - Gate some unlocks behind power-up discovery — `.planning/todos/pending/2026-03-10-gate-some-unlocks-behind-power-up-discovery.md`
+- Delay Game Over restart input — `.planning/todos/pending/2026-03-10-delay-game-over-restart-input.md`
 
 ### Blockers/Concerns
 
