@@ -10,6 +10,8 @@ import {
 } from '../utils/constants';
 import { ObjectPool } from '../core/ObjectPool';
 
+export type PlayerShotKind = 'standard' | 'spread' | 'piercing';
+
 export class Bullet {
   public x: number = 0;
   public y: number = 0;
@@ -19,6 +21,11 @@ export class Bullet {
   public readonly height: number = BULLET_HEIGHT / 2; // AABB half-height
   public isPlayerBullet: boolean = true;
   public active: boolean = false; // managed by pool via visible flag
+  public shotKind: PlayerShotKind = 'standard';
+  public remainingHits: number = 1;
+  public currentDamageScale: number = 1;
+  public damageFalloff: number = 1;
+  public readonly hitEnemyIds: Set<number> = new Set();
 
   // 'visible' property is defined via Object.defineProperty below to keep
   // mesh.visible and this.active in sync. Declared here for TypeScript only.
@@ -57,7 +64,13 @@ export class Bullet {
     this.vy = isPlayerBullet ? BULLET_SPEED : -ENEMY_BULLET_SPEED;
     this.vx = 0;
     this.active = true;
+    this.shotKind = 'standard';
+    this.remainingHits = 1;
+    this.currentDamageScale = 1;
+    this.damageFalloff = 1;
+    this.hitEnemyIds.clear();
     this.mesh.position.set(x, y, 0);
+    this.mesh.scale.set(1, 1, 1);
 
     // Apply emissive color based on bullet type
     const mat = this.mesh.material as MeshStandardMaterial;
@@ -79,6 +92,37 @@ export class Bullet {
     const mat = this.mesh.material as MeshStandardMaterial;
     mat.color.setHex(hexColor);
     mat.emissive.setHex(hexColor);
+  }
+
+  public configureSpreadShot(): void {
+    this.shotKind = 'spread';
+    this.setColor(0x0088ff);
+    this.mesh.scale.set(1, 1, 1);
+  }
+
+  public configurePiercingShot(): void {
+    this.shotKind = 'piercing';
+    this.remainingHits = 2;
+    this.currentDamageScale = 1;
+    this.damageFalloff = 0.5;
+    this.setColor(0x44f5ff);
+    (this.mesh.material as MeshStandardMaterial).emissiveIntensity = 1.6;
+    this.mesh.scale.set(1.15, 2.8, 1);
+  }
+
+  public consumeHit(): number {
+    const damageScale = this.currentDamageScale;
+    this.remainingHits = Math.max(0, this.remainingHits - 1);
+    this.currentDamageScale *= this.damageFalloff;
+    return damageScale;
+  }
+
+  public canHitEnemy(enemyId: number): boolean {
+    return !this.hitEnemyIds.has(enemyId) && this.remainingHits > 0;
+  }
+
+  public markEnemyHit(enemyId: number): void {
+    this.hitEnemyIds.add(enemyId);
   }
 
   /** Sync mesh position to current x/y. Called by MovementSystem each fixed step. */

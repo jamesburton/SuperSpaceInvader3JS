@@ -82,8 +82,20 @@ export class WeaponSystem {
     powerUpManager?: PowerUpManager,
     shopSystem?: ShopSystem,
   ): void {
+    const isPiercingPowerUp = powerUpManager?.isActive('piercingShot') ?? false;
     const isSpreadPowerUp = powerUpManager?.isActive('spreadShot') ?? false;
     const shopSpread = shopSystem?.spreadCount ?? 1;
+    if (isPiercingPowerUp) {
+      const bullet = playerBulletPool.acquire();
+      if (!bullet) return;
+
+      bullet.init(player.x, player.y + player.height + 10, true);
+      bullet.vy *= shopSystem?.bulletSpeedMultiplier ?? 1;
+      bullet.configurePiercingShot();
+      activeBullets.push(bullet);
+      return;
+    }
+
     // Additive: shop spread is the base, power-up pickup adds +2 on top
     const bulletCount = isSpreadPowerUp ? shopSpread + 2 : shopSpread;
 
@@ -116,7 +128,7 @@ export class WeaponSystem {
         const speed = bullet.vy; // already scaled by speedMul
         bullet.vx = Math.sin(angleOffset) * speed;
         bullet.vy = Math.cos(angleOffset) * speed;
-        bullet.setColor(0x0088ff); // spread bullets: blue (FEEL-07)
+        bullet.configureSpreadShot();
       }
 
       activeBullets.push(bullet);

@@ -58,6 +58,35 @@ describe('Bullet — init()', () => {
     expect(b.vy).toBe(-ENEMY_BULLET_SPEED);
     expect(b.vx).toBe(0);
   });
+
+  it('resets piercing metadata on reuse', () => {
+    const b = new Bullet(makeScene());
+    b.init(0, 0, true);
+    b.configurePiercingShot();
+    b.markEnemyHit(7);
+
+    b.init(2, 3, true);
+
+    expect(b.shotKind).toBe('standard');
+    expect(b.remainingHits).toBe(1);
+    expect(b.currentDamageScale).toBe(1);
+    expect(b.hitEnemyIds.size).toBe(0);
+  });
+});
+
+describe('Bullet piercing shot configuration', () => {
+  it('configures two-hit falloff for piercing shots', () => {
+    const b = new Bullet(makeScene());
+    b.init(0, 0, true);
+
+    b.configurePiercingShot();
+
+    expect(b.shotKind).toBe('piercing');
+    expect(b.remainingHits).toBe(2);
+    expect(b.consumeHit()).toBe(1);
+    expect(b.consumeHit()).toBe(0.5);
+    expect(b.remainingHits).toBe(0);
+  });
 });
 
 describe('Bullet — visible/active sync', () => {

@@ -52,6 +52,22 @@ export class MeshStandardMaterial {
 export class Mesh {
   public visible: boolean = false;
   public position = { x: 0, y: 0, z: 0, set(_x: number, _y: number, _z: number) {} };
+  public rotation = { z: 0 };
+  public scale = {
+    x: 1,
+    y: 1,
+    z: 1,
+    set(x: number, y: number, z: number) {
+      this.x = x;
+      this.y = y;
+      this.z = z;
+    },
+    setScalar(s: number) {
+      this.x = s;
+      this.y = s;
+      this.z = s;
+    },
+  };
   public material: unknown;
 
   constructor(_geo?: unknown, mat?: unknown) {
