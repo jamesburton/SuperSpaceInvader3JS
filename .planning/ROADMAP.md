@@ -92,13 +92,13 @@ Plans:
   3. Time slow reduces all enemy and projectile speeds while the player ship moves at full speed, and a visual desaturation/tint effect communicates the active state
   4. All three new power-ups appear as purchasable options in the between-wave shop alongside existing power-ups
   5. Each new power-up has a visually distinct pickup appearance distinguishable from existing pickups at a glance
-**Plans**: TBD
+**Plans**: 4/4 implemented, awaiting human verification
 
 Plans:
-- [ ] 09-01: Piercing shot (CollisionSystem bullet-skip logic, elongated trail visual, PWR-02)
-- [ ] 09-02: Homing missiles (dedicated InstancedMesh, atan2 steering, lock-on reticle, lifetime cap)
-- [ ] 09-03: Time slow (RunState.timeScale, per-system selective application, desaturation visual treatment)
-- [ ] 09-04: Shop item registration for all three power-ups + distinct pickup appearances (PWR-07, PWR-08)
+- [x] 09-01: Piercing shot (CollisionSystem bullet-skip logic, elongated trail visual, PWR-02) — implemented 2026-03-10
+- [x] 09-02: Homing missiles (dedicated InstancedMesh, atan2 steering, lock-on reticle, lifetime cap) — implemented 2026-03-10
+- [x] 09-03: Time slow (RunState.timeScale, per-system selective application, desaturation visual treatment) — implemented 2026-03-10
+- [x] 09-04: Shop item registration for all three power-ups + distinct pickup appearances (PWR-07, PWR-08) — implemented 2026-03-10
 
 ### Phase 10: Meta Shop Expansion
 **Goal**: Players returning to the meta shop find a meaningfully expanded upgrade tree that surfaces all v1.1 features and offers a pre-run starting power-up selection
@@ -129,5 +129,5 @@ Plans:
 | 6. Foundation | v1.1 | 4/4 | Complete | 2026-03-07 |
 | 7. Gamepad Support | 2/2 | Complete   | 2026-03-07 | - |
 | 8. Visual Customization | 4/4 | Complete   | 2026-03-07 | - |
-| 9. Power-Ups | v1.1 | 0/4 | Not started | - |
+| 9. Power-Ups | v1.1 | 4/4 | Awaiting human verification | - |
 | 10. Meta Shop Expansion | v1.1 | 0/3 | Not started | - |
