@@ -19,7 +19,7 @@ created: 2026-03-10
 |----------|-------|
 | **Framework** | Vitest |
 | **Config file** | `vitest.config.ts` |
-| **Quick run command** | `npx vitest run src/state/MetaState.test.ts src/states/TitleState.test.ts src/states/PlayingState.test.ts src/ui/MetaShopUI.test.ts src/systems/BossSystem.test.ts` |
+| **Quick run command** | `npx vitest run src/state/MetaState.test.ts src/states/TitleState.test.ts src/states/PlayingState.test.ts src/ui/MetaShopUI.test.ts src/config/difficultyRules.test.ts src/config/waveConfig.test.ts src/systems/BossSystem.test.ts` |
 | **Full suite command** | `npx vitest run && npx tsc --noEmit` |
 | **Estimated runtime** | ~12 seconds once Phase 10 targeted tests exist |
 
@@ -46,7 +46,7 @@ created: 2026-03-10
 | 10-02-03 | 02 | 2 | SHOP-06 | unit + integration | `npx vitest run src/state/MetaState.test.ts src/states/TitleState.test.ts src/ui/MetaShopUI.test.ts` | ❌ W0 | ⬜ pending |
 | 10-02-04 | 02 | 2 | SHOP-07 | unit + integration | `npx vitest run src/systems/BossSystem.test.ts src/config/difficultyRules.test.ts src/states/PlayingState.test.ts` | ❌ W0 | ⬜ pending |
 | 10-03-01 | 03 | 3 | SHOP-01, SHOP-02, SHOP-04 | DOM integration | `npx vitest run src/ui/MetaShopUI.test.ts` | ❌ W0 | ⬜ pending |
-| 10-03-02 | 03 | 3 | SHOP-03 | DOM integration | `npx vitest run src/ui/MetaShopUI.test.ts src/states/TitleState.test.ts` | ❌ W0 | ⬜ pending |
+| 10-03-02 | 03 | 3 | SHOP-02, SHOP-04 | DOM integration | `npx vitest run src/ui/MetaShopUI.test.ts src/states/TitleState.test.ts` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

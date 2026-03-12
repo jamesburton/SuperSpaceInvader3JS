@@ -24,17 +24,21 @@ import type { BunkerManager } from '../entities/BunkerManager';
 import type { HomingMissileManager } from '../systems/HomingMissileManager';
 import { runState } from '../state/RunState';
 import { useMetaStore } from '../state/MetaState';
+import { countOwnedStartingLifeTiers } from '../state/runSetup';
 import { PlayerSkinManager } from '../entities/PlayerSkinManager';
 import { audioManager } from '../systems/AudioManager';
 import { FIXED_STEP } from '../utils/constants';
 import { BOSS_DEF } from '../config/boss';
-import { CAMPAIGN_CHAPTER_1, getAlgorithmicWaves } from '../config/campaign';
+import { CAMPAIGN_CHAPTER_1, getCampaignLevelWaves } from '../config/campaign';
 import { PausedState } from './PausedState';
 import { GameOverState } from './GameOverState';
 import { LevelBriefingState } from './LevelBriefingState';
+import { getBossPhaseCount } from '../config/difficultyRules';
+import { HARD_CLEAR_MARKER, normalizePurchasedUpgrades } from '../state/runSetup';
 
 /** Singleton skin manager — shared across all PlayingState instances (one per run). */
 const playerSkinManager = new PlayerSkinManager();
+const STARTING_POWER_UP_DURATION = 30;
 
 /** All dependencies PlayingState needs — passed from Game.ts */
 export interface PlayingStateContext {
@@ -91,6 +95,10 @@ export class PlayingState implements IGameState {
     this.ctx.scene.setTimeSlowEffect(0);
     this.ctx.cameraShake.reset(); // Phase 2: clear any residual shake
     this.applyMetaBonuses();      // Phase 4: apply persistent meta upgrades at run start
+    const { difficulty } = useMetaStore.getState();
+    this.ctx.spawnSystem.setDifficulty(difficulty);
+    this.ctx.aiSystem.setDifficulty(difficulty);
+    this.ctx.bossSystem.setDifficulty(difficulty);
     this._spawnBunkers();         // Spawn bunkers if enabled and slots purchased
     audioManager.playBgm();       // Phase 6: start BGM on gameplay enter (AUD-01)
 
@@ -212,7 +220,7 @@ export class PlayingState implements IGameState {
     if (ctx.spawnSystem.bossPending && !ctx.boss.active) {
       ctx.spawnSystem.clearBossPending();
       ctx.boss.activate();
-      ctx.bossHealthBar.show(2, 1);
+      ctx.bossHealthBar.show(getBossPhaseCount(useMetaStore.getState().difficulty), 1);
       // No new wave spawns — boss replaces normal wave progression
       return;
     }
@@ -389,6 +397,14 @@ export class PlayingState implements IGameState {
           runState.campaignLevelIndex,
         );
       }
+
+      if (useMetaStore.getState().difficulty === 'hard') {
+        useMetaStore.setState((state) => ({
+          purchasedUpgrades: state.purchasedUpgrades.includes(HARD_CLEAR_MARKER)
+            ? state.purchasedUpgrades
+            : normalizePurchasedUpgrades([...state.purchasedUpgrades, HARD_CLEAR_MARKER]),
+        }));
+      }
     }
 
     // Gold → SI$ conversion at end of run
@@ -510,7 +526,7 @@ export class PlayingState implements IGameState {
     const chapter = CAMPAIGN_CHAPTER_1;
     const level = chapter.levels[levelIndex];
     if (!level) return; // safety guard — out of bounds level index
-    const waves = level.waves ?? getAlgorithmicWaves(levelIndex, level.waveCount ?? 3);
+    const waves = getCampaignLevelWaves(levelIndex, useMetaStore.getState().difficulty);
     this.ctx.spawnSystem.setLevelWaves(waves);
   }
 
@@ -537,7 +553,7 @@ export class PlayingState implements IGameState {
       // Final level: trigger boss encounter — same as endless boss trigger
       ctx.spawnSystem.clearBossPending(); // prevent duplicate trigger if bossPending also set
       ctx.boss.activate();
-      ctx.bossHealthBar.show(2, 1);
+      ctx.bossHealthBar.show(getBossPhaseCount(useMetaStore.getState().difficulty), 1);
       return;
     }
 
@@ -583,11 +599,13 @@ export class PlayingState implements IGameState {
   /**
    * Apply purchased meta upgrades at run start (META-03, META-04).
    * Reads MetaStore.purchasedUpgrades and applies passive stat bonuses and starting loadouts.
-   * Called from enter() each time PlayingState becomes active (new run or restart).
+   * Called from enter() each time PlayingState becomes active. Fresh-run-only bonuses
+   * are explicitly gated so continue paths do not re-grant extra lives or loadouts.
    */
   private applyMetaBonuses(): void {
-    const { purchasedUpgrades, selectedSkin } = useMetaStore.getState();
+    const { purchasedUpgrades, selectedSkin, startingPowerUp } = useMetaStore.getState();
     const { player, powerUpManager } = this.ctx;
+    const isFreshRun = !runState.continueUsed;
 
     // Count tiers for multiplicative passives
     let fireRateTiers = 0;
@@ -610,21 +628,19 @@ export class PlayingState implements IGameState {
       player.setSpeedMultiplier(speedMultiplier);
     }
 
-    // Apply starting life bonus (+1 life, capped at MAX_LIVES_CAP)
-    if (purchasedUpgrades.includes('passive_startingLife')) {
-      runState.addLife();
+    if (isFreshRun) {
+      const extraLives = Math.min(2, countOwnedStartingLifeTiers(purchasedUpgrades));
+      for (let i = 0; i < extraLives; i++) {
+        runState.addLife();
+      }
     }
 
     // Apply bullet cap from highest owned passive_maxBullets_N tier
     const maxBulletTier = [7, 6, 5, 4, 3, 2].find(t => purchasedUpgrades.includes(`passive_maxBullets_${t}`)) ?? 1;
     player.setMaxBulletsInFlight(maxBulletTier);
 
-    // Apply starting loadout power-ups (timed, 30s duration)
-    if (purchasedUpgrades.includes('loadout_spread_start')) {
-      powerUpManager.activate('spreadShot', 30); // spread shot for 30s at run start
-    }
-    if (purchasedUpgrades.includes('loadout_rapid_start')) {
-      powerUpManager.activate('rapidFire', 30);  // rapid fire for 30s at run start
+    if (isFreshRun && startingPowerUp) {
+      powerUpManager.activate(startingPowerUp, STARTING_POWER_UP_DURATION);
     }
 
     // Wire bunker auto-repair: restore 1 segment per wave if upgrade owned

@@ -1,4 +1,6 @@
 import type { EnemyType } from './enemies';
+import { applyDifficultyToWaveConfig } from './difficultyRules';
+import type { DifficultySetting } from '../state/runSetup';
 
 /**
  * Data-driven wave configuration.
@@ -181,16 +183,18 @@ export const WAVE_CONFIGS: readonly WaveConfig[] = [
  *   - shopAfterThisWave is true every 5th wave
  *   - rows/cols are capped at 5/10
  */
-export function getWaveConfig(wave: number): WaveConfig {
+export function getWaveConfig(wave: number, difficulty: DifficultySetting = 'normal'): WaveConfig {
+  let config: WaveConfig;
   if (wave <= WAVE_CONFIGS.length) {
-    return WAVE_CONFIGS[wave - 1];
+    config = WAVE_CONFIGS[wave - 1];
+    return applyDifficultyToWaveConfig(config, difficulty);
   }
 
   // Beyond wave 10: derive from wave-10 template
   const base = WAVE_CONFIGS[WAVE_CONFIGS.length - 1];
   const extraWaves = wave - WAVE_CONFIGS.length;
 
-  return {
+  config = {
     waveNumber: wave,
     rows: Math.min(5, base.rows),
     cols: Math.min(10, base.cols),
@@ -200,4 +204,5 @@ export function getWaveConfig(wave: number): WaveConfig {
     allowedTypes: ALL_TYPES,
     shopAfterThisWave: wave % 5 === 0,
   };
+  return applyDifficultyToWaveConfig(config, difficulty);
 }

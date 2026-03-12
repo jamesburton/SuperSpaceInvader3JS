@@ -44,7 +44,7 @@ const createStorage = (): Storage => {
   };
 };
 
-describe('MetaShopUI Phase 8 controls', () => {
+describe('MetaShopUI Phase 10 tabs and CRT controls', () => {
   let hudRoot: HTMLElement;
 
   beforeEach(async () => {
@@ -65,7 +65,7 @@ describe('MetaShopUI Phase 8 controls', () => {
     });
   });
 
-  it('renders CRT upgrade cards and keeps higher tiers locked until prior tiers are owned', () => {
+  it('renders category tabs and keeps CRT upgrades inside the Visual tab', () => {
     const sceneManager = {
       initCrt: vi.fn(),
       crt: { setIntensity: vi.fn() },
@@ -73,13 +73,20 @@ describe('MetaShopUI Phase 8 controls', () => {
     const ui = new MetaShopUIClass(hudRoot, sceneManager as never);
 
     ui.show(() => ui.hide());
+    (window as unknown as Record<string, (tab: string) => void>).__metaShopTab('Visual');
 
     const overlay = document.getElementById('meta-shop-overlay') as HTMLElement;
-    expect(overlay.textContent).toContain('CRT FILTER');
+    expect(overlay.textContent).toContain('WEAPONS');
+    expect(overlay.textContent).toContain('VISUAL');
     expect(overlay.textContent).toContain('HIGH-DEF 2003');
+    expect(overlay.textContent).not.toContain('CONSUMER 1991');
+    expect(overlay.textContent).not.toContain('ARCADE 1983');
+
+    (window as unknown as Record<string, (id: string) => void>).__metaShopAction('toggle-locked');
+
     expect(overlay.textContent).toContain('CONSUMER 1991');
     expect(overlay.textContent).toContain('ARCADE 1983');
-    expect(overlay.innerHTML).toMatch(/CONSUMER 1991[\s\S]*?\[ LOCKED \]/);
+    expect(overlay.textContent).toContain('LOCKED');
     expect(overlay.querySelector('#crt-intensity-slider')).toBeNull();
   });
 
@@ -91,7 +98,8 @@ describe('MetaShopUI Phase 8 controls', () => {
     const ui = new MetaShopUIClass(hudRoot, sceneManager as never);
 
     ui.show(() => ui.hide());
-    (window as unknown as Record<string, (id: string) => void>).__metaShopBuy('crt_tier_1');
+    (window as unknown as Record<string, (tab: string) => void>).__metaShopTab('Visual');
+    (window as unknown as Record<string, (id: string) => void>).__metaShopAction('crt_tier_1');
 
     const state = useMetaStore.getState();
     expect(state.purchasedUpgrades).toContain('crt_tier_1');
@@ -114,6 +122,7 @@ describe('MetaShopUI Phase 8 controls', () => {
     const ui = new MetaShopUIClass(hudRoot, sceneManager as never);
 
     ui.show(() => ui.hide());
+    (window as unknown as Record<string, (tab: string) => void>).__metaShopTab('Visual');
 
     const slider = document.getElementById('crt-intensity-slider') as HTMLInputElement;
     slider.value = '0.73';

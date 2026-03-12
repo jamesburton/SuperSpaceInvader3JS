@@ -12,6 +12,7 @@ export interface MetaUpgrade {
    * Effect type for PlayingState to read on run start.
    * 'loadout_spread': start with 30s spread shot active
    * 'loadout_rapid': start with 1 rapid fire charge
+   * 'loadout_startingSlot': unlocks the pre-run starting power-up chooser
    * 'passive_fireRate': +10% fire rate per tier (stacks multiplicatively)
    * 'passive_moveSpeed': +8% move speed per tier
    * 'passive_startingLife': +1 starting life (once)
@@ -21,15 +22,17 @@ export interface MetaUpgrade {
    * 'bunker_slot': deploy N bunkers per run
    * 'bunker_autorepair': auto-repair 1 segment/wave on most damaged bunker
    * 'bunker_forceshield': player bullets pass through bunkers (enemy bullets still destroy)
+   * 'difficulty_unlock': unlocks a higher pre-run difficulty
    */
   effectType:
-    | 'loadout_spread' | 'loadout_rapid'
+    | 'loadout_spread' | 'loadout_rapid' | 'loadout_startingSlot'
     | 'passive_fireRate' | 'passive_moveSpeed' | 'passive_startingLife' | 'passive_continue'
     | 'passive_maxBullets'
     | 'passive_siConversion' | 'passive_siTaxReduction'
     | 'bunker_slot' | 'bunker_autorepair' | 'bunker_forceshield'
     | 'skin_shape'
-    | 'crt_tier';
+    | 'crt_tier'
+    | 'difficulty_unlock';
   /** Tier within its effect group (1, 2, or 3) — 0 for loadouts/once-only upgrades */
   tier: number;
 }
@@ -52,6 +55,15 @@ export const META_UPGRADES: MetaUpgrade[] = [
     cost: 40,
     category: 'loadout',
     effectType: 'loadout_rapid',
+    tier: 0,
+  },
+  {
+    id: 'starting_powerup_slot',
+    displayName: 'TACTICAL SLOT',
+    description: 'Unlock a pre-run starting power-up chooser',
+    cost: 60,
+    category: 'loadout',
+    effectType: 'loadout_startingSlot',
     tier: 0,
   },
 
@@ -115,13 +127,40 @@ export const META_UPGRADES: MetaUpgrade[] = [
 
   // --- Passive: Starting Life (META-04) ---
   {
-    id: 'passive_startingLife',
-    displayName: 'EXTRA PILOT',
+    id: 'passive_startingLife_1',
+    displayName: 'EXTRA PILOT I',
     description: 'Start each run with +1 life',
     cost: 60,
     category: 'passive',
     effectType: 'passive_startingLife',
     tier: 1,
+  },
+  {
+    id: 'passive_startingLife_2',
+    displayName: 'EXTRA PILOT II',
+    description: 'Start each run with +1 more life (max +2)',
+    cost: 90,
+    category: 'passive',
+    effectType: 'passive_startingLife',
+    tier: 2,
+  },
+  {
+    id: 'difficulty_hard_unlock',
+    displayName: 'HARD MODE',
+    description: 'Unlock Hard difficulty for pre-run selection',
+    cost: 90,
+    category: 'passive',
+    effectType: 'difficulty_unlock',
+    tier: 1,
+  },
+  {
+    id: 'difficulty_nightmare_unlock',
+    displayName: 'NIGHTMARE MODE',
+    description: 'Unlock Nightmare after clearing Campaign on Hard',
+    cost: 140,
+    category: 'passive',
+    effectType: 'difficulty_unlock',
+    tier: 2,
   },
 
   // --- Continue (META-04) ---

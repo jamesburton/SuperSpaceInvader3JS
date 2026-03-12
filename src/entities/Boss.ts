@@ -8,7 +8,8 @@ import {
 } from 'three';
 import type { Scene } from 'three';
 import { WORLD_HEIGHT } from '../utils/constants';
-import { BOSS_DEF } from '../config/boss';
+import { BOSS_DEF, getBossConfig, type BossConfig } from '../config/boss';
+import type { DifficultySetting } from '../state/runSetup';
 
 /**
  * Build the boss ship angular octagon geometry.
@@ -55,17 +56,18 @@ export class BossEnemy {
   public hp: number;
   public maxHp: number;
   public active: boolean = false;   // starts inactive; SpawnSystem/BossSystem activates it
-  public currentPhase: 1 | 2 = 1;
+  public currentPhase: number = 1;
   public readonly mesh: Mesh;
   private readonly mat: MeshStandardMaterial;
+  private config: BossConfig = BOSS_DEF;
 
   constructor(scene: Scene) {
-    this.hp = BOSS_DEF.totalHp;
-    this.maxHp = BOSS_DEF.totalHp;
+    this.hp = this.config.totalHp;
+    this.maxHp = this.config.totalHp;
     const geo = makeBossGeometry();
     this.mat = new MeshStandardMaterial({
-      color: BOSS_DEF.phases[0].color,
-      emissive: new Color(BOSS_DEF.phases[0].color),
+      color: this.config.phases[0].color,
+      emissive: new Color(this.config.phases[0].color),
       emissiveIntensity: 1.5,
       roughness: 1.0,
       metalness: 0.0,
@@ -91,21 +93,32 @@ export class BossEnemy {
   }
 
   /** Apply the phase color to the boss mesh material. phaseIndex 0=phase1, 1=phase2. */
-  public applyPhaseColor(phaseIndex: 0 | 1): void {
-    const color = BOSS_DEF.phases[phaseIndex].color;
+  public applyPhaseColor(phaseIndex: number): void {
+    const phase = this.config.phases[Math.max(0, Math.min(phaseIndex, this.config.phases.length - 1))];
+    const color = phase.color;
     this.mat.color.setHex(color);
     this.mat.emissive.setHex(color);
   }
 
   /** Flash the mesh with flashColor for visual phase transition telegraph. */
-  public applyFlashColor(phaseIndex: 0 | 1): void {
-    const flash = BOSS_DEF.phases[phaseIndex].flashColor;
+  public applyFlashColor(phaseIndex: number): void {
+    const phase = this.config.phases[Math.max(0, Math.min(phaseIndex, this.config.phases.length - 1))];
+    const flash = phase.flashColor;
     this.mat.emissive.setHex(flash);
+  }
+
+  public setDifficulty(difficulty: DifficultySetting): void {
+    this.config = getBossConfig(difficulty);
+    this.hp = this.config.totalHp;
+    this.maxHp = this.config.totalHp;
+    this.currentPhase = 1;
+    this.applyPhaseColor(0);
   }
 
   /** Activate boss — call from SpawnSystem/BossSystem at encounter start. */
   public activate(): void {
-    this.hp = this.maxHp;
+    this.hp = this.config.totalHp;
+    this.maxHp = this.config.totalHp;
     this.currentPhase = 1;
     this.active = true;
     this.mesh.visible = true;

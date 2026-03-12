@@ -1,5 +1,5 @@
 /**
- * Tests for MetaState v4 migration.
+ * Tests for MetaState v5 migration.
  * Verifies:
  *   - v3 save data survives migration with all existing fields intact
  *   - new v1.1 fields have correct defaults after migration
@@ -9,6 +9,11 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { _migrate, useMetaStore } from './MetaState';
+import {
+  countOwnedStartingLifeTiers,
+  getUnlockedStartingPowerUps,
+  normalizeStartingPowerUp,
+} from './runSetup';
 
 beforeEach(() => {
   useMetaStore.setState(useMetaStore.getInitialState());
@@ -41,7 +46,7 @@ describe('MetaState — v3->v4 migration preserves existing data', () => {
   });
 });
 
-describe('MetaState — v3->v4 migration adds new fields with correct defaults', () => {
+describe('MetaState — v3->v5 migration adds new fields with correct defaults', () => {
   it('adds all v1.1 fields with correct default values', () => {
     const v3Snapshot = {
       saveVersion: 3,
@@ -63,11 +68,41 @@ describe('MetaState — v3->v4 migration adds new fields with correct defaults',
     expect(result.difficulty).toBe('normal');
     expect(result.startingPowerUp).toBeNull();
     expect(result.extraLivesPurchased).toBe(0);
-    expect(result.saveVersion).toBe(4);
+    expect(result.saveVersion).toBe(5);
   });
 });
 
-describe('MetaState — full chain v0->v4 migration', () => {
+describe('MetaState — v4->v5 migration normalizes legacy run-setup data', () => {
+  it('converts legacy starting life ownership and upgrade-id loadouts to the new state shape', () => {
+    const v4Snapshot = {
+      saveVersion: 4,
+      metaCurrency: 500,
+      highScore: 12000,
+      purchasedUpgrades: ['passive_startingLife', 'loadout_spread_start'],
+      bunkersEnabled: true,
+      campaignProgress: { 1: 2 },
+      briefingAutoDismiss: false,
+      volume: 0.8,
+      muted: false,
+      selectedSkin: { shapeId: 'default', colorId: 'white' },
+      crtTier: null,
+      crtIntensity: 0.5,
+      difficulty: 'hard',
+      startingPowerUp: 'loadout_spread_start',
+      extraLivesPurchased: 0,
+    };
+
+    const result = _migrate(v4Snapshot, 4);
+
+    expect(result.purchasedUpgrades).toContain('passive_startingLife_1');
+    expect(result.purchasedUpgrades).not.toContain('passive_startingLife');
+    expect(result.startingPowerUp).toBe('spreadShot');
+    expect(result.extraLivesPurchased).toBe(1);
+    expect(result.saveVersion).toBe(5);
+  });
+});
+
+describe('MetaState — full chain v0->v5 migration', () => {
   it('migrates a bare v0 snapshot through the entire chain with all fields populated', () => {
     // v0 = no fields at all
     const result = _migrate({}, 0);
@@ -88,7 +123,7 @@ describe('MetaState — full chain v0->v4 migration', () => {
     expect(result.difficulty).toBe('normal');
     expect(result.startingPowerUp).toBeNull();
     expect(result.extraLivesPurchased).toBe(0);
-    expect(result.saveVersion).toBe(4);
+    expect(result.saveVersion).toBe(5);
   });
 });
 
@@ -123,5 +158,43 @@ describe('MetaState — setMuted action', () => {
     useMetaStore.getState().setMuted(true);
     useMetaStore.getState().setMuted(false);
     expect(useMetaStore.getState().muted).toBe(false);
+  });
+});
+
+describe('MetaState — run setup actions', () => {
+  it('persists selected difficulty and starting power-up', () => {
+    useMetaStore.getState().setDifficulty('hard');
+    useMetaStore.getState().setStartingPowerUp('timeSlow');
+
+    expect(useMetaStore.getState().difficulty).toBe('hard');
+    expect(useMetaStore.getState().startingPowerUp).toBe('timeSlow');
+  });
+
+  it('keeps extraLivesPurchased derived from purchased upgrade ids', () => {
+    useMetaStore.setState({ metaCurrency: 200 });
+    expect(useMetaStore.getState().purchaseUpgrade('passive_startingLife_1', 60)).toBe(true);
+    expect(useMetaStore.getState().purchaseUpgrade('passive_startingLife_2', 90)).toBe(true);
+
+    expect(useMetaStore.getState().extraLivesPurchased).toBe(2);
+  });
+});
+
+describe('runSetup helpers', () => {
+  it('derives unlocked starting power-ups from owned meta upgrades', () => {
+    const unlocked = getUnlockedStartingPowerUps([
+      'loadout_spread_start',
+      'starting_powerup_slot',
+    ]);
+
+    expect(unlocked).toEqual(['spreadShot', 'piercingShot', 'homingMissile', 'timeSlow']);
+  });
+
+  it('counts owned starting life tiers after legacy normalization', () => {
+    expect(countOwnedStartingLifeTiers(['passive_startingLife', 'passive_startingLife_2'])).toBe(2);
+  });
+
+  it('normalizes legacy starting power-up ids into PowerUpType values', () => {
+    expect(normalizeStartingPowerUp('loadout_rapid_start')).toBe('rapidFire');
+    expect(normalizeStartingPowerUp('bogus')).toBeNull();
   });
 });

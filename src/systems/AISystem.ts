@@ -7,6 +7,8 @@ import {
   WORLD_WIDTH,
   WORLD_HEIGHT,
 } from '../utils/constants';
+import { getDifficultyAiTuning } from '../config/difficultyRules';
+import type { DifficultySetting } from '../state/runSetup';
 
 // Approximate player Y position (near bottom of world)
 const PLAYER_Y_APPROX = -230;
@@ -22,7 +24,7 @@ export class AISystem {
   /** Seconds elapsed in current wave — used to trigger flanker charge */
   private flankerTimer: number = 0;
   /** Time (seconds) before flankers break formation and charge */
-  private readonly flankerChargeDelay: number = 15;
+  private flankerChargeDelay: number = 15;
   /** True once flankers have been triggered this wave */
   private flankersTriggered: boolean = false;
   /** Seconds elapsed since flankers triggered — used to switch to return phase */
@@ -34,7 +36,7 @@ export class AISystem {
   /** Accumulator for sniper aimed shot interval */
   private sniperFireAccumulator: number = 0;
   /** Snipers fire every 3 seconds (aimed at player) */
-  private readonly sniperFireInterval: number = 3.0;
+  private sniperFireInterval: number = 3.0;
 
   // ---- Swooper state ----
   /**
@@ -42,6 +44,7 @@ export class AISystem {
    * Group N triggers at 8 + N*10 seconds (8, 18, 28, 38).
    */
   private swooperGroupTimers: number[] = [8, 18, 28, 38];
+  private swooperGroupTimerDefaults: [number, number, number, number] = [8, 18, 28, 38];
   /** Tracks which swooper groups have already dive-triggered this wave */
   private swooperGroupTriggered: boolean[] = [false, false, false, false];
 
@@ -470,6 +473,14 @@ export class AISystem {
     this.fireInterval = BASE_FIRE_INTERVAL / multiplier;
   }
 
+  public setDifficulty(difficulty: DifficultySetting): void {
+    const tuning = getDifficultyAiTuning(difficulty);
+    this.flankerChargeDelay = tuning.flankerChargeDelay;
+    this.sniperFireInterval = tuning.sniperFireInterval;
+    this.swooperGroupTimerDefaults = [...tuning.swooperGroupTimers];
+    this.swooperGroupTimers = [...this.swooperGroupTimerDefaults];
+  }
+
   // ---------------------------------------------------------------------------
   // Reset (call on wave start)
   // ---------------------------------------------------------------------------
@@ -482,7 +493,7 @@ export class AISystem {
     this.flankerTimer = 0;
     this.flankersTriggered = false;
     this.flankerChargeTimer = 0;
-    this.swooperGroupTimers = [8, 18, 28, 38];
+    this.swooperGroupTimers = [...this.swooperGroupTimerDefaults];
     this.swooperGroupTriggered = [false, false, false, false];
   }
 }

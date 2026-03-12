@@ -26,7 +26,7 @@
 - [x] **Phase 7: Gamepad Support** - Controller input synthesized into existing input layer (completed 2026-03-07)
 - [x] **Phase 8: Visual Customization** - Ship skins + CRT post-processing effects (completed 2026-03-07)
 - [x] **Phase 9: Power-Ups** - Piercing shot, homing missiles, and time slow (completed 2026-03-10)
-- [ ] **Phase 10: Meta Shop Expansion** - Extra lives, difficulty unlocks, starting power-up slot, CRT tiers
+- [x] **Phase 10: Meta Shop Expansion** - Extra lives, difficulty unlocks, starting power-up slot, CRT tiers (completed 2026-03-11)
 
 ## Phase Details
 
@@ -110,12 +110,12 @@ Plans:
   3. Player unlocks Hard difficulty in the meta shop and Hard mode has visibly faster enemies, one additional enemy per wave, and earlier Sniper spawns
   4. Player unlocks Nightmare difficulty after completing Hard, and Nightmare mode adds an extra boss attack phase and more aggressive formation breaks
   5. The meta shop is organized clearly enough that a player can locate any upgrade category within ten seconds of opening the UI
-**Plans**: TBD
+**Plans**: 3/3 complete
 
 Plans:
-- [ ] 10-01: Extra lives + starting power-up slot unlock + pre-run selection screen (SHOP-01, SHOP-02, SHOP-03)
-- [ ] 10-02: Hard and Nightmare difficulty unlocks + waveConfig multipliers (SHOP-04, SHOP-05, SHOP-06, SHOP-07)
-- [ ] 10-03: Meta shop UI reorganization into categories (Weapons, Ships, Upgrades, Visual)
+- [x] 10-01: Extra lives + starting power-up slot unlock + pre-run selection screen (SHOP-01, SHOP-02, SHOP-03) — completed 2026-03-11
+- [x] 10-02: Hard and Nightmare difficulty unlocks + waveConfig multipliers (SHOP-04, SHOP-05, SHOP-06, SHOP-07) — completed 2026-03-11
+- [x] 10-03: Meta shop UI reorganization into categories (Weapons, Ships, Upgrades, Visual) — completed 2026-03-11
 
 ## Progress
 
@@ -130,4 +130,4 @@ Plans:
 | 7. Gamepad Support | 2/2 | Complete   | 2026-03-07 | - |
 | 8. Visual Customization | 4/4 | Complete   | 2026-03-07 | - |
 | 9. Power-Ups | v1.1 | 4/4 | Complete | 2026-03-10 |
-| 10. Meta Shop Expansion | v1.1 | 0/3 | Not started | - |
+| 10. Meta Shop Expansion | v1.1 | 3/3 | Complete | 2026-03-11 |

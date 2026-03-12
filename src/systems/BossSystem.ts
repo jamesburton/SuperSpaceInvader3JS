@@ -1,7 +1,8 @@
 import type { BossEnemy } from '../entities/Boss';
 import type { ObjectPool } from '../core/ObjectPool';
 import type { Bullet } from '../entities/Bullet';
-import { BOSS_DEF } from '../config/boss';
+import { getBossConfig } from '../config/boss';
+import type { DifficultySetting } from '../state/runSetup';
 
 /** Horizontal movement boundary (±units from center). */
 const MOVE_BOUND = 280;
@@ -33,6 +34,7 @@ export class BossSystem {
   private moveDir: number = 1;       // +1 = right, -1 = left
   private flashTimer: number = 0;    // countdown for phase transition flash
   private _phaseJustChanged: boolean = false;
+  private difficulty: DifficultySetting = 'normal';
 
   /**
    * True for exactly one update() call after phase transition — for camera shake trigger.
@@ -52,26 +54,25 @@ export class BossSystem {
     activeBullets: Bullet[],
   ): void {
     if (!boss.active) return;
+    const config = getBossConfig(this.difficulty);
+    const nextPhaseIndex = this._getPhaseIndex(boss.healthFraction(), config.phases.map((phase) => phase.startFraction));
 
-    // --- Phase transition check ---
-    if (boss.currentPhase === 1 && boss.healthFraction() <= 0.5) {
-      boss.currentPhase = 2;
+    if (boss.currentPhase !== nextPhaseIndex + 1) {
+      boss.currentPhase = nextPhaseIndex + 1;
       this._phaseJustChanged = true;
-      this.flashTimer = 0.4;       // 0.4s flash duration
-      this.attackTimer = 0;        // reset attack pattern on transition
-      boss.applyFlashColor(1);     // phase[1] flashColor = 0xFFFFFF (white)
+      this.flashTimer = 0.4;
+      this.attackTimer = 0;
+      boss.applyFlashColor(nextPhaseIndex);
     }
 
-    // --- Flash timer (phase transition telegraph) ---
     if (this.flashTimer > 0) {
       this.flashTimer -= dt;
       if (this.flashTimer <= 0) {
-        boss.applyPhaseColor(1);   // settle to phase 2 color (orange)
+        boss.applyPhaseColor(boss.currentPhase - 1);
       }
     }
 
-    // --- Horizontal movement ---
-    const moveSpeed = boss.currentPhase === 1 ? 60 : 100;
+    const moveSpeed = [60, 100, 130][boss.currentPhase - 1] ?? 130;
     boss.x += this.moveDir * moveSpeed * dt;
     if (boss.x > MOVE_BOUND) {
       boss.x = MOVE_BOUND;
@@ -84,12 +85,12 @@ export class BossSystem {
     boss.updateMesh();
 
     // --- Attack timer ---
-    const phaseIdx = (boss.currentPhase - 1) as 0 | 1;
-    const fireInterval = 1 / BOSS_DEF.phases[phaseIdx].fireRate;
+    const phaseIdx = Math.max(0, Math.min(boss.currentPhase - 1, config.phases.length - 1));
+    const fireInterval = 1 / config.phases[phaseIdx].fireRate;
     this.attackTimer -= dt;
     if (this.attackTimer <= 0) {
       this.attackTimer = fireInterval;
-      this.fire(boss, playerX, enemyBulletPool, activeBullets, boss.currentPhase);
+      this.fire(boss, playerX, enemyBulletPool, activeBullets, phaseIdx);
     }
   }
 
@@ -98,13 +99,13 @@ export class BossSystem {
     playerX: number,
     pool: ObjectPool<Bullet>,
     activeBullets: Bullet[],
-    phase: 1 | 2,
+    phaseIndex: number,
   ): void {
     // Fire from bottom edge of boss hull
     const bx = boss.x;
     const by = boss.y - boss.height - 8;
 
-    if (phase === 1) {
+    if (phaseIndex === 0) {
       // Aimed spread: 3 bullets aimed at player position ±25 degrees
       const dx = playerX - bx;
       const dy = -600; // strongly downward aim (player is below)
@@ -118,7 +119,7 @@ export class BossSystem {
         b.vy = Math.sin(baseAngle + offset) * BULLET_SPD;
         activeBullets.push(b);
       }
-    } else {
+    } else if (phaseIndex === 1) {
       // Sweeping beam: 5 bullets across -60° to +60° from straight down
       // Straight down = -π/2; spread is added to that base angle
       const angles = [-60, -30, 0, 30, 60].map(d => d * Math.PI / 180 - Math.PI / 2);
@@ -130,7 +131,30 @@ export class BossSystem {
         b.vy = Math.sin(angle) * BULLET_SPD;
         activeBullets.push(b);
       }
+    } else {
+      const angles = [-80, -48, -16, 16, 48, 80].map((d) => d * Math.PI / 180 - Math.PI / 2);
+      for (const angle of angles) {
+        const b = pool.acquire();
+        if (!b) continue;
+        b.init(bx, by, false);
+        b.vx = Math.cos(angle) * (BULLET_SPD + 30);
+        b.vy = Math.sin(angle) * (BULLET_SPD + 30);
+        activeBullets.push(b);
+      }
     }
+  }
+
+  public setDifficulty(difficulty: DifficultySetting): void {
+    this.difficulty = difficulty;
+  }
+
+  private _getPhaseIndex(healthFraction: number, thresholds: number[]): number {
+    for (let i = thresholds.length - 1; i >= 0; i--) {
+      if (healthFraction <= thresholds[i]) {
+        return i;
+      }
+    }
+    return 0;
   }
 
   /** Reset system state — call when boss encounter resets or on game restart. */

@@ -8,6 +8,7 @@ export class BossHealthBar {
   private readonly fillEl: HTMLElement;
   private readonly phaseMarkerEl: HTMLElement;
   private readonly phaseLabel: HTMLElement;
+  private totalPhases: number = 2;
 
   constructor(hudRoot: HTMLElement) {
     const el = document.createElement('div');
@@ -40,9 +41,10 @@ export class BossHealthBar {
   }
 
   /** Show the boss health bar — call on boss encounter start (Phase 4) */
-  public show(_totalPhases: number, _currentPhase: number): void {
+  public show(totalPhases: number, currentPhase: number): void {
+    this.totalPhases = Math.max(1, totalPhases);
     this.root.style.display = 'block';
-    this.update(1.0, 1);
+    this.update(1.0, currentPhase);
   }
 
   /** Hide the boss health bar — call on boss defeat or game over */
@@ -58,8 +60,7 @@ export class BossHealthBar {
     this.fillEl.style.background = color;
     this.phaseLabel.style.color = color;
     this.phaseLabel.style.textShadow = `0 0 8px ${color}`;
-    this.phaseLabel.textContent = `BOSS \u2014 PHASE ${currentPhase}`;
-    // Phase marker always visible at 50% (boundary between phase 1 and 2)
-    this.phaseMarkerEl.style.display = 'block';
+    this.phaseLabel.textContent = `BOSS \u2014 PHASE ${currentPhase}/${this.totalPhases}`;
+    this.phaseMarkerEl.style.display = this.totalPhases > 1 ? 'block' : 'none';
   }
 }

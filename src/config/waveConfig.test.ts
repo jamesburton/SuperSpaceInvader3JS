@@ -10,8 +10,8 @@ import {
 } from './waveConfig';
 
 describe('WAVE_CONFIGS — structure', () => {
-  it('has 10 entries (waves 1-10)', () => {
-    expect(WAVE_CONFIGS).toHaveLength(10);
+  it('has 12 entries (waves 1-12)', () => {
+    expect(WAVE_CONFIGS).toHaveLength(12);
   });
 
   it('every entry has required WaveConfig fields', () => {
@@ -35,41 +35,40 @@ describe('WAVE_CONFIGS — structure', () => {
 });
 
 describe('getWaveConfig — known waves', () => {
-  it('wave 1: rows=3, cols=8, only grunt allowed, shopAfterThisWave=false', () => {
+  it('wave 1: rows=1, cols=4, only grunt allowed, shopAfterThisWave=false', () => {
     const cfg = getWaveConfig(1);
-    expect(cfg.rows).toBe(3);
-    expect(cfg.cols).toBe(8);
+    expect(cfg.rows).toBe(1);
+    expect(cfg.cols).toBe(4);
     expect(cfg.allowedTypes).toEqual(['grunt']);
     expect(cfg.shopAfterThisWave).toBe(false);
-    expect(cfg.speedMultiplier).toBe(1.0);
+    expect(cfg.speedMultiplier).toBe(0.5);
   });
 
-  it('wave 5: shopAfterThisWave=true, has flanker in allowedTypes', () => {
+  it('wave 5: shopAfterThisWave=true, has shielder in allowedTypes', () => {
     const cfg = getWaveConfig(5);
     expect(cfg.shopAfterThisWave).toBe(true);
-    expect(cfg.allowedTypes).toContain('flanker');
     expect(cfg.allowedTypes).toContain('shielder');
   });
 
-  it('wave 10: shopAfterThisWave=true, all 6 types allowed', () => {
-    const cfg = getWaveConfig(10);
-    expect(cfg.shopAfterThisWave).toBe(true);
+  it('wave 12: all 6 types allowed', () => {
+    const cfg = getWaveConfig(12);
+    expect(cfg.shopAfterThisWave).toBe(false);
     expect(cfg.allowedTypes).toContain('grunt');
     expect(cfg.allowedTypes).toContain('swooper');
     expect(cfg.rows).toBe(5);
     expect(cfg.cols).toBe(10);
   });
 
-  it('wave 3: includes shielder', () => {
+  it('wave 3: still grunt-only but full formation begins', () => {
     const cfg = getWaveConfig(3);
-    expect(cfg.allowedTypes).toContain('shielder');
-    expect(cfg.rows).toBe(4);
+    expect(cfg.allowedTypes).toEqual(['grunt']);
+    expect(cfg.rows).toBe(3);
   });
 });
 
-describe('getWaveConfig — beyond wave 10', () => {
-  it('wave 11: returns valid config (does not throw)', () => {
-    expect(() => getWaveConfig(11)).not.toThrow();
+describe('getWaveConfig — beyond wave 12', () => {
+  it('wave 13: returns valid config (does not throw)', () => {
+    expect(() => getWaveConfig(13)).not.toThrow();
   });
 
   it('wave 999: returns valid config with all types', () => {
@@ -91,10 +90,20 @@ describe('getWaveConfig — beyond wave 10', () => {
     expect(cfg.shopAfterThisWave).toBe(false);
   });
 
-  it('wave 15 speedMultiplier > wave 10 speedMultiplier (escalates)', () => {
-    const w10 = getWaveConfig(10);
+  it('wave 15 speedMultiplier > wave 12 speedMultiplier (escalates)', () => {
+    const w12 = getWaveConfig(12);
     const w15 = getWaveConfig(15);
-    expect(w15.speedMultiplier).toBeGreaterThan(w10.speedMultiplier);
+    expect(w15.speedMultiplier).toBeGreaterThan(w12.speedMultiplier);
+  });
+
+  it('hard difficulty applies the shared transform without mutating the base config', () => {
+    const normal = getWaveConfig(7);
+    const hard = getWaveConfig(7, 'hard');
+
+    expect(hard.cols).toBeGreaterThanOrEqual(normal.cols);
+    expect(hard.speedMultiplier).toBeGreaterThan(normal.speedMultiplier);
+    expect(normal.allowedTypes).not.toContain('sniper');
+    expect(hard.allowedTypes).toContain('sniper');
   });
 });
 

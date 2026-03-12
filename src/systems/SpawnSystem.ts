@@ -8,6 +8,7 @@ import { wavePalette } from '../config/palettes';
 import { getWaveConfig } from '../config/waveConfig';
 import type { WaveConfig } from '../config/waveConfig';
 import { BOSS_TRIGGER_WAVE } from '../utils/constants';
+import type { DifficultySetting } from '../state/runSetup';
 
 export class SpawnSystem {
   private waveTransitioning: boolean = false;
@@ -39,6 +40,7 @@ export class SpawnSystem {
   private levelWaves: WaveConfig[] | null = null;
   private levelWaveIndex: number = 0;
   private _levelCompletePending: boolean = false;
+  private difficulty: DifficultySetting = 'normal';
 
   /** True when campaign level waves are exhausted — PlayingState should handle level-complete routing */
   public get levelCompletePending(): boolean { return this._levelCompletePending; }
@@ -55,6 +57,10 @@ export class SpawnSystem {
     this.levelWaves = waves;
     this.levelWaveIndex = 0;
     this._levelCompletePending = false;
+  }
+
+  public setDifficulty(difficulty: DifficultySetting): void {
+    this.difficulty = difficulty;
   }
 
   /**
@@ -91,7 +97,7 @@ export class SpawnSystem {
     // Check if all enemies cleared
     if (formation.activeCount === 0 && !this.waveTransitioning) {
       // Capture current wave config BEFORE advancing (shopAfterThisWave belongs to wave just cleared)
-      const currentConfig = getWaveConfig(runState.wave);
+      const currentConfig = getWaveConfig(runState.wave, this.difficulty);
       runState.nextWave();
       this.onWaveCleared?.(); // e.g. bunker auto-repair
       this.waveTransitioning = true;
@@ -131,7 +137,7 @@ export class SpawnSystem {
       // Return a dummy config; PlayingState will handle level-complete before next spawn
       return this.levelWaves[this.levelWaves.length - 1];
     }
-    return getWaveConfig(runState.wave);
+    return getWaveConfig(runState.wave, this.difficulty);
   }
 
   private startNextWave(
@@ -171,5 +177,6 @@ export class SpawnSystem {
     this.levelWaves = null;
     this.levelWaveIndex = 0;
     this._levelCompletePending = false;
+    this.difficulty = 'normal';
   }
 }

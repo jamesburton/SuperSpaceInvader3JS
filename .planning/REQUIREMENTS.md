@@ -46,13 +46,13 @@ Requirements for v1.1 Polish & Depth. Each maps to roadmap phases.
 
 ### Meta Shop
 
-- [ ] **SHOP-01**: Player can purchase extra starting lives in meta shop (capped at +2)
-- [ ] **SHOP-02**: Player can unlock a starting power-up slot in meta shop
-- [ ] **SHOP-03**: Player can select a starting power-up from unlocked pool before each run
-- [ ] **SHOP-04**: Player can unlock Hard difficulty mode in meta shop
-- [ ] **SHOP-05**: Hard mode increases enemy speed, adds +1 enemy per wave, enables earlier Sniper spawns
-- [ ] **SHOP-06**: Player can unlock Nightmare difficulty mode after completing Hard
-- [ ] **SHOP-07**: Nightmare mode has aggressive formation breaks and an additional boss attack phase
+- [x] **SHOP-01**: Player can purchase extra starting lives in meta shop (capped at +2)
+- [x] **SHOP-02**: Player can unlock a starting power-up slot in meta shop
+- [x] **SHOP-03**: Player can select a starting power-up from unlocked pool before each run
+- [x] **SHOP-04**: Player can unlock Hard difficulty mode in meta shop
+- [x] **SHOP-05**: Hard mode increases enemy speed, adds +1 enemy per wave, enables earlier Sniper spawns
+- [x] **SHOP-06**: Player can unlock Nightmare difficulty mode after completing Hard
+- [x] **SHOP-07**: Nightmare mode has aggressive formation breaks and an additional boss attack phase
 - [x] **SHOP-08**: Existing v1.0 save data migrates to v1.1 schema without loss (MetaStore v3→v4)
 
 ### CRT / Visual
@@ -145,13 +145,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PWR-06 | Phase 9 | Complete |
 | PWR-07 | Phase 9 | Complete |
 | PWR-08 | Phase 9 | Complete |
-| SHOP-01 | Phase 10 | Pending |
-| SHOP-02 | Phase 10 | Pending |
-| SHOP-03 | Phase 10 | Pending |
-| SHOP-04 | Phase 10 | Pending |
-| SHOP-05 | Phase 10 | Pending |
-| SHOP-06 | Phase 10 | Pending |
-| SHOP-07 | Phase 10 | Pending |
+| SHOP-01 | Phase 10 | Complete |
+| SHOP-02 | Phase 10 | Complete |
+| SHOP-03 | Phase 10 | Complete |
+| SHOP-04 | Phase 10 | Complete |
+| SHOP-05 | Phase 10 | Complete |
+| SHOP-06 | Phase 10 | Complete |
+| SHOP-07 | Phase 10 | Complete |
 
 **Coverage:**
 - v1.1 requirements: 38 total

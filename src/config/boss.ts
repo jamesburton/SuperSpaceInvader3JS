@@ -1,4 +1,6 @@
 /** Boss configuration — data-driven, planner's discretion per CONTEXT.md */
+import type { DifficultySetting } from '../state/runSetup';
+
 export interface BossPhaseConfig {
   /** HP threshold at which this phase begins (fraction: 1.0 = full, 0.0 = dead) */
   startFraction: number;
@@ -20,7 +22,7 @@ export interface BossConfig {
   scoreValue: number;
   /** SI$ meta currency awarded when boss is defeated */
   metaCurrencyReward: number;
-  phases: [BossPhaseConfig, BossPhaseConfig]; // exactly 2 phases for v1
+  phases: BossPhaseConfig[];
 }
 
 export const BOSS_DEF: BossConfig = {
@@ -44,3 +46,26 @@ export const BOSS_DEF: BossConfig = {
     },
   ],
 };
+
+export function getBossConfig(difficulty: DifficultySetting = 'normal'): BossConfig {
+  if (difficulty !== 'nightmare') {
+    return {
+      ...BOSS_DEF,
+      phases: BOSS_DEF.phases.map((phase) => ({ ...phase })),
+    };
+  }
+
+  return {
+    ...BOSS_DEF,
+    totalHp: 140,
+    phases: [
+      ...BOSS_DEF.phases.map((phase) => ({ ...phase })),
+      {
+        startFraction: 0.22,
+        color: 0xAA33FF,
+        flashColor: 0xFFFFFF,
+        fireRate: 1.8,
+      },
+    ],
+  };
+}

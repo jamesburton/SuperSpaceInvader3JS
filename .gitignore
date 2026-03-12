@@ -392,6 +392,9 @@ FodyWeavers.xsd
 !.vscode/extensions.json
 *.code-workspace
 
+# Claude Code: keep shared project config trackable, ignore local overrides only
+.claude/*.local.*
+
 # Local History for Visual Studio Code
 .history/
 
@@ -480,3 +483,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+dist/
+
+

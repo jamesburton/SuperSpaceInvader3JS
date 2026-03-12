@@ -190,7 +190,7 @@ export const profileManager = {
   /** Reset MetaStore to fresh defaults (partial replace — keeps method refs) */
   _resetMetaStore(): void {
     useMetaStore.setState({
-      saveVersion: 4,
+      saveVersion: 5,
       metaCurrency: 0,
       highScore: 0,
       purchasedUpgrades: [],

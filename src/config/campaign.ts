@@ -1,5 +1,7 @@
 import type { WaveConfig } from './waveConfig';
 import { WAVE_CONFIGS } from './waveConfig';
+import { applyDifficultyToWaveConfig } from './difficultyRules';
+import type { DifficultySetting } from '../state/runSetup';
 
 /**
  * A single level within a campaign chapter.
@@ -28,22 +30,33 @@ export interface CampaignChapter {
  * Cycles through WAVE_CONFIGS with escalating difficulty based on level index.
  * Used when a CampaignLevel omits its `waves` array.
  */
-export function getAlgorithmicWaves(levelIndex: number, waveCount: number): WaveConfig[] {
+export function getAlgorithmicWaves(
+  levelIndex: number,
+  waveCount: number,
+  difficulty: DifficultySetting = 'normal',
+): WaveConfig[] {
   const result: WaveConfig[] = [];
   for (let i = 0; i < waveCount; i++) {
     const cycleIndex = (levelIndex * waveCount + i) % WAVE_CONFIGS.length;
     const base = WAVE_CONFIGS[cycleIndex];
     const escalation = 1 + levelIndex * 0.15;
-    result.push({
+    result.push(applyDifficultyToWaveConfig({
       ...base,
       waveNumber: levelIndex * waveCount + i + 1,
       speedMultiplier: base.speedMultiplier * escalation,
       fireRateMultiplier: base.fireRateMultiplier * escalation,
       hpMultiplier: base.hpMultiplier * escalation,
       shopAfterThisWave: i === waveCount - 1,
-    });
+    }, difficulty));
   }
   return result;
+}
+
+export function getCampaignLevelWaves(levelIndex: number, difficulty: DifficultySetting = 'normal'): WaveConfig[] {
+  const level = CAMPAIGN_CHAPTER_1.levels[levelIndex];
+  if (!level) return [];
+  const baseWaves = level.waves ?? getAlgorithmicWaves(levelIndex, level.waveCount ?? 3, 'normal');
+  return baseWaves.map((wave) => applyDifficultyToWaveConfig(wave, difficulty));
 }
 
 /**

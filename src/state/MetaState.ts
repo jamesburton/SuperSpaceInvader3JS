@@ -1,8 +1,15 @@
 import { createStore } from 'zustand/vanilla';
 import { persist } from 'zustand/middleware';
+import type { PowerUpType } from '../config/powerups';
 import { META_STORAGE_KEY } from '../utils/constants';
+import {
+  countOwnedStartingLifeTiers,
+  normalizePurchasedUpgrades,
+  normalizeStartingPowerUp,
+  type DifficultySetting,
+} from './runSetup';
 
-const SAVE_VERSION = 4;
+const SAVE_VERSION = 5;
 
 /** Per-chapter record: chapter number → furthest level index completed (0-based) */
 export type CampaignProgress = Record<number, number>;
@@ -22,8 +29,8 @@ export interface MetaStore {
   selectedSkin: { shapeId: string; colorId: string }; // default: { shapeId: 'default', colorId: 'white' }
   crtTier: number | null;                             // null = not unlocked; 1/2/3 = tier
   crtIntensity: number;                               // 0.0-1.0, default 0.5
-  difficulty: 'normal' | 'hard' | 'nightmare';        // default 'normal'
-  startingPowerUp: string | null;                     // upgrade ID or null
+  difficulty: DifficultySetting;                      // default 'normal'
+  startingPowerUp: PowerUpType | null;                // last selected run-start power-up
   extraLivesPurchased: number;                        // 0, 1, or 2
 
   updateHighScore: (score: number) => void;
@@ -55,11 +62,15 @@ export interface MetaStore {
   setCrtTier: (tier: number | null) => void;
   /** Set CRT intensity, clamped to [0, 1]. Persisted via Zustand middleware. */
   setCrtIntensity: (intensity: number) => void;
+  /** Persist the last selected run-start difficulty. */
+  setDifficulty: (difficulty: DifficultySetting) => void;
+  /** Persist the last selected run-start power-up, or null for NONE. */
+  setStartingPowerUp: (powerUp: PowerUpType | null) => void;
 }
 
 /**
  * Exported migrate function for testability.
- * Chain: v0 → v1 → v2 → v3 → v4
+ * Chain: v0 → v1 → v2 → v3 → v4 → v5
  */
 export const _migrate = (persistedState: unknown, version: number): MetaStore => {
   let state = persistedState as Partial<MetaStore>;
@@ -88,6 +99,18 @@ export const _migrate = (persistedState: unknown, version: number): MetaStore =>
       startingPowerUp: null,
       extraLivesPurchased: 0,
       saveVersion: 4,
+    };
+  }
+  // v4 → v5: normalize legacy starting-life unlock and tighten startingPowerUp to PowerUpType | null
+  if (version < 5) {
+    const purchasedUpgrades = normalizePurchasedUpgrades(state.purchasedUpgrades ?? []);
+    state = {
+      ...state,
+      purchasedUpgrades,
+      difficulty: state.difficulty ?? 'normal',
+      startingPowerUp: normalizeStartingPowerUp(state.startingPowerUp),
+      extraLivesPurchased: countOwnedStartingLifeTiers(purchasedUpgrades),
+      saveVersion: 5,
     };
   }
   return state as MetaStore;
@@ -127,12 +150,16 @@ export const useMetaStore = createStore<MetaStore>()(
       purchaseUpgrade: (id: string, cost: number) => {
         const state = get();
         if (state.metaCurrency < cost) return false;
-        set((s) => ({
-          metaCurrency: s.metaCurrency - cost,
-          purchasedUpgrades: s.purchasedUpgrades.includes(id)
-            ? s.purchasedUpgrades  // idempotent — don't double-add
-            : [...s.purchasedUpgrades, id],
-        }));
+        set((s) => {
+          const nextPurchased = s.purchasedUpgrades.includes(id)
+            ? s.purchasedUpgrades
+            : normalizePurchasedUpgrades([...s.purchasedUpgrades, id]);
+          return {
+            metaCurrency: s.metaCurrency - cost,
+            purchasedUpgrades: nextPurchased,
+            extraLivesPurchased: countOwnedStartingLifeTiers(nextPurchased),
+          };
+        });
         return true;
       },
 
@@ -177,10 +204,18 @@ export const useMetaStore = createStore<MetaStore>()(
       setCrtIntensity: (intensity: number) => {
         set({ crtIntensity: Math.max(0, Math.min(1, intensity)) });
       },
+
+      setDifficulty: (difficulty: DifficultySetting) => {
+        set({ difficulty });
+      },
+
+      setStartingPowerUp: (powerUp: PowerUpType | null) => {
+        set({ startingPowerUp: powerUp });
+      },
     }),
     {
       name: META_STORAGE_KEY,
-      version: 4,
+      version: 5,
       migrate: _migrate,
     },
   ),
