@@ -1,9 +1,24 @@
 # Milestones
 
+## v1.1 Polish & Depth (Shipped: 2026-03-13)
+
+**Phases completed:** 5 phases, 17 plans
+**Timeline:** 7 days (2026-03-07 -> 2026-03-13)
+**Codebase:** 10,990 LOC TypeScript
+
+**Key accomplishments:**
+1. MetaStore migration plus full audio wiring, pause-menu volume controls, and persistent mute/volume settings
+2. Full gamepad support across gameplay, shops, and overlays with dynamic input hints and controller toasts
+3. Ship customization with unlockable shapes, color variants, and CRT visual filters with live intensity control
+4. Three new power-ups: piercing shot, homing missiles, and selective time slow with readable visual feedback
+5. Expanded meta shop with extra lives, pre-run starting power-up setup, Hard/Nightmare unlock flow, and tabbed category browsing
+
+---
+
 ## v1.0 MVP (Shipped: 2026-03-06)
 
 **Phases completed:** 5 phases, 32 plans
-**Timeline:** 5 days (2026-03-02 → 2026-03-06)
+**Timeline:** 5 days (2026-03-02 -> 2026-03-06)
 **Codebase:** 7,486 LOC TypeScript, 58 feat commits
 
 **Key accomplishments:**
@@ -15,4 +30,3 @@
 6. Campaign Chapter 1 (4 handcrafted levels + boss) and Endless mode with mode selection, atmospheric briefings, and campaign progress persistence
 
 ---
-

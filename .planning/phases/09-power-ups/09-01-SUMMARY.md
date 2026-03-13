@@ -28,6 +28,7 @@ decisions:
   - "Bullets now own shotKind, remainingHits, damage falloff, and per-enemy hit tracking so pooling remains safe"
   - "Second-hit damage uses a scalar path (1.0 then 0.5) instead of a hard-coded special case in CollisionSystem"
   - "Piercing visuals use an elongated bullet mesh plus a lightweight trail/impact helper from ParticleManager"
+requirements-completed: [PWR-01, PWR-02]
 metrics:
   duration: "~20 min"
   completed: "2026-03-10"
@@ -69,3 +70,4 @@ None.
 Commits:
 - `20f5fd4` - feat(phase-09): add piercing shot bullet path
 - `e1b2ea5` - feat(phase-09): add piercing collision falloff
+

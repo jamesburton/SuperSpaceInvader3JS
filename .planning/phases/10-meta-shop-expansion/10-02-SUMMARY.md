@@ -1,3 +1,5 @@
+requirements-completed: [SHOP-04, SHOP-05, SHOP-06, SHOP-07]
+
 # Plan 10-02 Summary
 
 ## Outcome
@@ -30,3 +32,4 @@ Implemented the Phase 10 difficulty ladder and combat hooks:
 
 - Hard-clear gating reuses `purchasedUpgrades` through the pseudo-entitlement `milestone_hard_clear`, avoiding a second persistence channel.
 - Boss phase count now scales from difficulty, while Normal and Hard preserve the original two-phase fight.
+

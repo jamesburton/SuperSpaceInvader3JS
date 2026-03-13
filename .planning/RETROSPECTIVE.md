@@ -2,6 +2,48 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.1 — Polish & Depth
+
+**Shipped:** 2026-03-13
+**Phases:** 5 | **Plans:** 17 | **Timeline:** 7 days
+
+### What Was Built
+- MetaStore migration plus full audio system wiring with persistent volume and mute controls
+- Full gamepad support across gameplay, shops, and menu overlays
+- Ship customization with unlockable shapes, colors, and CRT filter tiers
+- Three new power-ups: piercing shot, homing missiles, and selective time slow
+- Expanded meta shop with extra starting lives, pre-run setup, and Hard/Nightmare difficulty unlock flow
+
+### What Worked
+- Feature phases stayed cleanly layered: foundation before input, input before cosmetics, cosmetics before power-up and meta expansion
+- Focused targeted test suites made retro-validation for Phases 9 and 10 straightforward
+- The data/config split for upgrades and difficulty rules made Phase 10 easier to extend without large UI rewrites
+- Using dedicated subsystems for specialized behavior (AudioManager, PlayerSkinManager, HomingMissileManager, CRTManager) kept later changes localized
+
+### What Was Inefficient
+- Validation history drifted behind implementation for later phases, which forced cleanup work at milestone end
+- Milestone summary extraction was weaker for plans without consistent frontmatter, leaving archive tooling short on accomplishments and task counts
+- Audio shipped in a technically complete state but still depends on final asset replacement for the intended player-facing quality level
+
+### Patterns Established
+- Retro-validation as a cleanup pass can recover Nyquist compliance if per-phase validation lags behind execution
+- Requirement-to-summary frontmatter traceability matters if milestone tooling depends on it later
+- Category-based meta-shop presentation scales better than a long-scroll upgrade list once multiple cosmetic and progression systems exist
+- Pre-run setup is a useful seam for future loadout and mode configuration features
+
+### Key Lessons
+1. Planning artifacts need the same maintenance discipline as code or the milestone closeout becomes needlessly expensive.
+2. A good test surface on core systems pays off twice: during implementation and again during archival/audit cleanup.
+3. Asset placeholders should be tracked as explicit ship debt early, otherwise "feature complete" and "release ready" drift apart.
+4. Expansion phases benefit from preserving a clear config layer so balance and unlock logic do not leak into UI code.
+
+### Cost Observations
+- Model mix: mostly balanced execution with targeted orchestration and cleanup passes
+- Sessions: milestone finish required extra audit/validation sessions because some docs lagged behind shipped code
+- Notable: the codebase scaled well, but archive tooling quality was limited by inconsistent planning metadata rather than implementation quality
+
+---
+
 ## Milestone: v1.0 — MVP
 
 **Shipped:** 2026-03-06
@@ -29,7 +71,7 @@
 
 ### Patterns Established
 - Object.defineProperty visible/active sync pattern for all pooled entities (Bullet, Particle, PickupToken)
-- Factory callback pattern to avoid circular imports between states (GameOverState → PlayingState)
+- Factory callback pattern to avoid circular imports between states (GameOverState -> PlayingState)
 - Auto-reset-on-read pattern for one-shot flags (wasHitThisStep, phaseJustChanged)
 - DOM overlay HUD over Three.js TextGeometry for all UI elements
 - Module-level private vars in RunState for routing state that shouldn't be in snapshots
@@ -54,14 +96,17 @@
 | Milestone | Timeline | Phases | Key Change |
 |-----------|----------|--------|------------|
 | v1.0 | 5 days | 5 | Initial build — established all patterns |
+| v1.1 | 7 days | 5 | Shift from core buildout to feature layering, validation cleanup, and archive hygiene |
 
 ### Cumulative Quality
 
 | Milestone | LOC | Files | Requirements |
 |-----------|-----|-------|-------------|
 | v1.0 | 7,486 TS | 140 | 64/64 verified |
+| v1.1 | 10,990 TS | 160+ | 38/38 milestone requirements satisfied |
 
 ### Top Lessons (Verified Across Milestones)
 
 1. Front-load architectural decisions — they compound across all subsequent phases
 2. Data-driven patterns enable parallel development and future extensibility
+3. Validation and traceability artifacts need continuous maintenance, not just end-of-milestone cleanup

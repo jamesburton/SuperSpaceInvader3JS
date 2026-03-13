@@ -1,3 +1,5 @@
+requirements-completed: [SHOP-01, SHOP-02, SHOP-03]
+
 # Plan 10-01 Summary
 
 ## Outcome
@@ -29,3 +31,4 @@ Implemented the Phase 10 run-start foundation:
 
 - Save schema advanced to version 5 to normalize the legacy `passive_startingLife` purchase and convert old stored loadout ids into `PowerUpType` values.
 - The current Meta Shop UI was minimally updated so the two starting-life purchases remain sequential until the larger tabbed rewrite lands in Plan 10-03.
+

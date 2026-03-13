@@ -26,6 +26,7 @@ decisions:
   - "Time slow uses selective hostile dt routing instead of a global game clock reduction"
   - "Player bullets and input remain on raw dt; enemy movement, boss logic, and hostile bullets receive scaled dt"
   - "Visual communication combines a cool HUD tint with scene desaturation/brightness filtering and eased interpolation"
+requirements-completed: [PWR-05, PWR-06]
 metrics:
   duration: "~20 min"
   completed: "2026-03-10"
@@ -65,3 +66,4 @@ None.
 
 Commits:
 - `073579f` - feat(phase-09): add homing, time slow, and shop power-ups
+

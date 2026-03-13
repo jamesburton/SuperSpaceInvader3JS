@@ -24,6 +24,7 @@ decisions:
   - "Timed power-up purchases use a callback injected from Game to avoid a direct ShopSystem/PowerUpManager dependency"
   - "Pickup differentiation is handled through scale/rotation variants so pooled tokens stay simple and cheap"
   - "Shop rows keep the existing layout but now show category/tier metadata to stay readable as the catalog grows"
+requirements-completed: [PWR-07, PWR-08]
 metrics:
   duration: "~10 min"
   completed: "2026-03-10"
@@ -58,3 +59,4 @@ None.
 
 Commits:
 - `073579f` - feat(phase-09): add homing, time slow, and shop power-ups
+

@@ -25,6 +25,7 @@ decisions:
   - "Homing missiles use a dedicated projectile path instead of adding more flags to Bullet"
   - "Missiles lock the nearest active formation enemy when fired and steer with a conservative 120 deg/sec turn cap"
   - "Each missile owns a pooled reticle that clears automatically on expiry or target loss"
+requirements-completed: [PWR-03, PWR-04]
 metrics:
   duration: "~25 min"
   completed: "2026-03-10"
@@ -61,3 +62,4 @@ metrics:
 
 Commits:
 - `073579f` - feat(phase-09): add homing, time slow, and shop power-ups
+

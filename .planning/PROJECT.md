@@ -2,11 +2,18 @@
 
 ## What This Is
 
-A browser-based Space Invaders remake built with Three.js/WebGL, featuring a Neon Tokyo cyberpunk aesthetic with dense neon color, six enemy archetypes with formation-breaking AI, a roguelite meta-progression economy, and both Campaign and Endless game modes. Shipped v1.0 with 7,486 LOC TypeScript as a portfolio piece showcasing polished game development craft.
+A browser-based Space Invaders remake built with Three.js/WebGL, now expanded beyond the v1.0 arcade core with full audio wiring, controller support, ship customization, three additional power-ups, unlockable difficulty tiers, and a broader meta-progression loop across Campaign and Endless modes.
 
 ## Core Value
 
 The thrill of arcade shooting elevated — every run feels different because of layered in-run progression, meta-unlocks that evolve your build over time, and enemies smart enough to keep you on your toes.
+
+## Current State
+
+- **Latest shipped milestone:** v1.1 Polish & Depth (shipped 2026-03-13)
+- **Codebase:** 10,990 LOC TypeScript
+- **Tech stack:** Three.js 0.183.2, TypeScript, Vite, pmndrs/postprocessing, Zustand 5.x
+- **Shipping caveat:** Audio systems are implemented, but placeholder assets still need to be replaced with final BGM/SFX files for a fully polished release
 
 ## Requirements
 
@@ -32,18 +39,23 @@ The thrill of arcade shooting elevated — every run feels different because of 
 - ✓ Endless mode with infinite wave escalation — v1.0
 - ✓ Mode selection UI (Campaign/Endless/Upgrades) with keyboard navigation — v1.0
 - ✓ Campaign progress saved to localStorage and resumable — v1.0
+- ✓ Audio system with gameplay/UI/flow hooks, pause-menu controls, and persisted volume/mute settings — v1.1
+- ✓ Gamepad support across gameplay, menus, and shops with connect/disconnect feedback — v1.1
+- ✓ Ship skins: unlockable shapes, colors, and persisted selection — v1.1
+- ✓ New power-ups: piercing shot, homing missiles, and time slow — v1.1
+- ✓ Starting power-up selection from unlocked pool before each run — v1.1
+- ✓ Extra lives and expanded meta shop structure — v1.1
+- ✓ Difficulty mode unlocks (Hard/Nightmare) with gameplay changes and boss escalation — v1.1
+- ✓ CRT/scanline presets with unlockable tiers and live intensity control — v1.1
 
 ### Active
 
-- [ ] Audio: single synthwave BGM loop + full SFX coverage (combat, UI, ambient)
-- [ ] Gamepad support with button mapping
-- [ ] Ship skins: 3-4 distinct ship shapes + color variants, unlockable in meta shop
-- [ ] New power-ups: piercing shot, homing missiles, time slow
-- [ ] New power-ups: continuous beam laser, charged burst laser, sweeping laser (rare, busy screens)
-- [ ] Starting power-up selection from unlocked pool
-- [ ] Extra lives and alternate ships in meta shop
-- [ ] Difficulty mode unlocks (Hard/Nightmare) purchasable in meta shop
-- [ ] CRT/scanline presets with intensity slider, unlockable in steps via meta shop
+- [ ] Replace placeholder audio assets with final BGM and SFX files
+- [ ] New power-ups: continuous beam laser, charged burst laser, sweeping laser
+- [ ] Ship flavor text and richer identity/per-ship progression
+- [ ] Audio polish: per-weapon identity, multi-track BGM, boss intensity shifts
+- [ ] Gamepad polish: rumble/haptics and higher-fidelity controller support
+- [ ] Meta progression follow-ups from backlog (unlock gating, economy tuning, alternate run choices)
 
 ### Out of Scope
 
@@ -55,29 +67,16 @@ The thrill of arcade shooting elevated — every run feels different because of 
 
 ## Context
 
-Shipped v1.0 with 7,486 LOC TypeScript across 140 files.
-Tech stack: Three.js 0.183.2 + TypeScript + Vite + pmndrs/postprocessing + Zustand 5.x (no React).
-All rendering uses OrthographicCamera, InstancedMesh, and object pooling for zero-GC gameplay.
-localStorage persistence via Zustand persist (SAVE_VERSION 3, key: ssi-meta-v1).
+Shipped v1.1 with 10,990 LOC TypeScript and a broader player-expression loop built on top of the v1.0 arcade foundation.
+The game now supports keyboard and gamepad input, persistent ship cosmetics, CRT visual filters, run-start loadout setup, and a deeper power-up/difficulty ladder.
+Known production debt is mostly asset and planning hygiene, not missing core game systems.
 
 ## Constraints
 
 - **Tech Stack**: Three.js/WebGL — committed, not up for debate
-- **Platform**: Browser-first, desktop keyboard in v1
-- **Audio**: Deferred to v2
+- **Platform**: Browser-first, desktop-first
 - **Infrastructure**: None — fully client-side, no server/backend
-
-## Current Milestone: v1.1 Polish & Depth
-
-**Goal:** Add audio, gamepad support, ship customization, six new power-ups, expanded meta shop, and unlockable CRT visual filters to deepen the gameplay loop and player expression.
-
-**Target features:**
-- Single synthwave BGM + full SFX coverage
-- Gamepad controller support
-- Ship skins (shapes + color variants) unlockable in shop
-- 6 new power-ups: piercing, homing, time slow, continuous beam, charged burst, sweeping laser
-- Meta shop expansion: extra lives, alt ships, starting power-up slot, difficulty unlocks
-- CRT/scanline presets with intensity, unlockable in steps
+- **Readability**: Combat clarity takes priority over overly aggressive visual distortion or UI density
 
 ## Key Decisions
 
@@ -87,13 +86,18 @@ localStorage persistence via Zustand persist (SAVE_VERSION 3, key: ssi-meta-v1).
 | OrthographicCamera for 2D plane | Exact hitbox math, consistent visual scale | ✓ Good — AABB collision works perfectly |
 | InstancedMesh + object pooling from Phase 1 | Cannot be retrofitted; zero-GC gameplay critical | ✓ Good — stable 60fps with 50+ entities |
 | pmndrs/postprocessing selective bloom | Three.js UnrealBloomPass too broad; selective control needed | ✓ Good — neon elements glow without washing HUD |
-| Zustand 5.x persist for meta state | Versioned schema enables migration; no React dependency | ✓ Good — 3 schema versions migrated cleanly |
-| RunState as plain TS singleton (volatile) | In-run state must reset completely; no persistence needed | ✓ Good — clean separation from meta |
-| Dual currency (Gold + SI$) | In-run economy separate from meta prevents inflation | ✓ Good — shop/meta feel distinct |
-| DOM overlay HUD (not Three.js TextGeometry) | Simpler, more readable, no font loading | ✓ Good — crisp text at all resolutions |
-| Keyboard-only controls for v1 | Keeps scope tight; gamepad/mouse are v2 | ✓ Good — shipped on time |
-| No audio in v1 | Removes significant scope without hurting core game loop | ✓ Good — v1 focused on visuals and gameplay |
-| Campaign as data-driven wave configs | TypeScript objects not hardcoded logic; future chapters easy to add | ✓ Good — Chapter 1 defined in single config file |
+| Zustand persist for meta state with versioned migrations | Enables long-lived meta progression without React dependency | ✓ Good — migrations supported both v1.0 and v1.1 evolution |
+| DOM overlay HUD and menu UI | Faster iteration and better readability than 3D text | ✓ Good — all menu/shop overlays stayed legible and easy to extend |
+| Per-system time slow instead of global clock reduction | Keeps player controls crisp while slowing hostile systems only | ✓ Good — delivered readable slowdown without harming input feel |
+| CRT as a separate pass / overlay rather than merged with bloom | Preserves glow readability and keeps visual stack controllable | ✓ Good — CRT customization shipped without losing bloom identity |
+| Dedicated subsystem for homing missiles instead of overloading Bullet | Keeps projectile logic bounded and testable | ✓ Good — missile steering and reticle behavior stayed isolated |
+| Expanded meta shop via categories and pre-run setup | Makes the larger unlock tree scannable and supports loadout decisions before a run | ✓ Good — Phase 10 shipped with clearer browsing and setup flow |
+
+## Next Milestone Goals
+
+- Decide the next milestone scope and define fresh requirements
+- Replace placeholder audio assets if v1.1 is being treated as fully player-facing
+- Choose whether the next push is combat depth (beam weapons, new choices) or progression/economy cleanup
 
 ---
-*Last updated: 2026-03-06 after v1.1 milestone start*
+*Last updated: 2026-03-13 after v1.1 milestone completion*

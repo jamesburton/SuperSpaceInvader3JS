@@ -1,3 +1,5 @@
+requirements-completed: [SHOP-01, SHOP-02, SHOP-04]
+
 # Plan 10-03 Summary
 
 ## Outcome
@@ -23,3 +25,4 @@ Reorganized the meta shop into faster-scanning category tabs:
 
 - The tabbed UI keeps entitlement logic in the data/config layer and treats the shop as a presentation surface over existing upgrade state.
 - Locked CRT tiers remain hidden until reveal mode is enabled, matching the Phase 10 browse-path requirement.
+
